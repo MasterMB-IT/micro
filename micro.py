@@ -4,10 +4,10 @@ import calendar
 import random
 from datetime import datetime
 
-# --- CONFIGURAZIONE PAGINA A TUTTO SCHERMO ---
+# --- CONFIGURAZIONE PAGINA ---
 st.set_page_config(page_title="Alliance Train Manager Ultra", layout="wide")
 
-# CSS per layout orizzontale e stile "Gaming Pro"
+# CSS Gaming Style & Layout Full-Width
 st.markdown("""
     <style>
     .stApp { background-color: #0e1117; color: #ffffff; }
@@ -15,134 +15,122 @@ st.markdown("""
         background: linear-gradient(90deg, #00c8ff, #0072ff); 
         padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 20px;
     }
-    .calendar-row { 
-        background-color: #1e2229; border-radius: 8px; padding: 10px; 
-        margin-bottom: 5px; display: flex; align-items: center; border: 1px solid #333;
-    }
-    .day-num { width: 50px; font-weight: bold; color: #00c8ff; font-size: 1.2rem; }
-    .role-box { flex: 1; padding: 0 15px; border-right: 1px solid #444; }
-    .btn-col { width: 100px; text-align: center; }
     .r5-r4-text { color: #ff4757; font-weight: bold; }
     .r3-text { color: #2ed573; font-weight: bold; }
-    .other-text { color: #a29bfe; font-weight: bold; }
+    .r2-text { color: #a29bfe; font-weight: bold; }
+    .r1-text { color: #eccc68; font-weight: bold; }
+    .calendar-row { background: #1e2229; padding: 10px; border-radius: 5px; margin-bottom: 5px; border-left: 5px solid #444; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- INIZIALIZZAZIONE DATABASE ---
+# --- DATABASE GIOCATORI AGGIORNATO ---
 if 'players_db' not in st.session_state:
     data = []
-    # Leader
-    leaders = ["Hool (R5)", "MASTER (R4)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", "Starbetty (R4)", "PEPPE (R4)", "Ricky Around (R4)", "uncle g (R4)", "09ALEX24 (R4)", "ShinyPasta (R4)", "Wall 7 (R4)"]
-    for n in leaders: data.append({"Nome": n, "Grado": "R5/R4"})
-    # R3
-    r3_init = ["G Erry", "Uncle g brother", "Cane Avvoltoio", "Ghandal", "Aryron", "Tricheco", "Maメツ", "NOVEMBERGENZ", "Lalla 96", "Whale Panda", "GennaroM", "EchoZero", "EDDward", "AMY", "Resilienza", "Ana Bunny", "Giuseppec84", "Benito Muschiolini", "Pandino19", "xFlotchy", "MX63", "holdfast", "Ghost", "BadBigBoss", "Stefano00000", "PakII", "BANDOLERO26", "BlOOdyBlade", "Whale hunter Levve", "Aresxxx", "KingGruffalo", "Hulkspakka", "Joseone", "ImAde", "Nysbie", "LeFada13", "Skifetto", "SPio24", "TomEnergy", "Markus Defender", "Sho0t3r", "Wolf006", "Zokra", "perseusxxx", "Bendico", "Obbyy", "ArLes", "Fatz87", "cruel neve", "Trivellatore", "Osgh00", "Slowfia ABOH", "Pontatinatore", "27Francesco", "MissDrinks", "krompir", "MaledettO"]
-    for n in r3_init: data.append({"Nome": n, "Grado": "R3"})
-    # R2/R1 filler
-    for i in range(1, 33): data.append({"Nome": f"Soldato_{i}", "Grado": "R2" if i < 16 else "R1"})
+    # R5 & R4
+    for n in ["Hool (R5)", "MASTER (R4)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", "Starbetty (R4)", "PEPPE (R4)", "Ricky Around (R4)", "uncle g (R4)", "09ALEX24 (R4)", "ShinyPasta (R4)", "Wall 7 (R4)"]:
+        data.append({"Nome": n, "Grado": "R5/R4"})
+    
+    # R3 (Dalle immagini precedenti)
+    r3_list = ["G Erry", "Uncle g brother", "Cane Avvoltoio", "Ghandal", "Aryron", "Tricheco", "Maメツ", "NOVEMBERGENZ", "Lalla 96", "Whale Panda", "GennaroM", "EchoZero", "EDDward", "AMY", "Resilienza", "Ana Bunny", "Giuseppec84", "Benito Muschiolini", "Pandino19", "xFlotchy", "MX63", "holdfast", "Ghost", "BadBigBoss", "Stefano00000", "PakII", "BANDOLERO26", "BlOOdyBlade", "Whale hunter Levve", "Aresxxx", "KingGruffalo", "Hulkspakka", "Joseone", "ImAde", "Nysbie", "LeFada13", "Skifetto", "SPio24", "TomEnergy", "Markus Defender", "Sho0t3r", "Wolf006", "Zokra", "perseusxxx", "Bendico", "Obbyy", "ArLes", "Fatz87", "cruel neve", "Trivellatore", "Osgh00", "Slowfia ABOH", "Pontatinatore", "27Francesco", "MissDrinks", "krompir", "MaledettO"]
+    for n in r3_list: data.append({"Nome": n, "Grado": "R3"})
+    
+    # R2 (Inseriti dai nuovi screenshot forniti)
+    r2_new = [
+        "teomadh", "Bossnico", "Valecit", "FarmerHool", "camiiiii 08", "Doctor team", 
+        "Yass081", "Nuorifleming", "Vergabrio", "Frenk70", "Comandante Maveric", "Thor9000",
+        "MrBolly", "BustaMaki", "Ritardato", "StUnTmArK", "MONKEY D LUFFY 20", "CineSalentino",
+        "Danylo98", "Ezechielefabianino", "BRNcommando", "LEONIDA", "elchicogyot", "erer1000",
+        "Pupisnic", "Backfire1", "AnarchyBG", "Fabrizio1987", "JurdanS", "WiseR9", "Infinity8080"
+    ]
+    for n in r2_new: data.append({"Nome": n, "Grado": "R2"})
+    
+    # Slot R1 (Esempio per completare il roster)
+    for i in range(1, 11): data.append({"Nome": f"Cadetto_R1_{i}", "Grado": "R1"})
+    
     st.session_state['players_db'] = pd.DataFrame(data)
 
-# --- HEADER E SELEZIONI IN ALTO (FULL WIDTH) ---
-st.markdown('<div class="main-header"><h1>MANAGEMENT TRENI ALLEANZA - CONTROLLO TOTALE</h1></div>', unsafe_allow_html=True)
+# --- INTERFACCIA SUPERIORE ---
+st.markdown('<div class="main-header"><h1>MANAGEMENT TRENI ALLEANZA</h1></div>', unsafe_allow_html=True)
 
-# SEZIONE 1: GESTIONE ROSTER (Spostamenti tra categorie)
-with st.expander("👥 GESTIONE CATEGORIE E GRADI (Clicca per spostare i giocatori)", expanded=False):
+# GESTIONE ROSTER (Spostamenti rapidi)
+with st.expander("🔄 GESTIONE ROSTER E TRASFERIMENTI (Tutto Schermo)", expanded=False):
     st.session_state['players_db'] = st.data_editor(
         st.session_state['players_db'],
-        column_config={"Grado": st.column_config.SelectboxColumn("Cambia Grado", options=["R5/R4", "R3", "R2", "R1"])},
+        column_config={"Grado": st.column_config.SelectboxColumn("Grado", options=["R5/R4", "R3", "R2", "R1"])},
         hide_index=True, use_container_width=True
     )
 
-# SEZIONE 2: FILTRI DI GENERAZIONE (Orizzontali)
-col_m, col_a, col_gen = st.columns([2, 1, 2])
-with col_m:
-    mese_nome = st.selectbox("📅 Seleziona Mese", list(calendar.month_name)[1:], index=datetime.now().month-1)
-with col_a:
-    anno = st.number_input("Year", 2024, 2030, 2024)
-with col_gen:
-    st.write("") # Spacer
-    btn_genera = st.button("🚀 GENERA CALENDARIO RANDOMIZZATO", use_container_width=True)
+# SELEZIONE MERITEVOLI E DATA
+st.markdown("### 🚂 Configurazione Treni Mensili")
+c1, c2, c3 = st.columns([1, 1, 3])
+with c1:
+    mese_n = st.selectbox("Mese", list(calendar.month_name)[1:], index=datetime.now().month-1)
+with c2:
+    anno_n = st.number_input("Anno", 2024, 2030, 2024)
 
-# SEZIONE 3: SELEZIONE MERITEVOLI (Ricerca inclusa)
-st.markdown("### 🌟 Seleziona i partecipanti per questo mese")
 db = st.session_state['players_db']
-sel_r3 = st.multiselect("Seleziona da R3 (Search active)", db[db['Grado']=="R3"]['Nome'].tolist())
-sel_r2_r1 = st.multiselect("Seleziona da R2/R1 (Search active)", db[db['Grado'].isin(["R2", "R1"])]['Nome'].tolist())
-meritevoli_totali = sel_r3 + sel_r2_r1
+sel_r3 = st.multiselect("🌟 Meritevoli R3", db[db['Grado']=="R3"]['Nome'].tolist())
+sel_r2 = st.multiselect("🎖️ Meritevoli R2", db[db['Grado']=="R2"]['Nome'].tolist())
+sel_r1 = st.multiselect("🔰 Meritevoli R1", db[db['Grado']=="R1"]['Nome'].tolist())
 
-# --- LOGICA DI GENERAZIONE ---
-mese_idx = list(calendar.month_name).index(mese_nome)
-num_giorni = calendar.monthrange(anno, mese_idx)[1]
+meritevoli = sel_r3 + sel_r2 + sel_r1
 
-if btn_genera:
-    random.shuffle(meritevoli_totali)
-    pool = list(meritevoli_totali)
+# --- GENERAZIONE ---
+if st.button("🚀 GENERA CALENDARIO RANDOM", use_container_width=True):
+    random.shuffle(meritevoli)
+    pool = list(meritevoli)
     leaders = db[db['Grado']=="R5/R4"]['Nome'].tolist()
     
-    new_cal = []
-    for g in range(1, num_giorni + 1):
+    num_gg = calendar.monthrange(anno_n, list(calendar.month_name).index(mese_n))[1]
+    nuovo_cal = []
+    for g in range(1, num_gg + 1):
         if g <= 11:
-            # Leader a rotazione fissa per i primi 11
-            c = leaders[g-1 % len(leaders)]
-            p = leaders[(g) % len(leaders)]
+            c, p = leaders[g-1 % len(leaders)], leaders[(g) % len(leaders)]
         else:
-            # Random per gli altri
             c = pool.pop(0) if pool else "DA ASSEGNARE"
             p = pool.pop(0) if pool else "DA ASSEGNARE"
-        new_cal.append({"Giorno": g, "Capotreno": c, "Passeggero": p})
-    st.session_state['master_cal'] = new_cal
+        nuovo_cal.append({"Giorno": g, "Capotreno": c, "Passeggero": p})
+    st.session_state['master_cal'] = nuovo_cal
 
-# --- CALENDARIO A TUTTO SCHERMO CON MODIFICA SINGOLA RIGA ---
+# --- CALENDARIO E MODIFICA RIGA ---
 if 'master_cal' in st.session_state:
     st.markdown("---")
-    st.subheader(f"📅 Programma di {mese_nome}")
-    
     all_names = db['Nome'].tolist()
     
-    # Intestazione Tabella Custom
-    st.markdown("""
-        <div style="display: flex; font-weight: bold; padding: 10px; background: #333; border-radius: 5px;">
-            <div style="width: 50px;">Giorno</div>
-            <div style="flex: 1; padding-left: 15px;">Capotreno</div>
-            <div style="flex: 1; padding-left: 15px;">Passeggero</div>
-            <div style="width: 150px; text-align: center;">Azioni</div>
-        </div>
-    """, unsafe_allow_html=True)
+    # Intestazione Colonne
+    st.markdown("""<div style="display:flex; font-weight:bold; background:#333; padding:10px; border-radius:5px;">
+        <div style="width:10%;">Giorno</div><div style="width:35%;">Capotreno</div><div style="width:35%;">Passeggero</div><div style="width:20%; text-align:center;">Azioni</div>
+    </div>""", unsafe_allow_html=True)
 
-    for i, row in enumerate(st.session_state['master_cal']):
-        cols = st.columns([0.5, 3, 3, 1.5])
+    for i, r in enumerate(st.session_state['master_cal']):
+        cols = st.columns([1, 3.5, 3.5, 2])
         
-        with cols[0]:
-            st.markdown(f"**{row['Giorno']:02d}**")
+        # Colore basato sul grado attuale nel DB
+        def get_style(nome):
+            grado = db[db['Nome']==nome]['Grado'].values[0] if nome in all_names else ""
+            if grado == "R5/R4": return "r5-r4-text"
+            if grado == "R3": return "r3-text"
+            if grado == "R2": return "r2-text"
+            return "r1-text"
+
+        with cols[0]: st.markdown(f"**{r['Giorno']:02d}**")
+        with cols[1]: st.markdown(f'<span class="{get_style(r["Capotreno"])}">{r["Capotreno"]}</span>', unsafe_allow_html=True)
+        with cols[2]: st.markdown(f'<span class="{get_style(r["Passeggero"])}">{r["Passeggero"]}</span>', unsafe_allow_html=True)
         
-        with cols[1]:
-            # Identificazione colore per grado
-            g_c = db[db['Nome'] == row['Capotreno']]['Grado'].values[0] if row['Capotreno'] in all_names else "N/A"
-            style_c = "r5-r4-text" if g_c == "R5/R4" else "r3-text" if g_c == "R3" else "other-text"
-            st.markdown(f'<span class="{style_c}">{row["Capotreno"]}</span>', unsafe_allow_html=True)
-            
-        with cols[2]:
-            g_p = db[db['Nome'] == row['Passeggero']]['Grado'].values[0] if row['Passeggero'] in all_names else "N/A"
-            style_p = "r5-r4-text" if g_p == "R5/R4" else "r3-text" if g_p == "R3" else "other-text"
-            st.markdown(f'<span class="{style_p}">{row["Passeggero"]}</span>', unsafe_allow_html=True)
-            
         with cols[3]:
-            # Tasto Modifica Riga
-            if st.button(f"📝 Modifica", key=f"edit_{i}"):
-                st.session_state[f"editing_row_{i}"] = True
-        
-        # Se il tasto modifica è attivo, apre un mini menu sotto la riga
-        if st.session_state.get(f"editing_row_{i}", False):
+            if st.button(f"📝 Modifica", key=f"btn_{i}"):
+                st.session_state[f"edit_active_{i}"] = not st.session_state.get(f"edit_active_{i}", False)
+
+        # Pannello di modifica inline
+        if st.session_state.get(f"edit_active_{i}", False):
             with st.container():
-                edit_c1, edit_c2, edit_btn = st.columns([3, 3, 1])
-                new_c = edit_c1.selectbox(f"Nuovo Capo G{row['Giorno']}", all_names, index=all_names.index(row['Capotreno']), key=f"sel_c_{i}")
-                new_p = edit_c2.selectbox(f"Nuovo Pass G{row['Giorno']}", all_names, index=all_names.index(row['Passeggero']), key=f"sel_p_{i}")
-                if edit_btn.button("✅ Salva", key=f"save_{i}"):
+                ec1, ec2, ec3 = st.columns([4, 4, 2])
+                new_c = ec1.selectbox("Capo", all_names, index=all_names.index(r['Capotreno']) if r['Capotreno'] in all_names else 0, key=f"sel_c{i}")
+                new_p = ec2.selectbox("Pass", all_names, index=all_names.index(r['Passeggero']) if r['Passeggero'] in all_names else 0, key=f"sel_p{i}")
+                if ec3.button("💾 OK", key=f"save_{i}"):
                     st.session_state['master_cal'][i]['Capotreno'] = new_c
                     st.session_state['master_cal'][i]['Passeggero'] = new_p
-                    st.session_state[f"editing_row_{i}"] = False
+                    st.session_state[f"edit_active_{i}"] = False
                     st.rerun()
 
-    # Esportazione Finale
-    st.markdown("---")
-    if st.download_button("📥 SCARICA CALENDARIO COMPLETO (CSV)", pd.DataFrame(st.session_state['master_cal']).to_csv(index=False).encode('utf-8'), f"Treni_{mese_nome}.csv"):
-        st.success("Download avviato!")
+    st.download_button("📥 Scarica Tabella CSV", pd.DataFrame(st.session_state['master_cal']).to_csv(index=False).encode('utf-8'), "Calendario_Treni.csv")
