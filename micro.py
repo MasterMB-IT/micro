@@ -178,6 +178,7 @@ if 'master_cal' in st.session_state:
             st.markdown(f"""
             <div class="summary-card">
                 <div class="day-label">GIORNO {r['Giorno']}</div>
+                <div style="color:#8b5a2b; font-size:0.7rem; text-align:center; margin: 8px 0; font-family: 'Special Elite';">CAPOTRENO</div>
                 <div class="name-text" style="color:{c_col};">🤠 {r['Capo']}</div>
                 <div style="color:#8b5a2b; font-size:0.7rem; text-align:center; margin: 8px 0; font-family: 'Special Elite';">PASSEGGERO</div>
                 <div class="name-text" style="color:{p_col};">🐎 {r['Pass']}</div>
