@@ -24,49 +24,39 @@ st.markdown("""
 
     .train-title {
         font-family: 'Special Elite', cursive;
-        text-align: center;
-        color: #ffcc66;
+        text-align: center; color: #ffcc66;
         text-shadow: 3px 3px 0px #4b2e1b;
-        font-size: 2.8rem;
-        margin-bottom: 15px;
-        width: 100%;
+        font-size: 2.8rem; margin-bottom: 15px; width: 100%;
     }
 
-    /* Card Standard */
+    /* CARD STANDARD */
     .summary-card {
-        background: #f4e4bc; 
-        border: 2px solid #8b5a2b; 
-        padding: 10px 5px; 
-        border-radius: 2px; 
-        position: relative; 
-        box-shadow: 3px 3px 10px rgba(0,0,0,0.5);
-        color: #2b1d0e;
-        margin-bottom: 10px;
-        min-height: 140px;
+        background: #f4e4bc; border: 2px solid #8b5a2b; 
+        padding: 10px 5px; border-radius: 2px; 
+        position: relative; box-shadow: 3px 3px 10px rgba(0,0,0,0.5);
+        color: #2b1d0e; margin-bottom: 10px; min-height: 140px;
     }
 
-    /* Card DIAPOSITIVA (Mini) */
-    .mini-card {
-        background: #f4e4bc; 
-        border: 1px solid #8b5a2b; 
-        padding: 5px 2px; 
-        border-radius: 2px; 
-        text-align: center;
-        box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
-        margin-bottom: 5px;
+    /* CARD DIAPOSITIVA (VERSIONE MEDIA) */
+    .diapo-card {
+        background: #f4e4bc; border: 2px solid #8b5a2b; 
+        padding: 8px 4px; border-radius: 4px; 
+        text-align: center; box-shadow: 4px 4px 8px rgba(0,0,0,0.4);
+        margin-bottom: 8px; min-height: 90px;
+        display: flex; flex-direction: column; justify-content: center;
     }
 
     .day-label { color: #8b0000; font-family: 'Special Elite'; font-weight: bold; text-align: center; font-size: 0.9rem; border-bottom: 1px dashed #8b5a2b; }
-    .mini-day { color: #8b0000; font-family: 'Special Elite'; font-weight: bold; font-size: 0.7rem; }
+    .diapo-day { color: #8b0000; font-family: 'Special Elite'; font-weight: bold; font-size: 0.85rem; margin-bottom: 4px; border-bottom: 1px solid rgba(139, 90, 43, 0.3); }
     
     .name-text { font-family: 'Special Elite'; font-size: 0.85rem; font-weight: 800; text-align: center; text-transform: uppercase; margin: 2px 0; }
-    .mini-name { font-family: 'Special Elite'; font-size: 0.6rem; font-weight: bold; margin: 1px 0; line-height: 1; }
+    .diapo-name { font-family: 'Special Elite'; font-size: 0.75rem; font-weight: 800; margin: 2px 0; line-height: 1.1; text-transform: uppercase; }
 
     .role-label { color: #8b5a2b; font-size: 0.6rem; text-align: center; font-family: 'Special Elite'; text-transform: uppercase; }
 
     /* Bottoni */
-    .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; font-family: 'Special Elite'; font-weight: bold; border: 2px solid #4b3621 !important; }
-    .btn-resetta button { background: #a44a3f !important; color: #f1e5ac !important; font-family: 'Special Elite'; border: 2px solid #4b1d1d !important; }
+    .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; font-family: 'Special Elite'; font-weight: bold; border: 2px solid #4b3621 !important; height: 45px !important; }
+    .btn-resetta button { background: #a44a3f !important; color: #f1e5ac !important; font-family: 'Special Elite'; border: 2px solid #4b1d1d !important; height: 45px !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -123,24 +113,23 @@ with col_b2:
     st.markdown('</div>', unsafe_allow_html=True)
 
 with col_b3:
-    # TASTO DIAPOSITIVA (Toggle)
-    modo_diapositiva = st.toggle("🎞️ MODALITÀ DIAPOSITIVA", help="Visualizza tutto in una sola schermata")
+    modo_diapositiva = st.toggle("🎞️ MODALITÀ DIAPOSITIVA", value=False)
 
 # --- CALENDARIO ---
 if 'master_cal' in st.session_state:
-    st.markdown(f"<h3 style='text-align: center; font-family: Special Elite; color: #ffcc66;'>📅 {st.session_state['sel_mese'].upper()}</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='text-align: center; font-family: Special Elite; color: #ffcc66; margin-top:10px;'>📅 {st.session_state['sel_mese'].upper()} {st.session_state['sel_anno']}</h3>", unsafe_allow_html=True)
     
     if modo_diapositiva:
-        cols = st.columns(10) # 10 colonne per la vista compatta
+        cols = st.columns(8) # Passato a 8 colonne per card più grandi
         for i, r in enumerate(st.session_state['master_cal']):
-            with cols[i % 10]:
+            with cols[i % 8]:
                 c_col = "#8b0000" if any(db[(db['Nome'] == r['Capo']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
                 p_col = "#8b0000" if any(db[(db['Nome'] == r['Pass']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
                 st.markdown(f"""
-                <div class="mini-card">
-                    <div class="mini-day">G{r['Giorno']}</div>
-                    <div class="mini-name" style="color:{c_col};">{r['Capo']}</div>
-                    <div class="mini-name" style="color:{p_col};">{r['Pass']}</div>
+                <div class="diapo-card">
+                    <div class="diapo-day">GG {r['Giorno']}</div>
+                    <div class="diapo-name" style="color:{c_col};">C: {r['Capo']}</div>
+                    <div class="diapo-name" style="color:{p_col};">P: {r['Pass']}</div>
                 </div>
                 """, unsafe_allow_html=True)
     else:
@@ -157,9 +146,9 @@ if 'master_cal' in st.session_state:
                     <div class="role-label">PASS</div>
                     <div class="name-text" style="color:{p_col};">🐎 {r['Pass']}</div>
                 """, unsafe_allow_html=True)
-                with st.popover("⚙️", help="Modifica"):
+                with st.popover("⚙️"):
                     nc = st.selectbox("Capo", all_names, index=all_names.index(r['Capo']), key=f"c_{i}")
                     np = st.selectbox("Pass", all_names, index=all_names.index(r['Pass']), key=f"p_{i}")
-                    if st.button("💾 OK", key=f"s_{i}"):
+                    if st.button("💾 Salva", key=f"s_{i}"):
                         st.session_state['master_cal'][i].update({"Capo": nc, "Pass": np}); st.rerun()
                 st.markdown('</div>', unsafe_allow_html=True)
