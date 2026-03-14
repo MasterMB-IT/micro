@@ -9,16 +9,18 @@ st.set_page_config(page_title="AOSR Train Manager Elite", layout="wide")
 MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
             "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
 
-# --- CSS ELITE CON SFONDO WESTERN E ANIMAZIONI ---
+# --- CSS ELITE CON SFONDO FAR WEST/CANYON E ANIMAZIONI ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 
-    /* SFONDO FAR WEST/CANYON RIPRISTINATO E AGGIORNATO */
+    /* SFONDO FAR WEST/CANYON DEFINITIVO */
     .stApp { 
-        background-image: linear-gradient(rgba(11, 14, 20, 0.6), rgba(11, 14, 20, 0.8)), 
-                          url('https://images.unsplash.com/photo-1516104273204-6f0a3d463870?q=80&w=1920&auto=format&fit=crop');
+        background-color: #0b0e14;
+        background-image: linear-gradient(rgba(11, 14, 20, 0.5), rgba(11, 14, 20, 0.7)), 
+                          url('https://images.unsplash.com/photo-1533161358997-7c0934983b54?q=80&w=1920&auto=format&fit=crop');
         background-size: cover;
+        background-position: center;
         background-attachment: fixed;
         color: #ffffff; 
     }
