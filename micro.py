@@ -7,83 +7,95 @@ from datetime import datetime
 # --- CONFIGURAZIONE PAGINA ---
 st.set_page_config(page_title="AOSR Train Manager Elite", layout="wide")
 
-# --- CSS CUSTOM CON IMMAGINE DI SFONDO ---
-# Ho aggiunto un'immagine di sfondo di un canyon scuro e sfocato per l'atmosfera.
+# --- CSS CUSTOM: EFFETTO NEON & HOVER ---
 st.markdown("""
     <style>
-    /* Sfondo dell'intera app con immagine Canyon */
-    .stApp {
-        background-image: linear-gradient(rgba(11, 14, 20, 0.8), rgba(11, 14, 20, 0.9)), 
-                          url('https://images.unsplash.com/photo-1506197361314-878513b4822a?q=80&w=1920&auto=format&fit=crop');
-        background-size: cover;
-        background-position: center;
-        color: #ffffff;
-    }
-
-    /* Header stilizzato con icona treno */
-    .aosr-header {
-        background: linear-gradient(135deg, rgba(26, 31, 44, 0.95) 0%, rgba(11, 14, 20, 0.95) 100%);
-        padding: 30px; 
-        border-radius: 20px; 
-        border: 2px solid #00c8ff;
-        text-align: center; 
-        margin-bottom: 30px;
-        position: relative;
-    }
+    .stApp { background-color: #0b0e14; color: #ffffff; }
     
-    /* Titolo con icona treno */
-    .aosr-title {
-        font-family: 'Orbitron', sans-serif;
-        color: #00c8ff;
-        font-size: 2.5rem;
-        letter-spacing: 4px;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 15px;
+    /* Header con Glow */
+    .aosr-header {
+        background: linear-gradient(135deg, #1a1f2c 0%, #0b0e14 100%);
+        padding: 25px; border-radius: 15px; 
+        border: 2px solid #00c8ff;
+        box-shadow: 0 0 15px rgba(0, 200, 255, 0.4);
+        text-align: center; margin-bottom: 20px;
     }
-    .train-icon { font-size: 3rem; }
-
-    /* Griglia Calendario Principale */
-    .calendar-grid {
-        display: grid; 
-        grid-template-columns: repeat(7, 1fr);
-        gap: 15px; 
-        margin-top: 20px;
-    }
-    .day-card {
-        background: rgba(22, 27, 37, 0.9); 
-        border-radius: 10px; 
-        padding: 12px;
-        border: 1px solid #2d343f; 
-        min-height: 140px;
-    }
-    .day-number { font-size: 1.2rem; font-weight: 900; color: #555; margin-bottom: 8px; display: block;}
+    .aosr-title { font-family: 'Orbitron', sans-serif; color: #00c8ff; font-size: 2.2rem; letter-spacing: 3px; margin: 0; }
     
     /* Badge Giocatori */
-    .p-box { padding: 4px 8px; border-radius: 4px; margin: 2px 0; font-size: 0.8rem; text-transform: uppercase; font-weight: 600; }
-    .label { font-size: 0.6rem; opacity: 0.7; display: block; }
-    .r5-r4-card { background: rgba(255, 71, 87, 0.15); border-left: 3px solid #ff4757; color: #ff4757; }
-    .r3-card { background: rgba(46, 213, 115, 0.15); border-left: 3px solid #2ed573; color: #2ed573; }
-    .r2-r1-card { background: rgba(162, 155, 254, 0.15); border-left: 3px solid #a29bfe; color: #a29bfe; }
+    .p-box { padding: 6px 10px; border-radius: 6px; margin: 3px 0; font-size: 0.85rem; text-transform: uppercase; font-weight: bold; }
+    .r5-r4-card { background: rgba(255, 71, 87, 0.2); border-left: 4px solid #ff4757; color: #ff4757; }
+    .r3-card { background: rgba(46, 213, 115, 0.2); border-left: 4px solid #2ed573; color: #2ed573; }
+    .r2-r1-card { background: rgba(162, 155, 254, 0.2); border-left: 4px solid #a29bfe; color: #a29bfe; }
+
+    /* Area Screenshot */
+    .print-container { 
+        background-color: #000; 
+        padding: 30px; 
+        border-radius: 20px; 
+        border: 3px solid #00c8ff;
+        box-shadow: inset 0 0 20px rgba(0, 200, 255, 0.2);
+    }
+
+    /* CASELLA CALENDARIO CON EFFETTI FLUO */
+    .summary-card {
+        background: #111; 
+        border: 1px solid #333; 
+        padding: 12px; 
+        text-align: center; 
+        border-radius: 12px; 
+        margin-bottom: 15px;
+        min-height: 110px;
+        transition: all 0.3s ease-in-out; /* Animazione fluida */
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Effetto quando passi il mouse sopra la casella */
+    .summary-card:hover {
+        transform: scale(1.05); /* Si ingrandisce */
+        border-color: #00c8ff; /* Il bordo diventa azzurro fluo */
+        box-shadow: 0 0 20px rgba(0, 200, 255, 0.8), 0 0 40px rgba(0, 200, 255, 0.4); /* Bagliore esterno */
+        background: #1a1a1a;
+        z-index: 10;
+    }
+
+    .day-label { 
+        color: #00c8ff; 
+        font-weight: 900; 
+        font-size: 0.9rem; 
+        border-bottom: 1px solid #222; 
+        margin-bottom: 8px;
+        text-shadow: 0 0 5px rgba(0, 200, 255, 0.5);
+    }
+    
+    /* Pulsante Genera */
+    .stButton > button[kind="primary"] {
+        width: 100%; height: 80px; font-size: 1.8rem !important; 
+        background: linear-gradient(45deg, #2ed573, #00ff85) !important;
+        border: none !important;
+        box-shadow: 0 0 20px rgba(46, 213, 115, 0.5);
+        color: black !important;
+        font-family: 'Orbitron', sans-serif;
+        transition: 0.3s;
+    }
+    .stButton > button:hover {
+        box-shadow: 0 0 40px rgba(46, 213, 115, 0.8) !important;
+        transform: translateY(-2px);
+    }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
     """, unsafe_allow_html=True)
 
-# --- DATABASE AGGIORNATO CON R2 ---
+# --- DATABASE ---
 if 'players_db' not in st.session_state:
     data = []
     leaders = ["Hool (R5)", "MASTER (R4)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", "Starbetty (R4)", "PEPPE (R4)", "Ricky Around (R4)", "uncle g (R4)", "09ALEX24 (R4)", "ShinyPasta (R4)", "Wall 7 (R4)"]
     for n in leaders: data.append({"Nome": n, "Grado": "R5/R4"})
-    
     r3 = ["G Erry", "Uncle g brother", "Cane Avvoltoio", "Ghandal", "Aryron", "Tricheco", "Maメツ", "NOVEMBERGENZ", "Lalla 96", "Whale Panda", "GennaroM", "EchoZero", "EDDward", "AMY", "Resilienza", "Ana Bunny", "Giuseppec84", "Benito Muschiolini", "Pandino19", "xFlotchy", "MX63", "holdfast", "Ghost", "BadBigBoss", "Stefano00000", "PakII", "BANDOLERO26", "BlOOdyBlade", "Whale hunter Levve", "Aresxxx", "KingGruffalo", "Hulkspakka", "Joseone", "ImAde", "Nysbie", "LeFada13", "Skifetto", "SPio24", "TomEnergy", "Markus Defender", "Sho0t3r", "Wolf006", "Zokra", "perseusxxx", "Bendico", "Obbyy", "ArLes", "Fatz87", "cruel neve", "Trivellatore", "Osgh00", "Slowfia ABOH", "Pontatinatore", "27Francesco", "MissDrinks", "krompir", "MaledettO"]
     for n in r3: data.append({"Nome": n, "Grado": "R3"})
-    
-    # Lista R2 estrapolata dai tuoi screenshot
     r2 = ["teomadh", "Bossnico", "Valecit", "FarmerHool", "camiiiii 08", "Doctor team", "Yass081", "Nuorifleming", "Vergabrio", "Frenk70", "Comandante Maveric", "Thor9000", "MrBolly", "BustaMaki", "Ritardato", "StUnTmArK", "MONKEY D LUFFY 20", "CineSalentino", "Danylo98", "Ezechielefabianino", "BRNcommando", "LEONIDA", "elchicogyot", "erer1000", "Pupisnic", "Backfire1", "AnarchyBG", "Fabrizio1987", "JurdanS", "WiseR9", "Infinity8080"]
     for n in r2: data.append({"Nome": n, "Grado": "R2"})
-    
     st.session_state['players_db'] = pd.DataFrame(data)
     st.session_state['sel_mese'] = list(calendar.month_name)[datetime.now().month]
     st.session_state['sel_anno'] = 2026
@@ -91,17 +103,9 @@ if 'players_db' not in st.session_state:
 db = st.session_state['players_db']
 all_names = db['Nome'].tolist()
 
-# --- HEADER CON ICONA TRENO ---
-# Ho aggiunto un emoji stilizzato di un treno ad alta velocità 🚄 accanto al titolo.
-st.markdown("""
-    <div class="aosr-header">
-        <div class="aosr-title">
-            <span class="train-icon">🚄</span>
-            <span>AOSR EXPRESS MANAGER</span>
-            <span class="train-icon">🚄</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+# --- HEADER ---
+if not st.session_state.get('print_mode', False):
+    st.markdown('<div class="aosr-header"><div class="aosr-title">AOSR EXPRESS MANAGER</div></div>', unsafe_allow_html=True)
 
 # --- CONFIGURAZIONE ---
 if not st.session_state.get('print_mode', False):
@@ -112,12 +116,11 @@ if not st.session_state.get('print_mode', False):
         meritevoli = db[db['Grado'] != "R5/R4"]['Nome'].tolist()
         sel_meritevoli = c2.multiselect("Seleziona Partecipanti (Vuoto = TUTTI)", meritevoli)
 
-    if st.button("🚀 GENERA / AGGIORNA CALENDARIO", use_container_width=True):
+    if st.button("🚀 GENERA NUOVO CALENDARIO", use_container_width=True, type="primary"):
         pool = sel_meritevoli if sel_meritevoli else meritevoli
         random.shuffle(pool)
         leaders = db[db['Grado']=="R5/R4"]['Nome'].tolist()
         num_gg = calendar.monthrange(st.session_state['sel_anno'], list(calendar.month_name).index(st.session_state['sel_mese']))[1]
-        
         cal = []
         p_idx = 0
         for g in range(1, num_gg + 1):
@@ -133,6 +136,7 @@ if not st.session_state.get('print_mode', False):
 if 'master_cal' in st.session_state:
     if not st.session_state.get('print_mode', False):
         st.subheader("📝 Modifica Giorni")
+        # Logica di modifica (invariata)
         for i, r in enumerate(st.session_state['master_cal']):
             col = st.columns([0.6, 2, 2, 0.5, 0.5])
             col[0].write(f"**G{r['Giorno']}**")
@@ -160,7 +164,7 @@ if 'master_cal' in st.session_state:
     a_titolo = st.session_state['sel_anno']
     st.markdown(f"### 🖼️ CALENDARIO AOSR - {m_titolo} {a_titolo}")
     
-    # --- GRIGLIA FINALE (Screenshot Ready) ---
+    # --- GRIGLIA FINALE CON EFFETTO HOVER ---
     with st.container():
         st.markdown('<div class="print-container">', unsafe_allow_html=True)
         cols_per_row = 6
@@ -176,20 +180,20 @@ if 'master_cal' in st.session_state:
                 grid[idx].markdown(f"""
                 <div class="summary-card">
                     <div class="day-label">GIORNO {r['Giorno']}</div>
-                    <div style="color:{c_c}; font-size:0.8rem; font-weight:bold;">{r['Capo']}</div>
-                    <div style="color:#444; font-size:0.5rem; margin:2px 0;">&</div>
-                    <div style="color:{p_c}; font-size:0.8rem; font-weight:bold;">{r['Pass']}</div>
+                    <div style="color:{c_c}; font-size:0.85rem; font-weight:bold;">{r['Capo']}</div>
+                    <div style="color:#444; font-size:0.6rem; margin:2px 0;">TRAIN PASS</div>
+                    <div style="color:{p_c}; font-size:0.85rem; font-weight:bold;">{r['Pass']}</div>
                 </div>
                 """, unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # --- BOTTONE STAMPA ---
+    # --- BOTTONI FINALI ---
     st.markdown("<br>", unsafe_allow_html=True)
     if not st.session_state.get('print_mode', False):
-        if st.button("🖨️ STAMPA CALENDARIO (MODALITÀ FOTO)", type="primary"):
+        if st.button("🖨️ MODALITÀ FOTO (SCREENSHOT)", type="primary"):
             st.session_state['print_mode'] = True
             st.rerun()
     else:
-        if st.button("🔙 TORNA ALLA MODIFICA"):
+        if st.button("🔙 ESCI DA MODALITÀ FOTO"):
             st.session_state['print_mode'] = False
             st.rerun()
