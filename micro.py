@@ -9,30 +9,50 @@ st.set_page_config(page_title="AOSR Train Manager Elite", layout="wide")
 MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
             "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
 
-# --- CSS ELITE ---
+# --- CSS ELITE CON SFONDO E ANIMAZIONI ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-    .stApp { background-color: #0b0e14; color: #ffffff; }
+
+    /* SFONDO ACCATTIVANTE RIPRISTINATO */
+    .stApp { 
+        background-image: linear-gradient(rgba(11, 14, 20, 0.85), rgba(11, 14, 20, 0.95)), 
+                          url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1920&auto=format&fit=crop');
+        background-size: cover;
+        background-attachment: fixed;
+        color: #ffffff; 
+    }
+
     .train-title {
         font-family: 'Orbitron', sans-serif; font-weight: 900; text-align: center;
         color: #00c8ff; text-shadow: 0 0 20px rgba(0, 200, 255, 0.6);
-        font-size: 2.5rem; margin-bottom: 30px; letter-spacing: 5px;
+        font-size: 2.8rem; margin-bottom: 30px; letter-spacing: 5px;
     }
-    .btn-genera button { background: linear-gradient(45deg, #2ed573, #7bed9f) !important; color: black !important; font-family: 'Orbitron'; font-weight: 900; height: 60px !important; width: 100%; border: none !important; }
-    .btn-resetta button { background: linear-gradient(45deg, #ff4757, #ff6b81) !important; color: white !important; font-family: 'Orbitron'; font-weight: 900; height: 60px !important; width: 100%; border: none !important; }
-    .btn-verifica button { background: linear-gradient(45deg, #00c8ff, #005f73) !important; color: white !important; font-family: 'Orbitron'; font-weight: 900; height: 60px !important; width: 100%; border: none !important; margin-top: 20px; box-shadow: 0 0 15px rgba(0,200,255,0.4); }
-    
+
+    /* Expander e Input */
+    .stExpander { background-color: rgba(26, 31, 44, 0.8) !important; border: 1px solid #00c8ff !important; border-radius: 15px !important; }
+
+    /* Bottoni Fluo */
+    .btn-genera button { background: linear-gradient(45deg, #2ed573, #7bed9f) !important; color: black !important; font-family: 'Orbitron'; font-weight: 900; height: 65px !important; width: 100%; border: none !important; box-shadow: 0 4px 15px rgba(46,213,115,0.4) !important; }
+    .btn-resetta button { background: linear-gradient(45deg, #ff4757, #ff6b81) !important; color: white !important; font-family: 'Orbitron'; font-weight: 900; height: 65px !important; width: 100%; border: none !important; box-shadow: 0 4px 15px rgba(255,71,87,0.4) !important; }
+    .btn-verifica button { background: linear-gradient(45deg, #00c8ff, #005f73) !important; color: white !important; font-family: 'Orbitron'; font-weight: 900; height: 65px !important; width: 100%; border: none !important; margin-top: 30px; box-shadow: 0 0 20px rgba(0,200,255,0.5) !important; }
+
+    /* Card Animata */
     .summary-card {
-        background: rgba(17, 17, 17, 0.9); border: 1px solid #333; padding: 20px; 
+        background: rgba(10, 10, 10, 0.85); border: 1px solid #333; padding: 20px; 
         border-radius: 15px; position: relative; border-top: 3px solid #00c8ff;
         transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        backdrop-filter: blur(5px);
     }
-    .summary-card:hover { transform: scale(1.05); border-color: #00c8ff; box-shadow: 0 10px 30px rgba(0, 200, 255, 0.4); }
-    .day-label { color: #00c8ff; font-family: 'Orbitron'; font-weight: bold; text-align: center; margin-bottom: 12px; }
-    .name-text { font-size: 0.95rem; font-weight: 800; text-align: center; text-transform: uppercase; margin: 4px 0; }
+    .summary-card:hover { transform: scale(1.05); border-color: #00c8ff; box-shadow: 0 10px 40px rgba(0, 200, 255, 0.5); background: rgba(20, 20, 20, 0.95); }
+    
+    .day-label { color: #00c8ff; font-family: 'Orbitron'; font-weight: bold; text-align: center; margin-bottom: 12px; font-size: 1.1rem; }
+    .name-text { font-size: 1rem; font-weight: 800; text-align: center; text-transform: uppercase; margin: 4px 0; letter-spacing: 1px; }
+
+    /* Ingranaggio Ghost */
     .popover-container { position: absolute; top: 10px; right: 10px; z-index: 100; }
-    div[data-testid="stPopover"] > button { background: transparent !important; border: none !important; color: rgba(255,255,255,0.3) !important; }
+    div[data-testid="stPopover"] > button { background: transparent !important; border: none !important; color: rgba(255,255,255,0.2) !important; font-size: 1.2rem !important; }
+    div[data-testid="stPopover"] > button:hover { color: #00c8ff !important; transform: rotate(90deg); transition: 0.3s; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -57,7 +77,7 @@ st.markdown('<div class="train-title">🚄 AOSR EXPRESS ELITE</div>', unsafe_all
 
 with st.expander("🛠️ CONFIGURAZIONE TRENO", expanded=True):
     c1, c2, c3 = st.columns([1, 1.5, 1.5])
-    st.session_state['sel_mese'] = c1.selectbox("Mese", MESI_ITA, index=MESI_ITA.index(st.session_state['sel_mese']))
+    st.session_state['sel_mese'] = c1.selectbox("Seleziona Mese", MESI_ITA, index=MESI_ITA.index(st.session_state['sel_mese']))
     st.session_state['sel_anno'] = c1.number_input("Anno", 2024, 2030, st.session_state['sel_anno'])
     m_r3, m_r2 = db[db['Grado'] == "R3"]['Nome'].tolist(), db[db['Grado'] == "R2"]['Nome'].tolist()
     sel_r3, sel_r2 = c2.multiselect("Filtra R3", m_r3), c3.multiselect("Filtra R2", m_r2)
@@ -87,49 +107,50 @@ with col_b2:
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
-# --- DISPLAY CALENDARIO ---
+# --- CALENDARIO ---
 if 'master_cal' in st.session_state:
-    st.markdown(f"<h2 style='text-align: center; font-family: Orbitron;'>{st.session_state['sel_mese'].upper()} {st.session_state['sel_anno']}</h2>", unsafe_allow_html=True)
+    st.markdown(f"<h2 style='text-align: center; font-family: Orbitron; color: white;'>{st.session_state['sel_mese'].upper()} {st.session_state['sel_anno']}</h2>", unsafe_allow_html=True)
     cols = st.columns(6)
     for i, r in enumerate(st.session_state['master_cal']):
         with cols[i % 6]:
             g_c = db[db['Nome']==r['Capo']]['Grado'].values[0] if r['Capo'] in all_names else "R3"
             g_p = db[db['Nome']==r['Pass']]['Grado'].values[0] if r['Pass'] in all_names else "R3"
             c_col, p_col = ("#ff4757" if g == "R5/R4" else "#2ed573" for g in [g_c, g_p])
-            st.markdown(f'<div class="summary-card"><div class="day-label">GG {r["Giorno"]}</div><div class="name-text" style="color:{c_col};">{r["Capo"]}</div><div style="color:#555; font-size:0.6rem; text-align:center; margin: 5px 0;">TRAIN PASS</div><div class="name-text" style="color:{p_col};">{r["Pass"]}</div>', unsafe_allow_html=True)
+            
+            st.markdown(f"""
+            <div class="summary-card">
+                <div class="day-label">GG {r['Giorno']}</div>
+                <div class="name-text" style="color:{c_col};">{r['Capo']}</div>
+                <div style="color:#555; font-size:0.6rem; text-align:center; margin: 5px 0;">TRAIN PASS</div>
+                <div class="name-text" style="color:{p_col};">{r['Pass']}</div>
+            """, unsafe_allow_html=True)
+            
             st.markdown('<div class="popover-container">', unsafe_allow_html=True)
             with st.popover("⚙️"):
-                if st.button("Scambia", key=f"sw_{i}"):
+                if st.button("🔄 Scambia Ruoli", key=f"sw_{i}"):
                     st.session_state['master_cal'][i]['Capo'], st.session_state['master_cal'][i]['Pass'] = r['Pass'], r['Capo']
                     st.rerun()
                 nc = st.selectbox("Capo", all_names, index=all_names.index(r['Capo']), key=f"c_{i}")
                 np = st.selectbox("Pass", all_names, index=all_names.index(r['Pass']), key=f"p_{i}")
-                if st.button("OK", key=f"s_{i}"):
+                if st.button("💾 Salva", key=f"s_{i}"):
                     st.session_state['master_cal'][i].update({"Capo": nc, "Pass": np}); st.rerun()
             st.markdown('</div></div>', unsafe_allow_html=True)
 
-    # --- 🛡️ PULSANTE VERIFICA FINALE ---
+    # --- VERIFICA INTEGRITÀ ---
     st.markdown('<div class="btn-verifica">', unsafe_allow_html=True)
     if st.button("🛡️ VERIFICA INTEGRITÀ TRENO"):
         cal = st.session_state['master_cal']
-        capi = [d['Capo'] for d in cal]
-        pass_list = [d['Pass'] for d in cal]
+        capi, pass_list = [d['Capo'] for d in cal], [d['Pass'] for d in cal]
         errori = []
-
-        # 1. Verifica nomi doppi nella stessa casella
         for d in cal:
-            if d['Capo'] == d['Pass']: errori.append(f"GG {d['Giorno']}: **{d['Capo']}** è sia Capo che Pass!")
-
-        # 2. Verifica univocità Capotreno
-        for nome in set(capi):
-            if capi.count(nome) > 1: errori.append(f"Il Capotreno **{nome}** compare {capi.count(nome)} volte!")
+            if d['Capo'] == d['Pass']: errori.append(f"GG {d['Giorno']}: **{d['Capo']}** è in doppio ruolo!")
+        for n in set(capi):
+            if capi.count(n) > 1: errori.append(f"Capo **{n}** compare {capi.count(n)} volte!")
+        for n in set(pass_list):
+            if pass_list.count(n) > 1: errori.append(f"Pass **{n}** compare {pass_list.count(n)} volte!")
         
-        # 3. Verifica univocità Passeggero
-        for nome in set(pass_list):
-            if pass_list.count(nome) > 1: errori.append(f"Il Passeggero **{nome}** compare {pass_list.count(nome)} volte!")
-
         if errori:
             for err in errori: st.error(err)
         else:
-            st.success("✅ VERIFICA COMPLETATA: Il treno è perfetto. Nessun doppio turno rilevato!")
+            st.success("✅ INTEGRITÀ CONFERMATA: Nessun doppio turno trovato!")
     st.markdown('</div>', unsafe_allow_html=True)
