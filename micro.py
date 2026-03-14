@@ -148,8 +148,8 @@ if 'master_cal' in st.session_state:
                 st.markdown(f"""
                 <div class="diapo-card">
                     <div class="diapo-day">GG {r['Giorno']}</div>
-                    <div class="diapo-name" style="color:{c_col};">C: {r['Capo']}</div>
-                    <div class="diapo-name" style="color:{p_col};">P: {r['Pass']}</div>
+                    <div class="diapo-name" style="color:{c_col};">C: {r['CAPOTRENO']}</div>
+                    <div class="diapo-name" style="color:{p_col};">P: {r['PASSEGGERO']}</div>
                 </div>
                 """, unsafe_allow_html=True)
     else:
