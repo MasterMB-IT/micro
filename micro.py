@@ -37,7 +37,7 @@ st.markdown("""
         color: #2b1d0e; margin-bottom: 10px; min-height: 140px;
     }
 
-    /* CARD DIAPOSITIVA (VERSIONE PERFETTA) */
+    /* CARD DIAPOSITIVA */
     .diapo-card {
         background: #f4e4bc; border: 2px solid #8b5a2b; 
         padding: 8px 4px; border-radius: 4px; 
@@ -104,22 +104,33 @@ col_b1, col_b2, col_b3 = st.columns([1, 1, 1])
 with col_b1:
     st.markdown('<div class="btn-genera">', unsafe_allow_html=True)
     if st.button("⚒️ GENERA"):
-        # Se non selezionati, usa tutti quelli del database
+        # Seleziona i pool
         pool_leaders = sel_leaders if sel_leaders else m_leaders
         pool_others = (sel_r3 if sel_r3 else m_r3) + (sel_r2 if sel_r2 else m_r2)
+        
+        # Mischia i pool per casualità
+        shuffled_leaders = pool_leaders.copy()
+        random.shuffle(shuffled_leaders)
         random.shuffle(pool_others)
         
         num_gg = (pd.Timestamp(year=st.session_state['sel_anno'], month=MESI_ITA.index(st.session_state['sel_mese'])+1, day=1) + pd.offsets.MonthEnd(0)).day
         st.session_state['master_cal'] = []
-        p_idx = 0
+        
+        l_idx = 0 # Indice per i leader
+        o_idx = 0 # Indice per gli altri
+        
         for g in range(1, num_gg + 1):
-            if g <= 11: 
-                c = pool_leaders[(g-1)%len(pool_leaders)]
-                p = pool_leaders[g%len(pool_leaders)]
+            if g <= 11:
+                # Estrazione pulita dai Leader (evita trascinamento)
+                c = shuffled_leaders[l_idx % len(shuffled_leaders)]
+                p = shuffled_leaders[(l_idx + 1) % len(shuffled_leaders)]
+                l_idx += 2 # Salta di due per non ripetere il passeggero come capo domani
             else:
-                c = pool_others[p_idx % len(pool_others)]
-                p = pool_others[(p_idx+1) % len(pool_others)]
-                p_idx += 2
+                # Estrazione pulita dagli altri gradi
+                c = pool_others[o_idx % len(pool_others)]
+                p = pool_others[(o_idx + 1) % len(pool_others)]
+                o_idx += 2
+            
             st.session_state['master_cal'].append({"Giorno": g, "Capo": c, "Pass": p})
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -138,7 +149,7 @@ if 'master_cal' in st.session_state:
     st.markdown(f"<h3 style='text-align: center; font-family: Special Elite; color: #ffcc66; margin-bottom: 5px;'>📅 {st.session_state['sel_mese'].upper()}</h3>", unsafe_allow_html=True)
     
     if modo_diapositiva:
-        cols = st.columns(8) # 8 colonne per card leggermente più grandi
+        cols = st.columns(8)
         for i, r in enumerate(st.session_state['master_cal']):
             with cols[i % 8]:
                 c_col = "#8b0000" if any(db[(db['Nome'] == r['Capo']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
