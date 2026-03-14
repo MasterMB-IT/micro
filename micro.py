@@ -111,4 +111,32 @@ if 'master_cal' in st.session_state:
             g_c = db[db['Nome'] == r['Capotreno']]['Grado'].values[0] if r['Capotreno'] in all_names else "R3"
             style_c = "r5-r4-text" if g_c == "R5/R4" else "r3-text" if g_c == "R3" else "r2-text" if g_c == "R2" else "r1-text"
             st.markdown(f'Capo: <span class="{style_c}">{r["Capotreno"]}</span>', unsafe_allow_html=True)
-            if is
+            if is_duplicate_merit(r['Capotreno']):
+                st.markdown('<div class="warning-box">⚠️ Meritevole già assegnato nel mese!</div>', unsafe_allow_html=True)
+
+        # Passeggero
+        with cols[2]:
+            g_p = db[db['Nome'] == r['Passeggero']]['Grado'].values[0] if r['Passeggero'] in all_names else "R3"
+            style_p = "r5-r4-text" if g_p == "R5/R4" else "r3-text" if g_p == "R3" else "r2-text" if g_p == "R2" else "r1-text"
+            st.markdown(f'Pass: <span class="{style_p}">{r["Passeggero"]}</span>', unsafe_allow_html=True)
+            if is_duplicate_merit(r['Passeggero']):
+                st.markdown('<div class="warning-box">⚠️ Meritevole già assegnato nel mese!</div>', unsafe_allow_html=True)
+
+        with cols[3]:
+            if st.button(f"📝 Modifica", key=f"edit_{i}"):
+                st.session_state[f"row_edit_{i}"] = not st.session_state.get(f"row_edit_{i}", False)
+
+        # Editor inline
+        if st.session_state.get(f"row_edit_{i}", False):
+            with st.container():
+                ec1, ec2, ec3 = st.columns([4, 4, 2])
+                new_c = ec1.selectbox("Nuovo Capo", all_names, index=all_names.index(r['Capotreno']) if r['Capotreno'] in all_names else 0, key=f"sel_c_{i}")
+                new_p = ec2.selectbox("Nuovo Pass", all_names, index=all_names.index(r['Passeggero']) if r['Passeggero'] in all_names else 0, key=f"sel_p_{i}")
+                if ec3.button("✅ Applica", key=f"save_{i}"):
+                    st.session_state['master_cal'][i]['Capotreno'] = new_c
+                    st.session_state['master_cal'][i]['Passeggero'] = new_p
+                    st.session_state[f"row_edit_{i}"] = False
+                    st.rerun()
+        st.markdown("---")
+
+    st.download_button("📥 Scarica Report CSV", pd.DataFrame(st.session_state['master_cal']).to_csv(index=False).encode('utf-8'), "Treni_Mese.csv")
