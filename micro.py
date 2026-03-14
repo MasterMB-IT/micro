@@ -37,37 +37,35 @@ st.markdown("""
         color: #2b1d0e; margin-bottom: 10px; min-height: 140px;
     }
 
-    /* CARD DIAPOSITIVA (VERSIONE MINI - DIMEZZATA) */
+    /* CARD DIAPOSITIVA (VERSIONE OTTIMIZZATA) */
     .diapo-card {
-        background: #f4e4bc; border: 1px solid #8b5a2b; 
-        padding: 4px 2px; border-radius: 2px; 
-        text-align: center; box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
-        margin-bottom: 5px; min-height: 55px; /* Altezza dimezzata */
+        background: #f4e4bc; border: 1.5px solid #8b5a2b; 
+        padding: 6px 3px; border-radius: 3px; 
+        text-align: center; box-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+        margin-bottom: 6px; min-height: 75px; 
         display: flex; flex-direction: column; justify-content: center;
     }
 
-    .day-label { color: #8b0000; font-family: 'Special Elite'; font-weight: bold; font-size: 0.9rem; border-bottom: 1px dashed #8b5a2b; }
-    
-    /* Etichetta giorno mini */
+    /* Testi Diapositiva */
     .diapo-day { 
         color: #8b0000; font-family: 'Special Elite'; font-weight: bold; 
-        font-size: 0.65rem; margin-bottom: 2px; line-height: 1;
+        font-size: 0.75rem; margin-bottom: 3px; border-bottom: 1px solid rgba(139, 90, 43, 0.3);
     }
     
-    .name-text { font-family: 'Special Elite'; font-size: 0.85rem; font-weight: 800; text-align: center; text-transform: uppercase; margin: 2px 0; }
-    
-    /* Nomi mini */
     .diapo-name { 
-        font-family: 'Special Elite'; font-size: 0.55rem; font-weight: 700; 
-        margin: 0px; line-height: 1.1; text-transform: uppercase;
+        font-family: 'Special Elite'; font-size: 0.65rem; font-weight: 800; 
+        margin: 1px 0; line-height: 1.2; text-transform: uppercase;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
+    /* Stili Base */
+    .day-label { color: #8b0000; font-family: 'Special Elite'; font-weight: bold; font-size: 0.9rem; border-bottom: 1px dashed #8b5a2b; }
+    .name-text { font-family: 'Special Elite'; font-size: 0.85rem; font-weight: 800; text-align: center; text-transform: uppercase; margin: 2px 0; }
     .role-label { color: #8b5a2b; font-size: 0.6rem; text-align: center; font-family: 'Special Elite'; text-transform: uppercase; }
 
     /* Bottoni */
-    .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; font-family: 'Special Elite'; font-weight: bold; border: 2px solid #4b3621 !important; height: 40px !important; font-size: 0.8rem !important; }
-    .btn-resetta button { background: #a44a3f !important; color: #f1e5ac !important; font-family: 'Special Elite'; border: 2px solid #4b1d1d !important; height: 40px !important; font-size: 0.8rem !important; }
+    .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; font-family: 'Special Elite'; font-weight: bold; border: 2px solid #4b3621 !important; height: 42px !important; }
+    .btn-resetta button { background: #a44a3f !important; color: #f1e5ac !important; font-family: 'Special Elite'; border: 2px solid #4b1d1d !important; height: 42px !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -131,14 +129,14 @@ if 'master_cal' in st.session_state:
     st.markdown(f"<h3 style='text-align: center; font-family: Special Elite; color: #ffcc66; margin-bottom: 5px;'>📅 {st.session_state['sel_mese'].upper()}</h3>", unsafe_allow_html=True)
     
     if modo_diapositiva:
-        cols = st.columns(10) # Griglia fitta per vista totale
+        cols = st.columns(9) # 9 colonne: equilibrio perfetto tra grandezza e spazio
         for i, r in enumerate(st.session_state['master_cal']):
-            with cols[i % 10]:
+            with cols[i % 9]:
                 c_col = "#8b0000" if any(db[(db['Nome'] == r['Capo']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
                 p_col = "#8b0000" if any(db[(db['Nome'] == r['Pass']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
                 st.markdown(f"""
                 <div class="diapo-card">
-                    <div class="diapo-day">G{r['Giorno']}</div>
+                    <div class="diapo-day">GG {r['Giorno']}</div>
                     <div class="diapo-name" style="color:{c_col};">C: {r['Capo']}</div>
                     <div class="diapo-name" style="color:{p_col};">P: {r['Pass']}</div>
                 </div>
