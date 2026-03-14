@@ -4,125 +4,105 @@ import random
 from datetime import datetime
 
 # --- CONFIGURAZIONE PAGINA ---
-st.set_page_config(page_title="AOSR Arcade Train Manager", layout="wide")
+st.set_page_config(page_title="AOSR Train Manager Elite", layout="wide")
 
 MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
             "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
 
-# --- CSS ARCADE WESTERN ---
+# --- CSS ELITE CON SFONDO TRENO FAR WEST E ANIMAZIONI ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Press+Start+2P&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 
-    /* SFONDO PIXEL ART ARCADE FAR WEST */
+    /* SFONDO CON TRENO FAR WEST */
     .stApp { 
-        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)), 
-                    url('https://img.freepik.com/premium-photo/pixel-art-desert-landscape-with-cacti-mountains-sunset_1020495-200.jpg');
-        background-size: cover !important;
-        background-position: bottom center !important;
-        background-attachment: fixed !important;
+        background-color: #0b0e14;
+        background-image: linear-gradient(rgba(11, 14, 20, 0.5), rgba(11, 14, 20, 0.7)), 
+                          url('https://images.unsplash.com/photo-1549642646-dfb55d9d968b?q=80&w=1920&auto=format&fit=crop');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
         color: #ffffff; 
     }
 
     .train-title {
-        font-family: 'Press Start 2P', cursive;
-        text-align: center;
-        color: #ffcc00;
-        text-shadow: 4px 4px #cc3300;
-        font-size: 1.8rem;
-        margin-bottom: 30px;
-        line-height: 1.6;
+        font-family: 'Orbitron', sans-serif; font-weight: 900; text-align: center;
+        color: #00c8ff; text-shadow: 0 0 20px rgba(0, 200, 255, 0.6);
+        font-size: 3rem; margin-bottom: 30px; letter-spacing: 5px;
     }
 
-    /* Pannelli stile cabinato */
-    .stExpander { 
-        background-color: rgba(40, 20, 0, 0.85) !important; 
-        border: 3px solid #ffcc00 !important; 
-        border-radius: 5px !important;
+    /* Expander e Input */
+    .stExpander { background-color: rgba(17, 21, 30, 0.85) !important; border: 1px solid #00c8ff !important; border-radius: 15px !important; }
+
+    /* Bottoni Fluo */
+    .btn-genera button { background: linear-gradient(45deg, #2ed573, #7bed9f) !important; color: black !important; font-family: 'Orbitron'; font-weight: 900; height: 65px !important; width: 100%; border: none !important; box-shadow: 0 4px 15px rgba(46,213,115,0.4) !important; transition: 0.3s; }
+    .btn-genera button:hover { transform: scale(1.02); box-shadow: 0 8px 25px rgba(46,213,115,0.6) !important; }
+    
+    .btn-resetta button { background: linear-gradient(45deg, #ff4757, #ff6b81) !important; color: white !important; font-family: 'Orbitron'; font-weight: 900; height: 65px !important; width: 100%; border: none !important; }
+    
+    .btn-verifica button { background: linear-gradient(45deg, #00c8ff, #005f73) !important; color: white !important; font-family: 'Orbitron'; font-weight: 900; height: 60px !important; width: 100%; border: none !important; margin-top: 20px; box-shadow: 0 0 15px rgba(0,200,255,0.4); }
+
+    /* Card con Animazione Hover */
+    .summary-card {
+        background: rgba(10, 10, 10, 0.8); border: 1px solid #333; padding: 20px; 
+        border-radius: 15px; position: relative; border-top: 3px solid #00c8ff;
+        transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         backdrop-filter: blur(5px);
     }
-
-    /* Bottoni Arcade */
-    .btn-genera button { background: #2ecc71 !important; border-bottom: 5px solid #27ae60 !important; color: white !important; font-family: 'Press Start 2P'; font-size: 0.8rem !important; height: 70px !important; width: 100%; border-radius: 5px !important; }
-    .btn-resetta button { background: #e74c3c !important; border-bottom: 5px solid #c0392b !important; color: white !important; font-family: 'Press Start 2P'; font-size: 0.8rem !important; height: 70px !important; width: 100%; border-radius: 5px !important; }
-    .btn-verifica button { background: #f1c40f !important; border-bottom: 5px solid #f39c12 !important; color: black !important; font-family: 'Press Start 2P'; font-size: 0.8rem !important; height: 70px !important; width: 100%; border-radius: 5px !important; margin-top: 20px; }
-
-    /* Card Giorno Arcade */
-    .summary-card {
-        background: rgba(0, 0, 0, 0.85); 
-        border: 2px solid #555; 
-        padding: 15px; 
-        border-radius: 0px; 
-        position: relative; 
-        border-left: 5px solid #ffcc00;
-        transition: 0.2s;
+    .summary-card:hover { 
+        transform: scale(1.05); border-color: #00c8ff; 
+        box-shadow: 0 10px 40px rgba(0, 200, 255, 0.5); 
+        background: rgba(20, 20, 20, 0.95); 
     }
-    .summary-card:hover { transform: translateY(-5px); border-color: #ffcc00; box-shadow: 0 5px 15px rgba(255, 204, 0, 0.3); }
     
-    .day-label { color: #ffcc00; font-family: 'Press Start 2P'; font-size: 0.7rem; text-align: center; margin-bottom: 10px; }
-    .name-text { font-family: 'Orbitron'; font-size: 0.9rem; font-weight: 800; text-align: center; text-transform: uppercase; margin: 3px 0; }
+    .day-label { color: #00c8ff; font-family: 'Orbitron'; font-weight: bold; text-align: center; margin-bottom: 12px; font-size: 1.1rem; }
+    .name-text { font-size: 1rem; font-weight: 800; text-align: center; text-transform: uppercase; margin: 4px 0; }
 
-    /* Popover */
-    div[data-testid="stPopover"] > button { background: rgba(255,255,255,0.1) !important; border: 1px solid #555 !important; }
+    /* Ingranaggio Ghost */
+    .popover-container { position: absolute; top: 10px; right: 10px; z-index: 100; }
+    div[data-testid="stPopover"] > button { background: transparent !important; border: none !important; color: rgba(255,255,255,0.2) !important; font-size: 1.2rem !important; }
+    div[data-testid="stPopover"] > button:hover { color: #00c8ff !important; transform: rotate(90deg); transition: 0.3s; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- INIZIALIZZAZIONE DATABASE ---
-if 'players_data' not in st.session_state:
-    st.session_state['players_data'] = {
-        "R5/R4": "Hool (R5), MASTER (R4), Le 12 Scimmie (R4), Sagittarius A1 (R4), Starbetty (R4), PEPPE (R4), Ricky Around (R4), uncle g (R4), 09ALEX24 (R4), ShinyPasta (R4), Wall 7 (R4)",
-        "R3": "G Erry, Uncle g brother, Cane Avvoltoio, Ghandal, Aryron, Tricheco, Maメツ, NOVEMBERGENZ, Lalla 96, Whale Panda, GennaroM, EchoZero, EDDward, AMY, Resilienza, Ana Bunny, Giuseppec84, Benito Muschiolini, Pandino19, xFlotchy, MX63, holdfast, Ghost, BadBigBoss, Stefano00000, PakII, BANDOLERO26, BlOOdyBlade, Whale hunter Levve, Aresxxx, KingGruffalo, Hulkspakka, Joseone, ImAde, Nysbie, LeFada13, Skifetto, SPio24, TomEnergy, Markus Defender, Sho0t3r, Wolf006, Zokra, perseusxxx, Bendico, Obbyy, ArLes, Fatz87, cruel neve, Trivellatore, Osgh00, Slowfia ABOH, Pontatinatore, 27Francesco, MissDrinks, krompir, MaledettO",
-        "R2": "teomadh, Bossnico, Valecit, FarmerHool, camiiiii 08, Doctor team, Yass081, Nuorifleming, Vergabrio, Frenk70, Comandante Maveric, Thor9000, MrBolly, BustaMaki, Ritardato, StUnTmArK, MONKEY D LUFFY 20, CineSalentino, Danylo98, Ezechielefabianino, BRNcommando, LEONIDA, elchicogyot, erer1000, Pupisnic, Backfire1, AnarchyBG, Fabrizio1987, JurdanS, WiseR9, Infinity8080"
-    }
+# --- DATABASE INVARIATO ---
+def init_db():
+    leaders = ["Hool (R5)", "MASTER (R4)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", "Starbetty (R4)", "PEPPE (R4)", "Ricky Around (R4)", "uncle g (R4)", "09ALEX24 (R4)", "ShinyPasta (R4)", "Wall 7 (R4)"]
+    r3 = ["G Erry", "Uncle g brother", "Cane Avvoltoio", "Ghandal", "Aryron", "Tricheco", "Maメツ", "NOVEMBERGENZ", "Lalla 96", "Whale Panda", "GennaroM", "EchoZero", "EDDward", "AMY", "Resilienza", "Ana Bunny", "Giuseppec84", "Benito Muschiolini", "Pandino19", "xFlotchy", "MX63", "holdfast", "Ghost", "BadBigBoss", "Stefano00000", "PakII", "BANDOLERO26", "BlOOdyBlade", "Whale hunter Levve", "Aresxxx", "KingGruffalo", "Hulkspakka", "Joseone", "ImAde", "Nysbie", "LeFada13", "Skifetto", "SPio24", "TomEnergy", "Markus Defender", "Sho0t3r", "Wolf006", "Zokra", "perseusxxx", "Bendico", "Obbyy", "ArLes", "Fatz87", "cruel neve", "Trivellatore", "Osgh00", "Slowfia ABOH", "Pontatinatore", "27Francesco", "MissDrinks", "krompir", "MaledettO"]
+    r2 = ["teomadh", "Bossnico", "Valecit", "FarmerHool", "camiiiii 08", "Doctor team", "Yass081", "Nuorifleming", "Vergabrio", "Frenk70", "Comandante Maveric", "Thor9000", "MrBolly", "BustaMaki", "Ritardato", "StUnTmArK", "MONKEY D LUFFY 20", "CineSalentino", "Danylo98", "Ezechielefabianino", "BRNcommando", "LEONIDA", "elchicogyot", "erer1000", "Pupisnic", "Backfire1", "AnarchyBG", "Fabrizio1987", "JurdanS", "WiseR9", "Infinity8080"]
+    data = [{"Nome": n, "Grado": "R5/R4"} for n in leaders] + [{"Nome": n, "Grado": "R3"} for n in r3] + [{"Nome": n, "Grado": "R2"} for n in r2]
+    return pd.DataFrame(data)
 
-# --- GESTIONE NOMI (EDITOR) ---
-with st.expander("👥 GESTIONE EQUIPAGGIO (Modifica Nomi)", expanded=False):
-    st.info("Separa i nomi con una virgola. Le modifiche influenzeranno il prossimo calendario generato.")
-    col_ed1, col_ed2, col_ed3 = st.columns(3)
-    
-    new_r4 = col_ed1.text_area("Capitani (R5/R4)", st.session_state['players_data']["R5/R4"], height=150)
-    new_r3 = col_ed2.text_area("Passeggeri R3", st.session_state['players_data']["R3"], height=150)
-    new_r2 = col_ed3.text_area("Passeggeri R2", st.session_state['players_data']["R2"], height=150)
-    
-    if st.button("💾 SALVA MODIFICHE EQUIPAGGIO"):
-        st.session_state['players_data']["R5/R4"] = new_r4
-        st.session_state['players_data']["R3"] = new_r3
-        st.session_state['players_data']["R2"] = new_r2
-        st.success("Equipaggio aggiornato!")
-        st.rerun()
+if 'players_db' not in st.session_state:
+    st.session_state['players_db'] = init_db()
+    st.session_state['sel_mese'] = MESI_ITA[datetime.now().month - 1]
+    st.session_state['sel_anno'] = 2026
 
-# Creazione liste nomi pulite
-def get_list(key):
-    return [n.strip() for n in st.session_state['players_data'][key].split(",") if n.strip()]
+db = st.session_state['players_db']
+all_names = sorted(db['Nome'].tolist())
 
-list_r4 = get_list("R5/R4")
-list_r3 = get_list("R3")
-list_r2 = get_list("R2")
-all_names_list = sorted(list_r4 + list_r3 + list_r2)
-
-# --- UI GENERALE ---
-st.markdown('<div class="train-title">AOSR CANYON RUNNER<br>ARCADE EDITION</div>', unsafe_allow_html=True)
+# --- UI ---
+st.markdown('<div class="train-title">🚄 AOSR EXPRESS ELITE</div>', unsafe_allow_html=True)
 
 with st.expander("🛠️ CONFIGURAZIONE TRENO", expanded=True):
     c1, c2, c3 = st.columns([1, 1.5, 1.5])
-    sel_mese = c1.selectbox("Mese", MESI_ITA, index=datetime.now().month - 1)
-    sel_anno = c1.number_input("Anno", 2024, 2030, 2026)
-    sel_r3 = c2.multiselect("Filtra R3", list_r3)
-    sel_r2 = c3.multiselect("Filtra R2", list_r2)
+    st.session_state['sel_mese'] = c1.selectbox("Seleziona Mese", MESI_ITA, index=MESI_ITA.index(st.session_state['sel_mese']))
+    st.session_state['sel_anno'] = c1.number_input("Anno", 2024, 2030, st.session_state['sel_anno'])
+    m_r3, m_r2 = db[db['Grado'] == "R3"]['Nome'].tolist(), db[db['Grado'] == "R2"]['Nome'].tolist()
+    sel_r3, sel_r2 = c2.multiselect("Filtra R3", m_r3), c3.multiselect("Filtra R2", m_r2)
 
 col_b1, col_b2 = st.columns(2)
 with col_b1:
     st.markdown('<div class="btn-genera">', unsafe_allow_html=True)
-    if st.button("🕹️ START GENERATION"):
-        pool = (sel_r3 if sel_r3 else list_r3) + (sel_r2 if sel_r2 else list_r2)
+    if st.button("🚀 GENERA NUOVO CALENDARIO"):
+        pool = (sel_r3 if sel_r3 else m_r3) + (sel_r2 if sel_r2 else m_r2)
         random.shuffle(pool)
-        num_gg = (pd.Timestamp(year=sel_anno, month=MESI_ITA.index(sel_mese)+1, day=1) + pd.offsets.MonthEnd(0)).day
+        leaders = db[db['Grado']=="R5/R4"]['Nome'].tolist()
+        num_gg = (pd.Timestamp(year=st.session_state['sel_anno'], month=MESI_ITA.index(st.session_state['sel_mese'])+1, day=1) + pd.offsets.MonthEnd(0)).day
         st.session_state['master_cal'] = []
         p_idx = 0
         for g in range(1, num_gg + 1):
-            if g <= 11: 
-                c = list_r4[(g-1)%len(list_r4)]
-                p = list_r4[g%len(list_r4)]
+            if g <= 11: c, p = leaders[(g-1)%len(leaders)], leaders[g%len(leaders)]
             else:
                 c = pool[p_idx % len(pool)]; p = pool[(p_idx+1) % len(pool)]
                 p_idx += 2
@@ -131,44 +111,56 @@ with col_b1:
 
 with col_b2:
     st.markdown('<div class="btn-resetta">', unsafe_allow_html=True)
-    if st.button("🛑 RESET SYSTEM"):
+    if st.button("🗑️ RESETTA SISTEMA"):
         if 'master_cal' in st.session_state: del st.session_state['master_cal']
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
 # --- DISPLAY CALENDARIO ---
 if 'master_cal' in st.session_state:
-    st.markdown(f"<h3 style='text-align: center; font-family: Press Start 2P; color: #ffcc00; font-size: 1rem;'>{sel_mese.upper()} {sel_anno}</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h2 style='text-align: center; font-family: Orbitron; color: white;'>{st.session_state['sel_mese'].upper()} {st.session_state['sel_anno']}</h2>", unsafe_allow_html=True)
     cols = st.columns(6)
     for i, r in enumerate(st.session_state['master_cal']):
         with cols[i % 6]:
-            c_col = "#ff4757" if r['Capo'] in list_r4 else "#2ed573"
-            p_col = "#ff4757" if r['Pass'] in list_r4 else "#2ed573"
-            
+            # Colori gradi
+            g_c = db[db['Nome']==r['Capo']]['Grado'].values[0] if r['Capo'] in all_names else "R3"
+            g_p = db[db['Nome']==r['Pass']]['Grado'].values[0] if r['Pass'] in all_names else "R3"
+            c_col, p_col = ("#ff4757" if g == "R5/R4" else "#2ed573" for g in [g_c, g_p])
+
+            # Card HTML
             st.markdown(f"""
             <div class="summary-card">
-                <div class="day-label">DAY {r['Giorno']}</div>
+                <div class="day-label">GG {r['Giorno']}</div>
                 <div class="name-text" style="color:{c_col};">{r['Capo']}</div>
-                <div style="color:#666; font-size:0.5rem; text-align:center; font-family:'Press Start 2P'; margin: 5px 0;">PASS</div>
+                <div style="color:#555; font-size:0.6rem; text-align:center; margin: 5px 0;">TRAIN PASS</div>
                 <div class="name-text" style="color:{p_col};">{r['Pass']}</div>
             """, unsafe_allow_html=True)
             
+            # Ingranaggio Popover
+            st.markdown('<div class="popover-container">', unsafe_allow_html=True)
             with st.popover("⚙️"):
-                nc = st.selectbox("Capo", all_names_list, index=all_names_list.index(r['Capo']), key=f"c_{i}")
-                np = st.selectbox("Pass", all_names_list, index=all_names_list.index(r['Pass']), key=f"p_{i}")
-                if st.button("UPDATE", key=f"s_{i}"):
-                    st.session_state['master_cal'][i].update({"Capo": nc, "Pass": np}); st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
+                # Scambio Ruoli
+                if st.button("🔄 Scambia Ruoli", key=f"sw_{i}"):
+                    st.session_state['master_cal'][i]['Capo'], st.session_state['master_cal'][i]['Pass'] = r['Pass'], r['Capo']
+                    st.rerun()
+                
+                new_c = st.selectbox("Capo", all_names, index=all_names.index(r['Capo']), key=f"selc_{i}")
+                new_p = st.selectbox("Pass", all_names, index=all_names.index(r['Pass']), key=f"selp_{i}")
+                
+                if st.button("💾 Salva", key=f"ok_{i}"):
+                    st.session_state['master_cal'][i]['Capo'] = new_c
+                    st.session_state['master_cal'][i]['Pass'] = new_p
+                    st.rerun()
+            st.markdown('</div></div>', unsafe_allow_html=True)
 
-    # --- VERIFICA ---
+    # --- VERIFICA INTEGRITÀ ---
     st.markdown('<div class="btn-verifica">', unsafe_allow_html=True)
-    if st.button("🛡️ INTEGRITY CHECK (VERIFICA)"):
+    if st.button("🛡️ VERIFICA INTEGRITÀ TRENO"):
         cal = st.session_state['master_cal']
-        capi = [d['Capo'] for d in cal]
-        pass_list = [d['Pass'] for d in cal]
+        capi, pass_list = [d['Capo'] for d in cal], [d['Pass'] for d in cal]
         errori = []
         for d in cal:
-            if d['Capo'] == d['Pass']: errori.append(f"Giorno {d['Giorno']}: **{d['Capo']}** doppio ruolo!")
+            if d['Capo'] == d['Pass']: errori.append(f"GG {d['Giorno']}: **{d['Capo']}** è in doppio ruolo!")
         for n in set(capi):
             if capi.count(n) > 1: errori.append(f"Capo **{n}** compare {capi.count(n)} volte!")
         for n in set(pass_list):
@@ -177,5 +169,5 @@ if 'master_cal' in st.session_state:
         if errori:
             for err in errori: st.error(err)
         else:
-            st.success("✅ GAME CLEAR: Nessun conflitto trovato!")
+            st.success("✅ INTEGRITÀ CONFERMATA: Nessun doppio turno trovato!")
     st.markdown('</div>', unsafe_allow_html=True)
