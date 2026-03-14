@@ -160,6 +160,3 @@ if 'master_cal' in st.session_state:
     </div>
     """
     st.markdown(full_summary_html, unsafe_allow_html=True)
-        """
-    summary_html += '</div></div>'
-    st.markdown(summary_html, unsafe_allow_html=True)
