@@ -37,24 +37,23 @@ st.markdown("""
         color: #2b1d0e; margin-bottom: 10px; min-height: 140px;
     }
 
-    /* CARD DIAPOSITIVA */
+    /* CARD DIAPOSITIVA (PULITA) */
     .diapo-card {
         background: #f4e4bc; border: 2px solid #8b5a2b; 
-        padding: 8px 4px; border-radius: 4px; 
+        padding: 10px 5px; border-radius: 4px; 
         text-align: center; box-shadow: 4px 4px 8px rgba(0,0,0,0.4);
-        margin-bottom: 5px; min-height: 85px; 
+        margin-bottom: 10px; min-height: 90px; 
         display: flex; flex-direction: column; justify-content: center;
     }
 
     .diapo-day { 
         color: #8b0000; font-family: 'Special Elite'; font-weight: bold; 
-        font-size: 0.8rem; margin-bottom: 2px; border-bottom: 1px solid rgba(139, 90, 43, 0.4);
+        font-size: 0.85rem; margin-bottom: 5px; border-bottom: 1px solid rgba(139, 90, 43, 0.4);
     }
     
     .diapo-name { 
-        font-family: 'Special Elite'; font-size: 0.7rem; font-weight: 800; 
-        margin: 1px 0; line-height: 1.1; text-transform: uppercase;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        font-family: 'Special Elite'; font-size: 0.75rem; font-weight: 800; 
+        margin: 2px 0; line-height: 1.2; text-transform: uppercase;
     }
 
     .day-label { color: #8b0000; font-family: 'Special Elite'; font-weight: bold; font-size: 0.9rem; border-bottom: 1px dashed #8b5a2b; }
@@ -64,9 +63,7 @@ st.markdown("""
     /* Bottoni */
     .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; font-family: 'Special Elite'; font-weight: bold; border: 2px solid #4b3621 !important; height: 45px !important; }
     .btn-resetta button { background: #a44a3f !important; color: #f1e5ac !important; font-family: 'Special Elite'; border: 2px solid #4b1d1d !important; height: 45px !important; }
-    
-    /* Riduzione spazio popover in diapositiva */
-    .diapo-card .stPopover button { padding: 0px 5px !important; height: 20px !important; min-height: 20px !important; line-height: 1 !important; }
+    .btn-verifica button { background: #1b4d3e !important; color: #ffffff !important; font-family: 'Special Elite'; border: 2px solid #0a2d22 !important; width: 100%; margin-top: 20px; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -104,21 +101,19 @@ col_b1, col_b2, col_b3 = st.columns([1, 1, 1])
 with col_b1:
     st.markdown('<div class="btn-genera">', unsafe_allow_html=True)
     if st.button("⚒️ GENERA"):
-        pool_leaders = sel_leaders if sel_leaders else m_leaders
-        pool_others = (sel_r3 if sel_r3 else m_r3) + (sel_r2 if sel_r2 else m_r2)
-        sh_leaders = pool_leaders.copy(); random.shuffle(sh_leaders)
-        random.shuffle(pool_others)
+        p_leaders = sel_leaders if sel_leaders else m_leaders
+        p_others = (sel_r3 if sel_r3 else m_r3) + (sel_r2 if sel_r2 else m_r2)
+        sh_leaders = p_leaders.copy(); random.shuffle(sh_leaders)
+        random.shuffle(p_others)
         num_gg = (pd.Timestamp(year=st.session_state['sel_anno'], month=MESI_ITA.index(st.session_state['sel_mese'])+1, day=1) + pd.offsets.MonthEnd(0)).day
         st.session_state['master_cal'] = []
         l_idx, o_idx = 0, 0
         for g in range(1, num_gg + 1):
             if g <= 11:
-                c = sh_leaders[l_idx % len(sh_leaders)]
-                p = sh_leaders[(l_idx + 1) % len(sh_leaders)]
+                c, p = sh_leaders[l_idx % len(sh_leaders)], sh_leaders[(l_idx+1) % len(sh_leaders)]
                 l_idx += 2
             else:
-                c = pool_others[o_idx % len(pool_others)]
-                p = pool_others[(o_idx + 1) % len(pool_others)]
+                c, p = p_others[o_idx % len(p_others)], p_others[(o_idx+1) % len(p_others)]
                 o_idx += 2
             st.session_state['master_cal'].append({"Giorno": g, "Capo": c, "Pass": p})
     st.markdown('</div>', unsafe_allow_html=True)
@@ -131,13 +126,12 @@ with col_b2:
     st.markdown('</div>', unsafe_allow_html=True)
 
 with col_b3:
-    modo_diapositiva = st.toggle("🎞️ DIAPOSITIVA (Vista Totale)", value=False)
+    modo_diapositiva = st.toggle("🎞️ DIAPOSITIVA", value=False)
 
 # --- CALENDARIO ---
 if 'master_cal' in st.session_state:
     st.markdown(f"<h3 style='text-align: center; font-family: Special Elite; color: #ffcc66; margin-bottom: 5px;'>📅 {st.session_state['sel_mese'].upper()}</h3>", unsafe_allow_html=True)
     
-    # SCEGLI COLONNE IN BASE ALLA MODALITÀ
     n_cols = 8 if modo_diapositiva else 7
     cols = st.columns(n_cols)
     
@@ -152,14 +146,8 @@ if 'master_cal' in st.session_state:
                     <div class="diapo-day">GG {r['Giorno']}</div>
                     <div class="diapo-name" style="color:{c_col};">C: {r['Capo']}</div>
                     <div class="diapo-name" style="color:{p_col};">P: {r['Pass']}</div>
+                </div>
                 """, unsafe_allow_html=True)
-                # TASTO MODIFICA ANCHE IN DIAPOSITIVA
-                with st.popover("⚙️"):
-                    nc = st.selectbox("Capo", all_names, index=all_names.index(r['Capo']), key=f"dc_{i}")
-                    np = st.selectbox("Pass", all_names, index=all_names.index(r['Pass']), key=f"dp_{i}")
-                    if st.button("💾 Salva", key=f"ds_{i}"):
-                        st.session_state['master_cal'][i].update({"Capo": nc, "Pass": np}); st.rerun()
-                st.markdown('</div>', unsafe_allow_html=True)
             else:
                 st.markdown(f"""
                 <div class="summary-card">
@@ -175,3 +163,17 @@ if 'master_cal' in st.session_state:
                     if st.button("💾 Salva", key=f"s_{i}"):
                         st.session_state['master_cal'][i].update({"Capo": nc, "Pass": np}); st.rerun()
                 st.markdown('</div>', unsafe_allow_html=True)
+
+    # --- TASTO DI VERIFICA FINALE ---
+    st.markdown('<div class="btn-verifica">', unsafe_allow_html=True)
+    if st.button("🔍 VERIFICA INTEGRITÀ CARICO"):
+        errori = []
+        for r in st.session_state['master_cal']:
+            if r['Capo'] == r['Pass']:
+                errori.append(f"Giorno {r['Giorno']}: Capo e Pass coincidono!")
+        
+        if errori:
+            for e in errori: st.error(e)
+        else:
+            st.success("✅ Tutto in ordine, Capotreno! Il convoglio può partire senza intoppi.")
+    st.markdown('</div>', unsafe_allow_html=True)
