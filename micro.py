@@ -130,7 +130,7 @@ db = st.session_state['players_db']
 all_names = sorted(db['Nome'].tolist())
 
 # --- TITOLO ---
-st.markdown('<div class="train-title">🚂 AOSR CANYON EXPRESS</div>', unsafe_allow_html=True)
+st.markdown('<div class="train-title">🚂 AOSR EXPRESS</div>', unsafe_allow_html=True)
 
 # --- CONFIGURAZIONE ---
 with st.expander("📜 REGISTRO DEL CAPOTRENO", expanded=True):
