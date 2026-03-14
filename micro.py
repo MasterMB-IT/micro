@@ -131,32 +131,36 @@ if 'master_cal' in st.session_state:
                 st.session_state[f"edit_mode_{i}"] = False
                 st.rerun()
 
-    # --- VISIONE D'INSIEME DEFINITIVA (SCREENSHOT READY) ---
+    # --- VISIONE D'INSIEME DEFINITIVA (SISTEMA ANTI-ERRORE) ---
     st.markdown("---")
-    st.markdown("### 🖼️ VISIONE D'INSIEME")
+    st.markdown("### 🖼️ VISIONE D'INSIEME (Ottimizzata per Screenshot)")
     
-    # Costruiamo l'HTML in una variabile per evitare errori di rendering parziale
-    items_html = ""
-    for r in st.session_state['master_cal']:
-        g_c = db[db['Nome']==r['Capotreno']]['Grado'].values[0] if r['Capotreno'] in all_names else "R3"
-        g_p = db[db['Nome']==r['Passeggero']]['Grado'].values[0] if r['Passeggero'] in all_names else "R3"
-        c_col = "#ff4757" if g_c == "R5/R4" else "#2ed573" if g_c == "R3" else "#a29bfe"
-        p_col = "#ff4757" if g_p == "R5/R4" else "#2ed573" if g_p == "R3" else "#a29bfe"
+    # Usiamo un contenitore con bordo per racchiudere tutto
+    with st.container():
+        st.markdown('<div style="border: 2px solid #00c8ff; padding: 20px; border-radius: 15px; background-color: #000;">', unsafe_allow_html=True)
         
-        items_html += f"""
-        <div class="summary-item">
-            <div class="summary-day-num">GG {r['Giorno']}</div>
-            <span class="summary-name" style="color:{c_col};">{r['Capotreno']}</span>
-            <div style="font-size:0.5rem; color:#444;">&</div>
-            <span class="summary-name" style="color:{p_col};">{r['Passeggero']}</span>
-        </div>
-        """
-    
-    full_summary_html = f"""
-    <div class="summary-section">
-        <div class="summary-grid">
-            {items_html}
-        </div>
-    </div>
-    """
-    st.markdown(full_summary_html, unsafe_allow_html=True)
+        # Creiamo una griglia di 6 colonne per riga
+        cols_per_row = 6
+        for i in range(0, len(st.session_state['master_cal']), cols_per_row):
+            batch = st.session_state['master_cal'][i : i + cols_per_row]
+            grid_cols = st.columns(cols_per_row)
+            
+            for idx, r in enumerate(batch):
+                g_c = db[db['Nome']==r['Capotreno']]['Grado'].values[0] if r['Capotreno'] in all_names else "R3"
+                g_p = db[db['Nome']==r['Passeggero']]['Grado'].values[0] if r['Passeggero'] in all_names else "R3"
+                
+                # Colori basati sul grado
+                c_col = "#ff4757" if g_c == "R5/R4" else "#2ed573" if g_c == "R3" else "#a29bfe"
+                p_col = "#ff4757" if g_p == "R5/R4" else "#2ed573" if g_p == "R3" else "#a29bfe"
+                
+                # Inseriamo il contenuto nel quadratino usando markdown semplice e sicuro
+                grid_cols[idx].markdown(f"""
+                <div style="background: #111; border: 1px solid #333; padding: 8px; border-radius: 8px; text-align: center; margin-bottom: 10px; min-height: 100px;">
+                    <div style="color: #00c8ff; font-weight: bold; font-size: 0.8rem; border-bottom: 1px solid #222; margin-bottom: 5px;">GG {r['Giorno']}</div>
+                    <div style="color: {c_col}; font-size: 0.75rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis;">{r['Capotreno']}</div>
+                    <div style="color: #444; font-size: 0.5rem;">&</div>
+                    <div style="color: {p_col}; font-size: 0.75rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis;">{r['Passeggero']}</div>
+                </div>
+                """, unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
