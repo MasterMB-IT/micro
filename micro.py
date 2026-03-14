@@ -9,11 +9,12 @@ st.set_page_config(page_title="AOSR Train Manager - Wild West", layout="wide")
 MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
             "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
 
-# --- CSS STILE FAR WEST ---
+# --- CSS STILE FAR WEST CALDO ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Ryye&display=swap');
 
+    /* SFONDO TRENO FAR WEST */
     .stApp { 
         background: linear-gradient(rgba(46, 34, 21, 0.6), rgba(20, 15, 10, 0.8)), 
                     url('https://images.unsplash.com/photo-1510524527013-0393282436da?q=80&w=1920&auto=format&fit=crop');
@@ -22,48 +23,93 @@ st.markdown("""
         background-attachment: fixed !important;
     }
 
+    /* TITOLO STILE SALOON */
     .train-title {
         font-family: 'Special Elite', cursive;
-        text-align: center; color: #ffcc66;
+        text-align: center;
+        color: #ffcc66;
         text-shadow: 3px 3px 0px #4b2e1b;
-        font-size: 2.5rem; margin-bottom: 10px; width: 100%;
+        font-size: 3.5rem;
+        margin-bottom: 20px;
+        letter-spacing: 2px;
+        border-bottom: 2px solid #ffcc66;
+        display: inline-block;
+        width: 100%;
     }
 
-    /* CARD STANDARD */
-    .summary-card {
-        background: #f4e4bc; border: 2px solid #8b5a2b; 
-        padding: 10px 5px; border-radius: 2px; 
-        position: relative; box-shadow: 3px 3px 10px rgba(0,0,0,0.5);
-        color: #2b1d0e; margin-bottom: 10px; min-height: 140px;
+    /* Pannelli stile Pergamena/Legno */
+    .stExpander { 
+        background-color: rgba(60, 40, 25, 0.9) !important; 
+        border: 2px solid #ffcc66 !important; 
+        border-radius: 5px !important;
+        color: #f1e5ac !important;
     }
 
-    /* CARD DIAPOSITIVA (PULITA) */
-    .diapo-card {
-        background: #f4e4bc; border: 2px solid #8b5a2b; 
-        padding: 10px 5px; border-radius: 4px; 
-        text-align: center; box-shadow: 4px 4px 8px rgba(0,0,0,0.4);
-        margin-bottom: 10px; min-height: 90px; 
-        display: flex; flex-direction: column; justify-content: center;
-    }
-
-    .diapo-day { 
-        color: #8b0000; font-family: 'Special Elite'; font-weight: bold; 
-        font-size: 0.85rem; margin-bottom: 5px; border-bottom: 1px solid rgba(139, 90, 43, 0.4);
+    /* Bottoni stile "Wanted Poster" */
+    .btn-genera button { 
+        background: #d4a373 !important; 
+        color: #2b1d0e !important; 
+        font-family: 'Special Elite'; 
+        font-weight: bold; 
+        height: 65px !important; 
+        width: 100%; 
+        border: 3px solid #4b3621 !important;
+        box-shadow: 4px 4px 0px #2b1d0e !important;
     }
     
-    .diapo-name { 
-        font-family: 'Special Elite'; font-size: 0.75rem; font-weight: 800; 
-        margin: 2px 0; line-height: 1.2; text-transform: uppercase;
+    .btn-resetta button { 
+        background: #a44a3f !important; 
+        color: #f1e5ac !important; 
+        font-family: 'Special Elite'; 
+        height: 65px !important; 
+        width: 100%; 
+        border: 3px solid #4b1d1d !important;
+        box-shadow: 4px 4px 0px #2b0a0a !important;
+    }
+    
+    .btn-verifica button { 
+        background: #8b5a2b !important; 
+        color: #ffcc66 !important; 
+        font-family: 'Special Elite'; 
+        height: 60px !important; 
+        width: 100%; 
+        border: 2px solid #ffcc66 !important; 
+        margin-top: 20px;
     }
 
-    .day-label { color: #8b0000; font-family: 'Special Elite'; font-weight: bold; font-size: 0.9rem; border-bottom: 1px dashed #8b5a2b; }
-    .name-text { font-family: 'Special Elite'; font-size: 0.85rem; font-weight: 800; text-align: center; text-transform: uppercase; margin: 2px 0; }
-    .role-label { color: #8b5a2b; font-size: 0.6rem; text-align: center; font-family: 'Special Elite'; text-transform: uppercase; }
+    /* Card Giorno stile Vecchia Carta */
+    .summary-card {
+        background: #f4e4bc; 
+        border: 2px solid #8b5a2b; 
+        padding: 20px; 
+        border-radius: 2px; 
+        position: relative; 
+        box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+        color: #2b1d0e;
+        background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.2), transparent);
+    }
+    
+    .day-label { 
+        color: #8b0000; 
+        font-family: 'Special Elite'; 
+        font-weight: bold; 
+        text-align: center; 
+        margin-bottom: 10px; 
+        font-size: 1.2rem;
+        border-bottom: 1px dashed #8b5a2b;
+    }
+    .name-text { 
+        font-family: 'Special Elite';
+        font-size: 1.1rem; 
+        font-weight: 800; 
+        text-align: center; 
+        text-transform: uppercase; 
+        margin: 4px 0; 
+    }
 
-    /* Bottoni */
-    .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; font-family: 'Special Elite'; font-weight: bold; border: 2px solid #4b3621 !important; height: 45px !important; }
-    .btn-resetta button { background: #a44a3f !important; color: #f1e5ac !important; font-family: 'Special Elite'; border: 2px solid #4b1d1d !important; height: 45px !important; }
-    .btn-verifica button { background: #1b4d3e !important; color: #ffffff !important; font-family: 'Special Elite'; border: 2px solid #0a2d22 !important; width: 100%; margin-top: 20px; }
+    /* Ingranaggio Popover */
+    .popover-container { position: absolute; top: 5px; right: 5px; z-index: 100; }
+    div[data-testid="stPopover"] > button { background: transparent !important; border: none !important; color: #8b5a2b !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -86,94 +132,82 @@ all_names = sorted(db['Nome'].tolist())
 # --- TITOLO ---
 st.markdown('<div class="train-title">🚂 AOSR EXPRESS</div>', unsafe_allow_html=True)
 
-# --- REGISTRO ---
+# --- CONFIGURAZIONE ---
 with st.expander("📜 REGISTRO DEL CAPOTRENO", expanded=True):
-    c1, c2, c3, c4 = st.columns([1, 1.2, 1.2, 1.2])
-    st.session_state['sel_mese'] = c1.selectbox("Periodo", MESI_ITA, index=MESI_ITA.index(st.session_state['sel_mese']))
-    st.session_state['sel_anno'] = c1.number_input("Anno", 2024, 2030, st.session_state['sel_anno'])
-    m_leaders = db[db['Grado'] == "R5/R4"]['Nome'].tolist()
+    c1, c2, c3 = st.columns([1, 1.5, 1.5])
+    st.session_state['sel_mese'] = c1.selectbox("Periodo (Mese)", MESI_ITA, index=MESI_ITA.index(st.session_state['sel_mese']))
+    st.session_state['sel_anno'] = c1.number_input("Anno Domini", 2024, 2030, st.session_state['sel_anno'])
     m_r3, m_r2 = db[db['Grado'] == "R3"]['Nome'].tolist(), db[db['Grado'] == "R2"]['Nome'].tolist()
-    sel_leaders = c2.multiselect("Sceriffi R5/R4", m_leaders)
-    sel_r3 = c3.multiselect("Banditi R3", m_r3)
-    sel_r2 = c4.multiselect("Fuorilegge R2", m_r2)
+    sel_r3, sel_r2 = c2.multiselect("Banditi R3", m_r3), c3.multiselect("Fuorilegge R2", m_r2)
 
-col_b1, col_b2, col_b3 = st.columns([1, 1, 1])
+col_b1, col_b2 = st.columns(2)
 with col_b1:
     st.markdown('<div class="btn-genera">', unsafe_allow_html=True)
-    if st.button("⚒️ GENERA"):
-        p_leaders = sel_leaders if sel_leaders else m_leaders
-        p_others = (sel_r3 if sel_r3 else m_r3) + (sel_r2 if sel_r2 else m_r2)
-        sh_leaders = p_leaders.copy(); random.shuffle(sh_leaders)
-        random.shuffle(p_others)
+    if st.button("⚒️ PREPARA IL CARICO (GENERA)"):
+        pool = (sel_r3 if sel_r3 else m_r3) + (sel_r2 if sel_r2 else m_r2)
+        random.shuffle(pool)
+        leaders = db[db['Grado']=="R5/R4"]['Nome'].tolist()
         num_gg = (pd.Timestamp(year=st.session_state['sel_anno'], month=MESI_ITA.index(st.session_state['sel_mese'])+1, day=1) + pd.offsets.MonthEnd(0)).day
         st.session_state['master_cal'] = []
-        l_idx, o_idx = 0, 0
+        p_idx = 0
         for g in range(1, num_gg + 1):
-            if g <= 11:
-                c, p = sh_leaders[l_idx % len(sh_leaders)], sh_leaders[(l_idx+1) % len(sh_leaders)]
-                l_idx += 2
+            if g <= 11: c, p = leaders[(g-1)%len(leaders)], leaders[g%len(leaders)]
             else:
-                c, p = p_others[o_idx % len(p_others)], p_others[(o_idx+1) % len(p_others)]
-                o_idx += 2
+                c = pool[p_idx % len(pool)]; p = pool[(p_idx+1) % len(pool)]
+                p_idx += 2
             st.session_state['master_cal'].append({"Giorno": g, "Capo": c, "Pass": p})
     st.markdown('</div>', unsafe_allow_html=True)
 
 with col_b2:
     st.markdown('<div class="btn-resetta">', unsafe_allow_html=True)
-    if st.button("🏜️ RESET"):
+    if st.button("🏜️ ABBANDONA IL TRENO (RESET)"):
         if 'master_cal' in st.session_state: del st.session_state['master_cal']
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
-with col_b3:
-    modo_diapositiva = st.toggle("🎞️ DIAPOSITIVA", value=False)
-
 # --- CALENDARIO ---
 if 'master_cal' in st.session_state:
-    st.markdown(f"<h3 style='text-align: center; font-family: Special Elite; color: #ffcc66; margin-bottom: 5px;'>📅 {st.session_state['sel_mese'].upper()}</h3>", unsafe_allow_html=True)
-    
-    n_cols = 8 if modo_diapositiva else 7
-    cols = st.columns(n_cols)
-    
+    st.markdown(f"<h2 style='text-align: center; font-family: Special Elite; color: #ffcc66;'>📅 RAPPORTO DI {st.session_state['sel_mese'].upper()}</h2>", unsafe_allow_html=True)
+    cols = st.columns(6)
     for i, r in enumerate(st.session_state['master_cal']):
-        with cols[i % n_cols]:
+        with cols[i % 6]:
+            # Colori stile inchiostro (Rosso scuro per capi, Verde scuro per pass)
             c_col = "#8b0000" if any(db[(db['Nome'] == r['Capo']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
             p_col = "#8b0000" if any(db[(db['Nome'] == r['Pass']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
             
-            if modo_diapositiva:
-                st.markdown(f"""
-                <div class="diapo-card">
-                    <div class="diapo-day">GG {r['Giorno']}</div>
-                    <div class="diapo-name" style="color:{c_col};">C: {r['CAPOTRENO']}</div>
-                    <div class="diapo-name" style="color:{p_col};">P: {r['PASSEGGERO']}</div>
-                </div>
-                """, unsafe_allow_html=True)
-            else:
-                st.markdown(f"""
-                <div class="summary-card">
-                    <div class="day-label">GG {r['Giorno']}</div>
-                    <div class="role-label">CAPO</div>
-                    <div class="name-text" style="color:{c_col};">🤠 {r['Capo']}</div>
-                    <div class="role-label">PASS</div>
-                    <div class="name-text" style="color:{p_col};">🐎 {r['Pass']}</div>
-                """, unsafe_allow_html=True)
-                with st.popover("⚙️"):
-                    nc = st.selectbox("Capo", all_names, index=all_names.index(r['Capo']), key=f"c_{i}")
-                    np = st.selectbox("Pass", all_names, index=all_names.index(r['Pass']), key=f"p_{i}")
-                    if st.button("💾 Salva", key=f"s_{i}"):
-                        st.session_state['master_cal'][i].update({"Capo": nc, "Pass": np}); st.rerun()
-                st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown(f"""
+            <div class="summary-card">
+                <div class="day-label">GIORNO {r['Giorno']}</div>
+                <div style="color:#8b5a2b; font-size:0.7rem; text-align:center; margin: 8px 0; font-family: 'Special Elite';">CAPOTRENO</div>
+                <div class="name-text" style="color:{c_col};">🤠 {r['Capo']}</div>
+                <div style="color:#8b5a2b; font-size:0.7rem; text-align:center; margin: 8px 0; font-family: 'Special Elite';">PASSEGGERO</div>
+                <div class="name-text" style="color:{p_col};">🐎 {r['Pass']}</div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown('<div class="popover-container">', unsafe_allow_html=True)
+            with st.popover("⚙️"):
+                if st.button("🔄 Scambia Ruoli", key=f"sw_{i}"):
+                    st.session_state['master_cal'][i]['Capo'], st.session_state['master_cal'][i]['Pass'] = r['Pass'], r['Capo']
+                    st.rerun()
+                nc = st.selectbox("Cambia Capo", all_names, index=all_names.index(r['Capo']), key=f"c_{i}")
+                np = st.selectbox("Cambia Pass", all_names, index=all_names.index(r['Pass']), key=f"p_{i}")
+                if st.button("💾 Conferma", key=f"s_{i}"):
+                    st.session_state['master_cal'][i].update({"Capo": nc, "Pass": np}); st.rerun()
+            st.markdown('</div></div>', unsafe_allow_html=True)
 
-    # --- TASTO DI VERIFICA FINALE ---
+    # --- VERIFICA ---
     st.markdown('<div class="btn-verifica">', unsafe_allow_html=True)
-    if st.button("🔍 VERIFICA INTEGRITÀ CARICO"):
+    if st.button("🛡️ CONTROLLA I VAGONI (VERIFICA)"):
+        cal = st.session_state['master_cal']
+        capi, pass_list = [d['Capo'] for d in cal], [d['Pass'] for d in cal]
         errori = []
-        for r in st.session_state['master_cal']:
-            if r['Capo'] == r['Pass']:
-                errori.append(f"Giorno {r['Giorno']}: Capo e Pass coincidono!")
+        for d in cal:
+            if d['Capo'] == d['Pass']: errori.append(f"Giorno {d['Giorno']}: **{d['Capo']}** sta guidando e cavalcando allo stesso tempo!")
+        for n in set(capi):
+            if capi.count(n) > 1: errori.append(f"Lo sceriffo **{n}** ha troppi turni di guida!")
         
         if errori:
-            for e in errori: st.error(e)
+            for err in errori: st.error(err)
         else:
-            st.success("✅ Tutto in ordine, Capotreno! Il convoglio può partire senza intoppi.")
+            st.success("🌵 TUTTO IN ORDINE, PARTIAMO!")
     st.markdown('</div>', unsafe_allow_html=True)
