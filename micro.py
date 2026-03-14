@@ -143,8 +143,8 @@ if 'master_cal' in st.session_state:
         cols = st.columns(8)
         for i, r in enumerate(st.session_state['master_cal']):
             with cols[i % 8]:
-                c_col = "#8b0000" if any(db[(db['Nome'] == r['Capo']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
-                p_col = "#8b0000" if any(db[(db['Nome'] == r['Pass']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
+                c_col = "#8b0000" if any(db[(db['Nome'] == r['CAPOTRENO']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
+                p_col = "#8b0000" if any(db[(db['Nome'] == r['PASSEGGERO']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
                 st.markdown(f"""
                 <div class="diapo-card">
                     <div class="diapo-day">GG {r['Giorno']}</div>
