@@ -15,9 +15,15 @@ st.markdown("""
         background: linear-gradient(135deg, #1a1f2c 0%, #0b0e14 100%);
         padding: 30px; border-radius: 20px; border: 2px solid #00c8ff;
         text-align: center; margin-bottom: 30px;
+        position: relative; overflow: hidden;
     }
-    .aosr-title { font-family: 'Orbitron', sans-serif; color: #00c8ff; font-size: 2.5rem; letter-spacing: 4px; margin: 0; }
+    .aosr-title { font-family: 'Orbitron', sans-serif; color: #00c8ff; font-size: 2.5rem; letter-spacing: 4px; margin: 0; position: relative; z-index: 2; }
     
+    /* Decorazione Treno Stilizzato */
+    .aosr-header::after {
+        content: "🚄"; position: absolute; bottom: -10px; right: 20px; font-size: 100px; opacity: 0.1;
+    }
+
     /* Griglia Calendario Principale */
     .calendar-grid {
         display: grid; grid-template-columns: repeat(7, 1fr);
@@ -37,21 +43,16 @@ st.markdown("""
     .r2-r1-card { background: rgba(162, 155, 254, 0.15); border-left: 3px solid #a29bfe; color: #a29bfe; }
 
     /* Visione d'Insieme Compatta (Screenshot) */
+    .summary-section {
+        background: linear-gradient(180deg, #0b0e14 0%, #1a1f2c 100%);
+        padding: 25px; border-radius: 15px; border: 1px solid #00c8ff; margin-top: 30px;
+    }
     .summary-container {
-        display: grid; 
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-        gap: 10px; 
-        background: #000; 
-        padding: 20px; 
-        border-radius: 10px; 
-        border: 1px solid #00c8ff;
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 10px;
     }
     .summary-item {
-        background: #111; 
-        border: 1px solid #333; 
-        padding: 8px; 
-        text-align: center; 
-        border-radius: 6px;
+        background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 8px; text-align: center; border-radius: 6px;
     }
     .summary-day-num { font-size: 0.75rem; color: #00c8ff; font-weight: bold; margin-bottom: 5px; border-bottom: 1px solid #222;}
     .summary-name { font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
@@ -81,44 +82,43 @@ with st.expander("🛠️ CONFIGURAZIONE", expanded=True):
     col_a, col_b = st.columns([1,3])
     with col_a:
         mese_n = st.selectbox("Mese", list(calendar.month_name)[1:], index=datetime.now().month-1)
-        anno_n = st.number_input("Anno", 2024, 2030, 2024)
+        anno_n = st.number_input("Anno", 2024, 2030, 2026) # 2026 come da istruzioni
     with col_b:
-        # CORREZIONE: Barra inizialmente VUOTA
         meritevoli_opzioni = db[db['Grado'] != "R5/R4"]['Nome'].tolist()
-        sel_meritevoli = st.multiselect("Seleziona Partecipanti (R3, R2)", meritevoli_opzioni, default=[])
+        sel_meritevoli = st.multiselect("Seleziona Partecipanti (Lascia vuoto per TUTTI)", meritevoli_opzioni, default=[])
 
 # --- GENERAZIONE ---
-if st.button("🚀 GENERA CALENDARIO COMPLETO", use_container_width=True):
-    if not sel_meritevoli:
-        st.warning("Seleziona almeno un meritevole per riempire i giorni dopo l'11!")
-    else:
-        random.shuffle(sel_meritevoli)
-        leaders = db[db['Grado']=="R5/R4"]['Nome'].tolist()
-        num_gg = calendar.monthrange(anno_n, list(calendar.month_name).index(mese_n))[1]
-        
-        res_cal = []
-        pool_idx = 0
-        for g in range(1, num_gg + 1):
-            if g <= 11:
-                c, p = leaders[(g-1) % len(leaders)], leaders[g % len(leaders)]
-            else:
-                c = sel_meritevoli[pool_idx % len(sel_meritevoli)]
-                pool_idx += 1
-                p = sel_meritevoli[pool_idx % len(sel_meritevoli)]
-                pool_idx += 1
-            res_cal.append({"Giorno": g, "Capotreno": c, "Passeggero": p})
-        st.session_state['master_cal'] = res_cal
+if st.button("🚀 GENERA CALENDARIO AOSR", use_container_width=True):
+    # LOGICA: Se vuoto, usa tutti i meritevoli del DB
+    pool_giocatori = sel_meritevoli if sel_meritevoli else db[db['Grado'] != "R5/R4"]['Nome'].tolist()
+    
+    random.shuffle(pool_giocatori)
+    leaders = db[db['Grado']=="R5/R4"]['Nome'].tolist()
+    num_gg = calendar.monthrange(anno_n, list(calendar.month_name).index(mese_n))[1]
+    
+    res_cal = []
+    pool_idx = 0
+    for g in range(1, num_gg + 1):
+        if g <= 11:
+            c, p = leaders[(g-1) % len(leaders)], leaders[g % len(leaders)]
+        else:
+            c = pool_giocatori[pool_idx % len(pool_giocatori)]
+            pool_idx += 1
+            p = pool_giocatori[pool_idx % len(pool_giocatori)]
+            pool_idx += 1
+        res_cal.append({"Giorno": g, "Capotreno": c, "Passeggero": p})
+    st.session_state['master_cal'] = res_cal
 
 # --- HELPER FUNZIONI ---
 def is_dup(nome):
-    if nome in ["DA ASSEGNARE", "VUOTO"]: return False
+    if not st.session_state.get('master_cal'): return False
     grado = db[db['Nome']==nome]['Grado'].values[0] if nome in all_names else "R3"
     if grado == "R5/R4": return False
-    return sum(1 for d in st.session_state.get('master_cal', []) if d['Capotreno']==nome or d['Passeggero']==nome) > 1
+    return sum(1 for d in st.session_state['master_cal'] if d['Capotreno']==nome or d['Passeggero']==nome) > 1
 
 # --- VISUALIZZAZIONE ---
 if 'master_cal' in st.session_state:
-    st.markdown("### 📅 Calendario Dettagliato")
+    st.markdown(f"### 📅 Tabellone Marce: {mese_n}")
     
     primo_gg_sett = calendar.weekday(anno_n, list(calendar.month_name).index(mese_n), 1)
     st.markdown('<div class="calendar-grid">', unsafe_allow_html=True)
@@ -128,10 +128,8 @@ if 'master_cal' in st.session_state:
     for r in st.session_state['master_cal']:
         g_c = db[db['Nome']==r['Capotreno']]['Grado'].values[0] if r['Capotreno'] in all_names else "R3"
         g_p = db[db['Nome']==r['Passeggero']]['Grado'].values[0] if r['Passeggero'] in all_names else "R3"
-        
         c_s = "r5-r4-card" if g_c == "R5/R4" else "r3-card" if g_c == "R3" else "r2-r1-card"
         p_s = "r5-r4-card" if g_p == "R5/R4" else "r3-card" if g_p == "R3" else "r2-r1-card"
-        
         warn_c = "⚠️" if is_dup(r['Capotreno']) else ""
         warn_p = "⚠️" if is_dup(r['Passeggero']) else ""
         
@@ -144,15 +142,13 @@ if 'master_cal' in st.session_state:
         """, unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # --- VISIONE D'INSIEME CORRETTA ---
-    st.markdown("---")
+    # --- VISIONE D'INSIEME (SCREENSHOT READY) ---
+    st.markdown('<div class="summary-section">', unsafe_allow_html=True)
     st.markdown("### 🖼️ VISIONE D'INSIEME (Screenshot Ready)")
-    
     summary_html = '<div class="summary-container">'
     for r in st.session_state['master_cal']:
         g_c_sum = db[db['Nome']==r['Capotreno']]['Grado'].values[0] if r['Capotreno'] in all_names else "R3"
         g_p_sum = db[db['Nome']==r['Passeggero']]['Grado'].values[0] if r['Passeggero'] in all_names else "R3"
-        
         c_color = "#ff4757" if g_c_sum == "R5/R4" else "#2ed573"
         p_color = "#ff4757" if g_p_sum == "R5/R4" else "#a29bfe"
         
@@ -164,7 +160,7 @@ if 'master_cal' in st.session_state:
             <div class="summary-name" style="color:{p_color};">{r['Passeggero']}</div>
         </div>
         """
-    summary_html += '</div>'
+    summary_html += '</div></div>'
     st.markdown(summary_html, unsafe_allow_html=True)
 
     # Modifica rapida
