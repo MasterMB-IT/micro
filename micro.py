@@ -9,7 +9,7 @@ st.set_page_config(page_title="AOSR Train Manager - Wild West", layout="wide")
 MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
             "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
 
-# --- CSS STILE FAR WEST CALDO ---
+# --- CSS STILE FAR WEST ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
@@ -42,18 +42,18 @@ st.markdown("""
         background: #f4e4bc; border: 2px solid #8b5a2b; 
         padding: 8px 4px; border-radius: 4px; 
         text-align: center; box-shadow: 4px 4px 8px rgba(0,0,0,0.4);
-        margin-bottom: 8px; min-height: 85px; 
+        margin-bottom: 5px; min-height: 85px; 
         display: flex; flex-direction: column; justify-content: center;
     }
 
     .diapo-day { 
         color: #8b0000; font-family: 'Special Elite'; font-weight: bold; 
-        font-size: 0.8rem; margin-bottom: 4px; border-bottom: 1px solid rgba(139, 90, 43, 0.4);
+        font-size: 0.8rem; margin-bottom: 2px; border-bottom: 1px solid rgba(139, 90, 43, 0.4);
     }
     
     .diapo-name { 
         font-family: 'Special Elite'; font-size: 0.7rem; font-weight: 800; 
-        margin: 2px 0; line-height: 1.2; text-transform: uppercase;
+        margin: 1px 0; line-height: 1.1; text-transform: uppercase;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
@@ -64,6 +64,9 @@ st.markdown("""
     /* Bottoni */
     .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; font-family: 'Special Elite'; font-weight: bold; border: 2px solid #4b3621 !important; height: 45px !important; }
     .btn-resetta button { background: #a44a3f !important; color: #f1e5ac !important; font-family: 'Special Elite'; border: 2px solid #4b1d1d !important; height: 45px !important; }
+    
+    /* Riduzione spazio popover in diapositiva */
+    .diapo-card .stPopover button { padding: 0px 5px !important; height: 20px !important; min-height: 20px !important; line-height: 1 !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -86,16 +89,13 @@ all_names = sorted(db['Nome'].tolist())
 # --- TITOLO ---
 st.markdown('<div class="train-title">🚂 AOSR EXPRESS</div>', unsafe_allow_html=True)
 
-# --- CONFIGURAZIONE ---
+# --- REGISTRO ---
 with st.expander("📜 REGISTRO DEL CAPOTRENO", expanded=True):
     c1, c2, c3, c4 = st.columns([1, 1.2, 1.2, 1.2])
     st.session_state['sel_mese'] = c1.selectbox("Periodo", MESI_ITA, index=MESI_ITA.index(st.session_state['sel_mese']))
     st.session_state['sel_anno'] = c1.number_input("Anno", 2024, 2030, st.session_state['sel_anno'])
-    
     m_leaders = db[db['Grado'] == "R5/R4"]['Nome'].tolist()
-    m_r3 = db[db['Grado'] == "R3"]['Nome'].tolist()
-    m_r2 = db[db['Grado'] == "R2"]['Nome'].tolist()
-    
+    m_r3, m_r2 = db[db['Grado'] == "R3"]['Nome'].tolist(), db[db['Grado'] == "R2"]['Nome'].tolist()
     sel_leaders = c2.multiselect("Sceriffi R5/R4", m_leaders)
     sel_r3 = c3.multiselect("Banditi R3", m_r3)
     sel_r2 = c4.multiselect("Fuorilegge R2", m_r2)
@@ -104,33 +104,22 @@ col_b1, col_b2, col_b3 = st.columns([1, 1, 1])
 with col_b1:
     st.markdown('<div class="btn-genera">', unsafe_allow_html=True)
     if st.button("⚒️ GENERA"):
-        # Seleziona i pool
         pool_leaders = sel_leaders if sel_leaders else m_leaders
         pool_others = (sel_r3 if sel_r3 else m_r3) + (sel_r2 if sel_r2 else m_r2)
-        
-        # Mischia i pool per casualità
-        shuffled_leaders = pool_leaders.copy()
-        random.shuffle(shuffled_leaders)
+        sh_leaders = pool_leaders.copy(); random.shuffle(sh_leaders)
         random.shuffle(pool_others)
-        
         num_gg = (pd.Timestamp(year=st.session_state['sel_anno'], month=MESI_ITA.index(st.session_state['sel_mese'])+1, day=1) + pd.offsets.MonthEnd(0)).day
         st.session_state['master_cal'] = []
-        
-        l_idx = 0 # Indice per i leader
-        o_idx = 0 # Indice per gli altri
-        
+        l_idx, o_idx = 0, 0
         for g in range(1, num_gg + 1):
             if g <= 11:
-                # Estrazione pulita dai Leader (evita trascinamento)
-                c = shuffled_leaders[l_idx % len(shuffled_leaders)]
-                p = shuffled_leaders[(l_idx + 1) % len(shuffled_leaders)]
-                l_idx += 2 # Salta di due per non ripetere il passeggero come capo domani
+                c = sh_leaders[l_idx % len(sh_leaders)]
+                p = sh_leaders[(l_idx + 1) % len(sh_leaders)]
+                l_idx += 2
             else:
-                # Estrazione pulita dagli altri gradi
                 c = pool_others[o_idx % len(pool_others)]
                 p = pool_others[(o_idx + 1) % len(pool_others)]
                 o_idx += 2
-            
             st.session_state['master_cal'].append({"Giorno": g, "Capo": c, "Pass": p})
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -148,25 +137,30 @@ with col_b3:
 if 'master_cal' in st.session_state:
     st.markdown(f"<h3 style='text-align: center; font-family: Special Elite; color: #ffcc66; margin-bottom: 5px;'>📅 {st.session_state['sel_mese'].upper()}</h3>", unsafe_allow_html=True)
     
-    if modo_diapositiva:
-        cols = st.columns(8)
-        for i, r in enumerate(st.session_state['master_cal']):
-            with cols[i % 8]:
-                c_col = "#8b0000" if any(db[(db['Nome'] == r['Capo']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
-                p_col = "#8b0000" if any(db[(db['Nome'] == r['Pass']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
+    # SCEGLI COLONNE IN BASE ALLA MODALITÀ
+    n_cols = 8 if modo_diapositiva else 7
+    cols = st.columns(n_cols)
+    
+    for i, r in enumerate(st.session_state['master_cal']):
+        with cols[i % n_cols]:
+            c_col = "#8b0000" if any(db[(db['Nome'] == r['Capo']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
+            p_col = "#8b0000" if any(db[(db['Nome'] == r['Pass']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
+            
+            if modo_diapositiva:
                 st.markdown(f"""
                 <div class="diapo-card">
                     <div class="diapo-day">GG {r['Giorno']}</div>
                     <div class="diapo-name" style="color:{c_col};">C: {r['Capo']}</div>
                     <div class="diapo-name" style="color:{p_col};">P: {r['Pass']}</div>
-                </div>
                 """, unsafe_allow_html=True)
-    else:
-        cols = st.columns(7)
-        for i, r in enumerate(st.session_state['master_cal']):
-            with cols[i % 7]:
-                c_col = "#8b0000" if any(db[(db['Nome'] == r['Capo']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
-                p_col = "#8b0000" if any(db[(db['Nome'] == r['Pass']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
+                # TASTO MODIFICA ANCHE IN DIAPOSITIVA
+                with st.popover("⚙️"):
+                    nc = st.selectbox("Capo", all_names, index=all_names.index(r['Capo']), key=f"dc_{i}")
+                    np = st.selectbox("Pass", all_names, index=all_names.index(r['Pass']), key=f"dp_{i}")
+                    if st.button("💾 Salva", key=f"ds_{i}"):
+                        st.session_state['master_cal'][i].update({"Capo": nc, "Pass": np}); st.rerun()
+                st.markdown('</div>', unsafe_allow_html=True)
+            else:
                 st.markdown(f"""
                 <div class="summary-card">
                     <div class="day-label">GG {r['Giorno']}</div>
