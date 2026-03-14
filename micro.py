@@ -50,7 +50,7 @@ st.markdown("""
     }
     
     .diapo-name { 
-        font-family: 'Special Elite'; font-size: 0.7rem; font-weight: 800; 
+        font-family: 'Special Elite'; font-size: 0.65rem; font-weight: 800; 
         margin: 2px 0; line-height: 1.2; text-transform: uppercase;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
@@ -62,7 +62,6 @@ st.markdown("""
     .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; font-family: 'Special Elite'; font-weight: bold; border: 2px solid #4b3621 !important; height: 45px !important; }
     .btn-resetta button { background: #a44a3f !important; color: #f1e5ac !important; font-family: 'Special Elite'; border: 2px solid #4b1d1d !important; height: 45px !important; }
     
-    /* Stile Pulsante Controllo */
     .btn-controllo button { 
         background: #5d4037 !important; color: #ffcc66 !important; 
         font-family: 'Special Elite'; border: 2px solid #ffcc66 !important;
@@ -143,13 +142,13 @@ if 'master_cal' in st.session_state:
         cols = st.columns(8)
         for i, r in enumerate(st.session_state['master_cal']):
             with cols[i % 8]:
-                c_col = "#8b0000" if any(db[(db['Nome'] == r['CAPOTRENO']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
-                p_col = "#8b0000" if any(db[(db['Nome'] == r['PASSEGGERO']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
+                c_col = "#8b0000" if any(db[(db['Nome'] == r['Capo']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
+                p_col = "#8b0000" if any(db[(db['Nome'] == r['Pass']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
                 st.markdown(f"""
                 <div class="diapo-card">
                     <div class="diapo-day">GG {r['Giorno']}</div>
-                    <div class="diapo-name" style="color:{c_col};">C: {r['CAPOTRENO']}</div>
-                    <div class="diapo-name" style="color:{p_col};">P: {r['PASSEGGERO']}</div>
+                    <div class="diapo-name" style="color:{c_col};">C: {r['Capo']}</div>
+                    <div class="diapo-name" style="color:{p_col};">P: {r['Pass']}</div>
                 </div>
                 """, unsafe_allow_html=True)
     else:
@@ -161,35 +160,29 @@ if 'master_cal' in st.session_state:
                 st.markdown(f"""
                 <div class="summary-card">
                     <div class="day-label">GG {r['Giorno']}</div>
-                    <div class="role-label">CAPO</div>
+                    <div class="role-label">CAPOTRENO</div>
                     <div class="name-text" style="color:{c_col};">🤠 {r['Capo']}</div>
-                    <div class="role-label">PASS</div>
+                    <div class="role-label">PASSEGGERO</div>
                     <div class="name-text" style="color:{p_col};">🐎 {r['Pass']}</div>
                 """, unsafe_allow_html=True)
                 with st.popover("⚙️"):
-                    nc = st.selectbox("Capo", all_names, index=all_names.index(r['Capo']), key=f"c_{i}")
-                    np = st.selectbox("Pass", all_names, index=all_names.index(r['Pass']), key=f"p_{i}")
+                    nc = st.selectbox("Capotreno", all_names, index=all_names.index(r['Capo']), key=f"c_{i}")
+                    np = st.selectbox("Passeggero", all_names, index=all_names.index(r['Pass']), key=f"p_{i}")
                     if st.button("💾 Salva", key=f"s_{i}"):
                         st.session_state['master_cal'][i].update({"Capo": nc, "Pass": np}); st.rerun()
                 st.markdown('</div>', unsafe_allow_html=True)
 
-    # --- NUOVO PULSANTE DI CONTROLLO FINALE ---
     st.markdown("---")
     st.markdown('<div class="btn-controllo">', unsafe_allow_html=True)
     if st.button("🔍 ISPEZIONE INTEGRITÀ CARICO"):
         cal = st.session_state['master_cal']
         capi = [d['Capo'] for d in cal]
         passy = [d['Pass'] for d in cal]
-        
-        # Trova duplicati
         dup_capi = list(set([x for x in capi if capi.count(x) > 1]))
         dup_pass = list(set([x for x in passy if passy.count(x) > 1]))
-        
         if not dup_capi and not dup_pass:
-            st.success("✅ NESSUN DUPLICATO! Il convoglio è bilanciato alla perfezione.")
+            st.success("✅ NESSUN DUPLICATO! Convoglio perfetto.")
         else:
-            if dup_capi:
-                st.error(f"⚠️ CAPITRENO DOPPI: {', '.join(dup_capi)}")
-            if dup_pass:
-                st.warning(f"⚠️ PASSEGGERI DOPPI: {', '.join(dup_pass)}")
+            if dup_capi: st.error(f"⚠️ CAPITRENO DOPPI: {', '.join(dup_capi)}")
+            if dup_pass: st.warning(f"⚠️ PASSEGGERI DOPPI: {', '.join(dup_pass)}")
     st.markdown('</div>', unsafe_allow_html=True)
