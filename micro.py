@@ -7,7 +7,7 @@ from datetime import datetime
 # --- CONFIGURAZIONE PAGINA ---
 st.set_page_config(page_title="AOSR Train Manager Elite", layout="wide")
 
-# --- CSS CUSTOM: NEON, HOVER E BOTTONI EQUILIBRATI ---
+# --- CSS CUSTOM: PULSANTI ALLUNGATI E FLUO ---
 st.markdown("""
     <style>
     .stApp {
@@ -22,67 +22,72 @@ st.markdown("""
         background: linear-gradient(135deg, rgba(26, 31, 44, 0.95) 0%, rgba(11, 14, 20, 0.95) 100%);
         padding: 30px; border-radius: 20px; border: 2px solid #00c8ff;
         text-align: center; margin-bottom: 30px;
-        box-shadow: 0 0 15px rgba(0, 200, 255, 0.4);
+        box-shadow: 0 0 20px rgba(0, 200, 255, 0.4);
     }
     
     .aosr-title {
         font-family: 'Orbitron', sans-serif; color: #00c8ff; font-size: 2.5rem;
         display: flex; align-items: center; justify-content: center; gap: 15px;
+        text-shadow: 0 0 10px rgba(0, 200, 255, 0.5);
     }
 
+    /* --- BOTTONI ALLUNGATI E POTENTI --- */
+    .stButton > button {
+        width: 100% !important; 
+        height: 90px !important; /* Molto più alti */
+        font-size: 1.6rem !important; /* Testo più grande */
+        font-family: 'Orbitron', sans-serif !important; 
+        border: none !important;
+        transition: 0.3s all ease-in-out !important; 
+        text-transform: uppercase !important; 
+        font-weight: 900 !important;
+        letter-spacing: 5px !important; /* Testo distanziato per allungare visivamente */
+        border-radius: 15px !important;
+    }
+
+    /* Bottone Genera (Verde Cyber) */
+    div[data-testid="stHorizontalBlock"] div:nth-child(1) button {
+        background: linear-gradient(90deg, #2ed573, #00ff85) !important;
+        box-shadow: 0 0 25px rgba(46, 213, 115, 0.5) !important;
+        color: #000 !important;
+    }
+    div[data-testid="stHorizontalBlock"] div:nth-child(1) button:hover {
+        box-shadow: 0 0 45px rgba(46, 213, 115, 0.9) !important;
+        transform: scale(1.03) translateY(-2px);
+    }
+
+    /* Bottone Resetta (Rosso Neon) */
+    div[data-testid="stHorizontalBlock"] div:nth-child(2) button {
+        background: linear-gradient(90deg, #ff4757, #ff0055) !important;
+        box-shadow: 0 0 25px rgba(255, 71, 87, 0.5) !important;
+        color: #fff !important;
+    }
+    div[data-testid="stHorizontalBlock"] div:nth-child(2) button:hover {
+        box-shadow: 0 0 45px rgba(255, 71, 87, 0.9) !important;
+        transform: scale(1.03) translateY(-2px);
+    }
+
+    /* Cards e Layout */
     .print-container { 
         background-color: rgba(0, 0, 0, 0.9); padding: 30px; border-radius: 20px; 
         border: 3px solid #00c8ff; box-shadow: inset 0 0 20px rgba(0, 200, 255, 0.2);
     }
-
     .summary-card {
         background: rgba(17, 17, 17, 0.9); border: 1px solid #333; padding: 12px; 
         text-align: center; border-radius: 12px; margin-bottom: 15px;
-        min-height: 110px; transition: all 0.3s ease-in-out;
+        min-height: 110px; transition: 0.3s;
     }
-
     .summary-card:hover {
-        transform: scale(1.05); border-color: #00c8ff;
-        box-shadow: 0 0 20px rgba(0, 200, 255, 0.8);
+        transform: translateY(-5px); border-color: #00c8ff;
+        box-shadow: 0 5px 20px rgba(0, 200, 255, 0.6);
     }
-
     .day-label { color: #00c8ff; font-weight: 900; border-bottom: 1px solid #222; margin-bottom: 8px; }
-    
-    /* --- STILE BOTTONI FLUO EQUILIBRATI --- */
-    .stButton > button {
-        width: 100%; height: 70px !important; font-size: 1.4rem !important;
-        font-family: 'Orbitron', sans-serif; border: none !important;
-        transition: 0.3s all !important; text-transform: uppercase; font-weight: bold !important;
-    }
-
-    /* Bottone Genera (Verde Fluo) */
-    div[data-testid="stHorizontalBlock"] div:nth-child(1) button {
-        background: linear-gradient(45deg, #2ed573, #00ff85) !important;
-        box-shadow: 0 0 15px rgba(46, 213, 115, 0.4) !important;
-        color: #000 !important;
-    }
-    div[data-testid="stHorizontalBlock"] div:nth-child(1) button:hover {
-        box-shadow: 0 0 30px rgba(46, 213, 115, 0.8) !important;
-        transform: scale(1.02);
-    }
-
-    /* Bottone Resetta (Rosso/Fucsia Fluo) */
-    div[data-testid="stHorizontalBlock"] div:nth-child(2) button {
-        background: linear-gradient(45deg, #ff4757, #ff0055) !important;
-        box-shadow: 0 0 15px rgba(255, 71, 87, 0.4) !important;
-        color: #fff !important;
-    }
-    div[data-testid="stHorizontalBlock"] div:nth-child(2) button:hover {
-        box-shadow: 0 0 30px rgba(255, 71, 87, 0.8) !important;
-        transform: scale(1.02);
-    }
-
     .p-box { padding: 4px 8px; border-radius: 4px; margin: 2px 0; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; }
     .r5-r4-card { background: rgba(255, 71, 87, 0.15); border-left: 3px solid #ff4757; color: #ff4757; }
     .r3-card { background: rgba(46, 213, 115, 0.15); border-left: 3px solid #2ed573; color: #2ed573; }
     .r2-r1-card { background: rgba(162, 155, 254, 0.15); border-left: 3px solid #a29bfe; color: #a29bfe; }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     """, unsafe_allow_html=True)
 
 # --- DATABASE ---
@@ -116,10 +121,10 @@ if not st.session_state.get('print_mode', False):
         
         m_r3 = db[db['Grado'] == "R3"]['Nome'].tolist()
         m_r2 = db[db['Grado'] == "R2"]['Nome'].tolist()
-        sel_r3 = c_r3.multiselect("Seleziona R3 (Vuoto=TUTTI)", m_r3)
-        sel_r2 = c_r2.multiselect("Seleziona R2 (Vuoto=TUTTI)", m_r2)
+        sel_r3 = c_r3.multiselect("Filtra R3 (Vuoto=TUTTI)", m_r3)
+        sel_r2 = c_r2.multiselect("Filtra R2 (Vuoto=TUTTI)", m_r2)
 
-    # --- BOTTONI AZIONE AFFIANCATI ---
+    # --- BOTTONI AZIONE AFFIANCATI (VERSIONE XL) ---
     col_btn1, col_btn2 = st.columns(2)
     
     if col_btn1.button("🚀 GENERA"):
@@ -195,6 +200,6 @@ if 'master_cal' in st.session_state:
 
     # --- BOTTONE FOTO ---
     st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("📸 MODALITÀ SCREENSHOT"):
+    if st.button("📸 MODALITÀ SCREENSHOT", use_container_width=True):
         st.session_state['print_mode'] = not st.session_state.get('print_mode', False)
         st.rerun()
