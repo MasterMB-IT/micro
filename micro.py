@@ -14,16 +14,10 @@ st.markdown("""
     .aosr-header {
         background: linear-gradient(135deg, #1a1f2c 0%, #0b0e14 100%);
         padding: 30px; border-radius: 20px; border: 2px solid #00c8ff;
-        text-align: center; margin-bottom: 30px;
-        position: relative; overflow: hidden;
+        text-align: center; margin-bottom: 30px; position: relative;
     }
-    .aosr-title { font-family: 'Orbitron', sans-serif; color: #00c8ff; font-size: 2.5rem; letter-spacing: 4px; margin: 0; position: relative; z-index: 2; }
+    .aosr-title { font-family: 'Orbitron', sans-serif; color: #00c8ff; font-size: 2.5rem; letter-spacing: 4px; margin: 0; }
     
-    /* Decorazione Treno Stilizzato */
-    .aosr-header::after {
-        content: "🚄"; position: absolute; bottom: -10px; right: 20px; font-size: 100px; opacity: 0.1;
-    }
-
     /* Griglia Calendario Principale */
     .calendar-grid {
         display: grid; grid-template-columns: repeat(7, 1fr);
@@ -31,7 +25,7 @@ st.markdown("""
     }
     .day-card {
         background: #161b25; border-radius: 10px; padding: 12px;
-        border: 1px solid #2d343f; min-height: 140px;
+        border: 1px solid #2d343f; min-height: 150px;
     }
     .day-number { font-size: 1.2rem; font-weight: 900; color: #555; margin-bottom: 8px; display: block;}
     
@@ -42,7 +36,7 @@ st.markdown("""
     .r3-card { background: rgba(46, 213, 115, 0.15); border-left: 3px solid #2ed573; color: #2ed573; }
     .r2-r1-card { background: rgba(162, 155, 254, 0.15); border-left: 3px solid #a29bfe; color: #a29bfe; }
 
-    /* Visione d'Insieme Compatta (Screenshot) */
+    /* Visione d'Insieme Compatta */
     .summary-section {
         background: linear-gradient(180deg, #0b0e14 0%, #1a1f2c 100%);
         padding: 25px; border-radius: 15px; border: 1px solid #00c8ff; margin-top: 30px;
@@ -56,6 +50,9 @@ st.markdown("""
     }
     .summary-day-num { font-size: 0.75rem; color: #00c8ff; font-weight: bold; margin-bottom: 5px; border-bottom: 1px solid #222;}
     .summary-name { font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+    
+    /* Edit Buttons Style */
+    .stButton>button { border-radius: 5px; font-size: 0.7rem; height: 1.8rem; padding: 0 10px; }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
     """, unsafe_allow_html=True)
@@ -82,16 +79,14 @@ with st.expander("🛠️ CONFIGURAZIONE", expanded=True):
     col_a, col_b = st.columns([1,3])
     with col_a:
         mese_n = st.selectbox("Mese", list(calendar.month_name)[1:], index=datetime.now().month-1)
-        anno_n = st.number_input("Anno", 2024, 2030, 2026) # 2026 come da istruzioni
+        anno_n = st.number_input("Anno", 2024, 2030, 2026)
     with col_b:
         meritevoli_opzioni = db[db['Grado'] != "R5/R4"]['Nome'].tolist()
-        sel_meritevoli = st.multiselect("Seleziona Partecipanti (Lascia vuoto per TUTTI)", meritevoli_opzioni, default=[])
+        sel_meritevoli = st.multiselect("Seleziona Partecipanti (Vuoto per TUTTI)", meritevoli_opzioni, default=[])
 
 # --- GENERAZIONE ---
 if st.button("🚀 GENERA CALENDARIO AOSR", use_container_width=True):
-    # LOGICA: Se vuoto, usa tutti i meritevoli del DB
     pool_giocatori = sel_meritevoli if sel_meritevoli else db[db['Grado'] != "R5/R4"]['Nome'].tolist()
-    
     random.shuffle(pool_giocatori)
     leaders = db[db['Grado']=="R5/R4"]['Nome'].tolist()
     num_gg = calendar.monthrange(anno_n, list(calendar.month_name).index(mese_n))[1]
@@ -118,39 +113,51 @@ def is_dup(nome):
 
 # --- VISUALIZZAZIONE ---
 if 'master_cal' in st.session_state:
-    st.markdown(f"### 📅 Tabellone Marce: {mese_n}")
+    st.markdown("### 📅 Gestione Dettagliata")
     
-    primo_gg_sett = calendar.weekday(anno_n, list(calendar.month_name).index(mese_n), 1)
-    st.markdown('<div class="calendar-grid">', unsafe_allow_html=True)
-    for _ in range(primo_gg_sett):
-        st.markdown('<div style="opacity: 0.1;">.</div>', unsafe_allow_html=True)
-    
-    for r in st.session_state['master_cal']:
-        g_c = db[db['Nome']==r['Capotreno']]['Grado'].values[0] if r['Capotreno'] in all_names else "R3"
-        g_p = db[db['Nome']==r['Passeggero']]['Grado'].values[0] if r['Passeggero'] in all_names else "R3"
-        c_s = "r5-r4-card" if g_c == "R5/R4" else "r3-card" if g_c == "R3" else "r2-r1-card"
-        p_s = "r5-r4-card" if g_p == "R5/R4" else "r3-card" if g_p == "R3" else "r2-r1-card"
-        warn_c = "⚠️" if is_dup(r['Capotreno']) else ""
-        warn_p = "⚠️" if is_dup(r['Passeggero']) else ""
+    # LISTA EDITABILE CON INVERTI E MODIFICA
+    for i, r in enumerate(st.session_state['master_cal']):
+        cols = st.columns([0.6, 2, 2, 0.8, 0.8])
+        cols[0].markdown(f"**G{r['Giorno']}**")
         
-        st.markdown(f"""
-            <div class="day-card">
-                <span class="day-number">{r['Giorno']}</span>
-                <div class="p-box {c_s}"><span class="label">CAPO {warn_c}</span>{r['Capotreno']}</div>
-                <div class="p-box {p_s}"><span class="label">PASS {warn_p}</span>{r['Passeggero']}</div>
-            </div>
-        """, unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+        # Capo e Pass con stili
+        for idx, role in enumerate(['Capotreno', 'Passeggero']):
+            name = r[role]
+            grado = db[db['Nome']==name]['Grado'].values[0] if name in all_names else "R3"
+            style = "r5-r4-card" if grado == "R5/R4" else "r3-card" if grado == "R3" else "r2-r1-card"
+            warn = "⚠️" if is_dup(name) else ""
+            cols[idx+1].markdown(f'<div class="p-box {style}">{role}: {name} {warn}</div>', unsafe_allow_html=True)
+        
+        # Tasto Inverti
+        if cols[3].button("🔄", key=f"inv_{i}", help="Inverti Capo/Pass"):
+            st.session_state['master_cal'][i]['Capotreno'], st.session_state['master_cal'][i]['Passeggero'] = r['Passeggero'], r['Capotreno']
+            st.rerun()
+            
+        # Tasto Modifica
+        if cols[4].button("✏️", key=f"edit_{i}", help="Cambia Giocatori"):
+            st.session_state[f"show_edit_{i}"] = not st.session_state.get(f"show_edit_{i}", False)
+        
+        # Pannello Modifica (Scompare/Appare)
+        if st.session_state.get(f"show_edit_{i}", False):
+            ec1, ec2, ec3 = st.columns([3, 3, 1])
+            new_c = ec1.selectbox("Nuovo Capo", all_names, index=all_names.index(r['Capotreno']), key=f"sel_c_{i}")
+            new_p = ec2.selectbox("Nuovo Pass", all_names, index=all_names.index(r['Passeggero']), key=f"sel_p_{i}")
+            if ec3.button("✅", key=f"save_{i}"):
+                st.session_state['master_cal'][i]['Capotreno'] = new_c
+                st.session_state['master_cal'][i]['Passeggero'] = new_p
+                st.session_state[f"show_edit_{i}"] = False
+                st.rerun()
+        st.markdown('<hr style="margin:5px 0; opacity:0.1">', unsafe_allow_html=True)
 
     # --- VISIONE D'INSIEME (SCREENSHOT READY) ---
     st.markdown('<div class="summary-section">', unsafe_allow_html=True)
     st.markdown("### 🖼️ VISIONE D'INSIEME (Screenshot Ready)")
     summary_html = '<div class="summary-container">'
     for r in st.session_state['master_cal']:
-        g_c_sum = db[db['Nome']==r['Capotreno']]['Grado'].values[0] if r['Capotreno'] in all_names else "R3"
-        g_p_sum = db[db['Nome']==r['Passeggero']]['Grado'].values[0] if r['Passeggero'] in all_names else "R3"
-        c_color = "#ff4757" if g_c_sum == "R5/R4" else "#2ed573"
-        p_color = "#ff4757" if g_p_sum == "R5/R4" else "#a29bfe"
+        g_c = db[db['Nome']==r['Capotreno']]['Grado'].values[0] if r['Capotreno'] in all_names else "R3"
+        g_p = db[db['Nome']==r['Passeggero']]['Grado'].values[0] if r['Passeggero'] in all_names else "R3"
+        c_color = "#ff4757" if g_c == "R5/R4" else "#2ed573"
+        p_color = "#ff4757" if g_p == "R5/R4" else "#a29bfe"
         
         summary_html += f"""
         <div class="summary-item">
@@ -162,16 +169,3 @@ if 'master_cal' in st.session_state:
         """
     summary_html += '</div></div>'
     st.markdown(summary_html, unsafe_allow_html=True)
-
-    # Modifica rapida
-    with st.expander("📝 MODIFICA GIORNO SPECIFICO"):
-        day_to_edit = st.number_input("Giorno", 1, 31, 1)
-        col1, col2 = st.columns(2)
-        idx_c = all_names.index(st.session_state['master_cal'][day_to_edit-1]['Capotreno'])
-        idx_p = all_names.index(st.session_state['master_cal'][day_to_edit-1]['Passeggero'])
-        new_c = col1.selectbox("Nuovo Capo", all_names, index=idx_c, key="nc")
-        new_p = col2.selectbox("Nuovo Pass", all_names, index=idx_p, key="np")
-        if st.button("Applica Modifica"):
-            st.session_state['master_cal'][day_to_edit-1]['Capotreno'] = new_c
-            st.session_state['master_cal'][day_to_edit-1]['Passeggero'] = new_p
-            st.rerun()
