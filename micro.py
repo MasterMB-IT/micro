@@ -29,7 +29,6 @@ st.markdown("""
         font-size: 2.5rem; margin-bottom: 10px; width: 100%;
     }
 
-    /* CARD STANDARD */
     .summary-card {
         background: #f4e4bc; border: 2px solid #8b5a2b; 
         padding: 10px 5px; border-radius: 2px; 
@@ -37,7 +36,6 @@ st.markdown("""
         color: #2b1d0e; margin-bottom: 10px; min-height: 140px;
     }
 
-    /* CARD DIAPOSITIVA (VERSIONE PERFETTA) */
     .diapo-card {
         background: #f4e4bc; border: 2px solid #8b5a2b; 
         padding: 8px 4px; border-radius: 4px; 
@@ -61,9 +59,15 @@ st.markdown("""
     .name-text { font-family: 'Special Elite'; font-size: 0.85rem; font-weight: 800; text-align: center; text-transform: uppercase; margin: 2px 0; }
     .role-label { color: #8b5a2b; font-size: 0.6rem; text-align: center; font-family: 'Special Elite'; text-transform: uppercase; }
 
-    /* Bottoni */
     .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; font-family: 'Special Elite'; font-weight: bold; border: 2px solid #4b3621 !important; height: 45px !important; }
     .btn-resetta button { background: #a44a3f !important; color: #f1e5ac !important; font-family: 'Special Elite'; border: 2px solid #4b1d1d !important; height: 45px !important; }
+    
+    /* Stile Pulsante Controllo */
+    .btn-controllo button { 
+        background: #5d4037 !important; color: #ffcc66 !important; 
+        font-family: 'Special Elite'; border: 2px solid #ffcc66 !important;
+        width: 100%; margin-top: 20px; font-size: 1.1rem !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -104,11 +108,9 @@ col_b1, col_b2, col_b3 = st.columns([1, 1, 1])
 with col_b1:
     st.markdown('<div class="btn-genera">', unsafe_allow_html=True)
     if st.button("⚒️ GENERA"):
-        # Se non selezionati, usa tutti quelli del database
         pool_leaders = sel_leaders if sel_leaders else m_leaders
         pool_others = (sel_r3 if sel_r3 else m_r3) + (sel_r2 if sel_r2 else m_r2)
         random.shuffle(pool_others)
-        
         num_gg = (pd.Timestamp(year=st.session_state['sel_anno'], month=MESI_ITA.index(st.session_state['sel_mese'])+1, day=1) + pd.offsets.MonthEnd(0)).day
         st.session_state['master_cal'] = []
         p_idx = 0
@@ -138,7 +140,7 @@ if 'master_cal' in st.session_state:
     st.markdown(f"<h3 style='text-align: center; font-family: Special Elite; color: #ffcc66; margin-bottom: 5px;'>📅 {st.session_state['sel_mese'].upper()}</h3>", unsafe_allow_html=True)
     
     if modo_diapositiva:
-        cols = st.columns(8) # 8 colonne per card leggermente più grandi
+        cols = st.columns(8)
         for i, r in enumerate(st.session_state['master_cal']):
             with cols[i % 8]:
                 c_col = "#8b0000" if any(db[(db['Nome'] == r['Capo']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
@@ -170,3 +172,24 @@ if 'master_cal' in st.session_state:
                     if st.button("💾 Salva", key=f"s_{i}"):
                         st.session_state['master_cal'][i].update({"Capo": nc, "Pass": np}); st.rerun()
                 st.markdown('</div>', unsafe_allow_html=True)
+
+    # --- NUOVO PULSANTE DI CONTROLLO FINALE ---
+    st.markdown("---")
+    st.markdown('<div class="btn-controllo">', unsafe_allow_html=True)
+    if st.button("🔍 ISPEZIONE INTEGRITÀ CARICO"):
+        cal = st.session_state['master_cal']
+        capi = [d['Capo'] for d in cal]
+        passy = [d['Pass'] for d in cal]
+        
+        # Trova duplicati
+        dup_capi = list(set([x for x in capi if capi.count(x) > 1]))
+        dup_pass = list(set([x for x in passy if passy.count(x) > 1]))
+        
+        if not dup_capi and not dup_pass:
+            st.success("✅ NESSUN DUPLICATO! Il convoglio è bilanciato alla perfezione.")
+        else:
+            if dup_capi:
+                st.error(f"⚠️ CAPITRENO DOPPI: {', '.join(dup_capi)}")
+            if dup_pass:
+                st.warning(f"⚠️ PASSEGGERI DOPPI: {', '.join(dup_pass)}")
+    st.markdown('</div>', unsafe_allow_html=True)
