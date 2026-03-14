@@ -4,139 +4,32 @@ import calendar
 import random
 from datetime import datetime
 
-# --- CONFIGURAZIONE PAGINA E TEMA ---
-st.set_page_config(page_title="Train Manager Ultra", layout="wide", page_icon="🚂")
+# --- CONFIGURAZIONE PAGINA ---
+st.set_page_config(page_title="Train Manager Ultra Pro", layout="wide", page_icon="🚂")
 
-# CSS Avanzato per un look Gaming/Professional, spaziatura e pulizia
+# CSS Avanzato (Mantenuto e migliorato per i menu a tendina)
 st.markdown("""
     <style>
-    /* Sfondo scuro e font globale */
-    .stApp {
-        background-color: #121418;
-        color: #e0e0e0;
-        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    /* Header Mese Grande e Accattivante */
+    .stApp { background-color: #121418; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; }
     .month-header-box {
         background: linear-gradient(135deg, #1e2229 0%, #121418 100%);
-        padding: 30px;
-        border-radius: 15px;
-        border-left: 5px solid #00c8ff;
-        box-shadow: 0 4px 15px rgba(0,200,255,0.2);
-        text-align: center;
-        margin-bottom: 35px;
+        padding: 25px; border-radius: 15px; border-left: 5px solid #00c8ff;
+        text-align: center; margin-bottom: 30px;
     }
-    .month-header-title {
-        margin: 0;
-        color: #00c8ff;
-        font-size: 3rem;
-        font-weight: 800;
-        letter-spacing: -1px;
-        text-transform: uppercase;
-    }
-    .month-header-subtitle {
-        margin: 5px 0 0 0;
-        color: #a0a0a0;
-        font-size: 1.2rem;
-        font-weight: 400;
-    }
-
-    /* Stile per i blocchi Settimanali */
-    .week-block {
-        background-color: #1e2229;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 25px;
-        border: 1px solid #2a3039;
-    }
-    .week-title {
-        color: #ff9f43; /* Colore accento per la settimana */
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 15px;
-        border-bottom: 2px solid #ff9f43;
-        padding-bottom: 5px;
-        display: inline-block;
-    }
-
-    /* Stile per le card giornaliere all'interno della settimana */
-    .day-card {
-        background-color: #252a33;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 10px;
-        border: 1px solid #333945;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .day-date {
-        color: #00c8ff;
-        font-weight: 700;
-        font-size: 1.1rem;
-        width: 80px;
-    }
-    .role-info {
-        flex-grow: 1;
-        display: flex;
-        gap: 20px;
-        justify-content: flex-start;
-    }
-    .role-block {
-        display: flex;
-        flex-direction: column;
-    }
-    .role-label {
-        color: #808080;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-    .player-name {
-        color: #ffffff;
-        font-weight: 600;
-        font-size: 1rem;
-    }
-    .leader-badge {
-        color: #ff4757; /* Colore per i Leader */
-        font-weight: 700;
-    }
-    .merit-badge {
-        color: #2ed573; /* Colore per i Meritevoli */
-        font-weight: 700;
-    }
-
-    /* Bottoni e Input Sidebar */
-    .stButton>button {
-        background-color: #00c8ff;
-        color: #121418;
-        font-weight: 700;
-        border-radius: 8px;
-        border: none;
-        padding: 12px 20px;
-        transition: all 0.3s;
-    }
-    .stButton>button:hover {
-        background-color: #0099cc;
-        box-shadow: 0 0 10px rgba(0,200,255,0.5);
-    }
-    .stMultiSelect div[data-baseweb="select"] {
-        background-color: #1e2229;
-        border-color: #333945;
-        color: #ffffff;
-    }
-
-    /* Nascondi header streamlit standard */
-    header {visibility: hidden;}
-    footer {visibility: hidden;}
+    .week-block { background-color: #1e2229; border-radius: 12px; padding: 20px; margin-bottom: 25px; border: 1px solid #2a3039; }
+    .week-title { color: #ff9f43; font-size: 1.5rem; font-weight: 700; border-bottom: 2px solid #ff9f43; padding-bottom: 5px; margin-bottom: 15px; display: inline-block; }
+    .day-card { background-color: #252a33; border-radius: 8px; padding: 12px; margin-bottom: 8px; border: 1px solid #333945; display: flex; justify-content: space-between; align-items: center; }
+    .leader-badge { color: #ff4757; font-weight: 700; }
+    .merit-badge { color: #2ed573; font-weight: 700; }
+    .role-label { color: #808080; font-size: 0.75rem; text-transform: uppercase; }
+    .player-name { color: #ffffff; font-weight: 600; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- DATABASE NOMI (Invariato) ---
-leaders = ["Hool (R5)", "MASTER (R4)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", 
-           "Starbetty (R4)", "PEPPE (R4)", "Ricky Around (R4)", "uncle g (R4)", 
-           "09ALEX24 (R4)", "ShinyPasta (R4)", "Wall 7 (R4)"]
+# --- DATABASE NOMI ---
+leaders_list = ["Hool (R5)", "MASTER (R4)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", 
+                "Starbetty (R4)", "PEPPE (R4)", "Ricky Around (R4)", "uncle g (R4)", 
+                "09ALEX24 (R4)", "ShinyPasta (R4)", "Wall 7 (R4)"]
 
 r3_list = sorted(["G Erry", "Uncle g brother", "Cane Avvoltoio", "Ghandal", "Aryron", "Tricheco", 
            "Maメツ", "NOVEMBERGENZ", "Lalla 96", "Whale Panda", "GennaroM", "EchoZero", 
@@ -148,153 +41,89 @@ r3_list = sorted(["G Erry", "Uncle g brother", "Cane Avvoltoio", "Ghandal", "Ary
            "Bendico", "Obbyy", "ArLes", "Fatz87", "cruel neve", "Trivellatore", "Osgh00", 
            "Slowfia ABOH", "Pontatinatore", "27Francesco", "MissDrinks", "krompir", "MaledettO"])
 
-# --- SIDEBAR: CONTROLLI (Invariato nella logica, stilizzato via CSS) ---
-st.sidebar.markdown("<h1 style='color:#00c8ff; text-align:center;'>TRAIN PANEL</h1>", unsafe_allow_html=True)
-st.sidebar.markdown("---")
-
-st.sidebar.subheader("📅 Periodo")
-col_m, col_a = st.sidebar.columns(2)
-mese_nome = col_m.selectbox("Mese", list(calendar.month_name)[1:], index=datetime.now().month-1)
-anno = col_a.number_input("Anno", min_value=2024, max_value=2030, value=2024)
-
+# --- SIDEBAR ---
+st.sidebar.header("⚙️ Configurazione")
+mese_nome = st.sidebar.selectbox("Mese", list(calendar.month_name)[1:], index=datetime.now().month-1)
+anno = st.sidebar.number_input("Anno", 2024, 2030, 2024)
 mese_idx = list(calendar.month_name).index(mese_nome)
 num_giorni = calendar.monthrange(anno, mese_idx)[1]
 
 st.sidebar.markdown("---")
-st.sidebar.subheader("🌟 Sezione Meritevoli")
-meritevoli_scelti = st.sidebar.multiselect(
-    "Seleziona R3/Meritevoli:",
-    options=r3_list,
-    help="Cerca o seleziona i nomi"
-)
+st.sidebar.subheader("🌟 Selezione Meritevoli")
+meritevoli_scelti = st.sidebar.multiselect("Chi partecipa (R3)?", r3_list)
 
-st.sidebar.markdown("---")
+# --- SEZIONE SPECIALE: ACCOPPIAMENTO LEADER (R5/R4) ---
+st.markdown(f"""<div class="month-header-box"><h1 style='color:#00c8ff; margin:0;'>{mese_nome.upper()} {anno}</h1></div>""", unsafe_allow_html=True)
 
-# --- MAIN INTERFACE: HEADER ---
-st.markdown(f"""
-    <div class="month-header-box">
-        <h1 class="month-header-title">{mese_nome} {anno}</h1>
-        <p class="month-header-subtitle">Programma Ufficiale Assegnazione Treni Alleanza</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-# --- LOGICA DI GENERAZIONE E RANDOMIZZAZIONE ---
-if st.button("🚀 GENERA / RIGENERA CALENDARIO", use_container_width=True):
+with st.expander("🛠️ CONFIGURAZIONE ACCOPPIAMENTI R5/R4 (Primi 11 Giorni)", expanded=True):
+    st.write("Personalizza chi fa il passeggero con quale leader per i primi 11 giorni:")
+    custom_leaders = []
     
-    # 1. Randomizzazione vera degli R3
-    # Creiamo una copia per non alterare la lista originale e la mescoliamo
+    cols = st.columns(3)
+    for i in range(11):
+        with cols[i % 3]:
+            st.markdown(f"**Giorno {i+1:02d}**")
+            capo = st.selectbox(f"Capotreno G{i+1}", leaders_list, index=i, key=f"c{i}")
+            # Di default suggeriamo il leader successivo come passeggero, ma l'utente può cambiare
+            pass_default = (i + 1) % len(leaders_list)
+            passeg = st.selectbox(f"Passeggero G{i+1}", leaders_list, index=pass_default, key=f"p{i}")
+            custom_leaders.append({"capotreno": capo, "passeggero": passeg})
+
+# --- GENERAZIONE ---
+if st.button("🚀 GENERA CALENDARIO COMPLETO", use_container_width=True):
+    
+    # Randomizzazione R3
     meritevoli_random = list(meritevoli_scelti)
     random.shuffle(meritevoli_random)
     
-    # 2. Struttura dati per il calendario
     giorni_info = []
     
     for giorno in range(1, num_giorni + 1):
-        # Logica Leader (primi 11 giorni) - Sequenziale tra leader, come richiesto
         if giorno <= 11:
-            capotreno = leaders[giorno-1]
-            # Il passeggero potrebbe essere un altro leader o il primo R3 random
-            if giorno < 11:
-                passeggero = leaders[giorno]
-            else:
-                passeggero = meritevoli_random[0] if meritevoli_random else "Da assegnare"
+            # Usa gli accoppiamenti scelti manualmente nell'expander
+            config = custom_leaders[giorno-1]
+            capotreno = config['capotreno']
+            passeggero = config['passeggero']
             is_leader = True
         else:
-            # Logica Meritevoli (dal giorno 12 in poi) - Random
+            # Logica Random per R3
             if meritevoli_random:
-                # Usiamo l'operatore modulo per ciclare sulla lista RANDOMIZZATA
                 idx = (giorno - 12) % len(meritevoli_random)
                 capotreno = meritevoli_random[idx]
-                # Accoppiamento casuale: il passeggero è il successivo nella lista random
                 passeggero = meritevoli_random[(idx + 1) % len(meritevoli_random)]
             else:
                 capotreno = "Nessun Meritevole"
                 passeggero = "---"
             is_leader = False
 
-        giorni_info.append({
-            "giorno": giorno,
-            "capotreno": capotreno,
-            "passeggero": passeggero,
-            "is_leader": is_leader
-        })
+        giorni_info.append({"giorno": giorno, "capotreno": capotreno, "passeggero": passeggero, "is_leader": is_leader})
 
-    # --- RENDERING ORDINATO PER SETTIMANE ---
-    st.subheader("🗓️ Calendario Dettagliato")
-    
-    # Organizziamo i giorni in settimane
+    # --- RENDERING A SETTIMANE ---
     settimane = []
     settimana_corrente = []
-    
     for i, info in enumerate(giorni_info):
         settimana_corrente.append(info)
-        # Se è domenica (o l'ultimo giorno del mese), chiudiamo la settimana
-        # calendar.weekday restituisce 0=Lunedì, ..., 6=Domenica
         wd = calendar.weekday(anno, mese_idx, info['giorno'])
         if wd == 6 or i == len(giorni_info) - 1:
             settimane.append(settimana_corrente)
             settimana_corrente = []
 
-    # Rendering visivo delle settimane
     for i, settimana in enumerate(settimane):
         st.markdown(f"""<div class="week-block"><div class="week-title">Settimana {i+1}</div>""", unsafe_allow_html=True)
-        
         for d in settimana:
-            # Scegliamo il badge corretto in base al ruolo
-            capo_class = "leader-badge" if d['is_leader'] else "merit-badge"
-            # Il passeggero del giorno 11 è un R3, quindi badge verde
-            pass_class = "leader-badge" if d['is_leader'] and d['giorno'] < 11 else "merit-badge"
-            
-            # Rendering della card giornaliera con HTML pulito
+            capo_c = "leader-badge" if d['capotreno'] in leaders_list else "merit-badge"
+            pass_c = "leader-badge" if d['passeggero'] in leaders_list else "merit-badge"
             st.markdown(f"""
                 <div class="day-card">
-                    <div class="day-date">{d['giorno']:02d} {mese_nome[:3]}</div>
-                    <div class="role-info">
-                        <div class="role-block">
-                            <span class="role-label">Capotreno</span>
-                            <span class="player-name {capo_class}">{d['capotreno']}</span>
-                        </div>
-                        <div class="role-block">
-                            <span class="role-label">Passeggero</span>
-                            <span class="player-name {pass_class}">{d['passeggero']}</span>
-                        </div>
+                    <div style="color:#00c8ff; font-weight:700; width:60px;">{d['giorno']:02d}</div>
+                    <div style="flex-grow:1; display:flex; gap:30px;">
+                        <div><span class="role-label">Capotreno:</span><br><span class="{capo_c}">{d['capotreno']}</span></div>
+                        <div><span class="role-label">Passeggero:</span><br><span class="{pass_c}">{d['passeggero']}</span></div>
                     </div>
                 </div>
             """, unsafe_allow_html=True)
-            
-        st.markdown("</div>", unsafe_allow_html=True) # Chiude week-block
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    # --- POST GENERAZIONE: EDITING E EXPORT (Spostato sotto il rendering visivo) ---
-    st.markdown("---")
-    st.subheader("📝 Revisione e Modifica Rapida (Tabella)")
-    st.info("Usa questa tabella per scambi veloci dell'ultimo minuto. Le modifiche qui non influenzano la visualizzazione a schede sopra.")
-    
-    # Creiamo un DataFrame pulito per l'editor
-    df_editor = pd.DataFrame([{
-        "Data": f"{d['giorno']:02d} {mese_nome}",
-        "Capotreno": d['capotreno'],
-        "Passeggero": d['passeggero']
-    } for d in giorni_info])
-    
-    edited_df = st.data_editor(
-        df_editor,
-        column_config={
-            "Capotreno": st.column_config.SelectboxColumn("Capotreno", options=leaders + r3_list, width="large"),
-            "Passeggero": st.column_config.SelectboxColumn("Passeggero", options=leaders + r3_list, width="large")
-        },
-        disabled=["Data"],
-        hide_index=True,
-        use_container_width=True
-    )
-
-    # Esportazione
-    st.download_button(
-        label="📥 Scarica Calendario Finale (CSV)",
-        data=edited_df.to_csv(index=False).encode('utf-8'),
-        file_name=f'Calendario_Treni_{mese_nome}_{anno}.csv',
-        mime='text/csv',
-    )
-else:
-    # Stato iniziale arioso
-    st.markdown("---")
-    st.warning("👈 Configura il periodo e seleziona i meritevoli nella colonna di sinistra, poi clicca su 'Genera' per visualizzare il programma.")
+    # Export
+    df_export = pd.DataFrame(giorni_info)[['giorno', 'capotreno', 'passeggero']]
+    st.download_button("📥 Scarica in CSV", df_export.to_csv(index=False).encode('utf-8'), f"Treni_{mese_nome}.csv", "text/csv")
