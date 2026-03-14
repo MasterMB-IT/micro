@@ -9,15 +9,15 @@ st.set_page_config(page_title="AOSR Train Manager Elite", layout="wide")
 MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
             "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
 
-# --- CSS ELITE CON SFONDO E ANIMAZIONI ---
+# --- CSS ELITE CON SFONDO WESTERN E ANIMAZIONI ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 
-    /* SFONDO ACCATTIVANTE RIPRISTINATO */
+    /* SFONDO FAR WEST/CANYON RIPRISTINATO E AGGIORNATO */
     .stApp { 
-        background-image: linear-gradient(rgba(11, 14, 20, 0.85), rgba(11, 14, 20, 0.95)), 
-                          url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1920&auto=format&fit=crop');
+        background-image: linear-gradient(rgba(11, 14, 20, 0.6), rgba(11, 14, 20, 0.8)), 
+                          url('https://images.unsplash.com/photo-1516104273204-6f0a3d463870?q=80&w=1920&auto=format&fit=crop');
         background-size: cover;
         background-attachment: fixed;
         color: #ffffff; 
@@ -25,34 +25,40 @@ st.markdown("""
 
     .train-title {
         font-family: 'Orbitron', sans-serif; font-weight: 900; text-align: center;
-        color: #00c8ff; text-shadow: 0 0 20px rgba(0, 200, 255, 0.6);
+        color: #ff9f43; /* Colore ambra/tramonto per contrasto Western */
+        text-shadow: 0 0 20px rgba(255, 159, 67, 0.6);
         font-size: 2.8rem; margin-bottom: 30px; letter-spacing: 5px;
     }
 
-    /* Expander e Input */
-    .stExpander { background-color: rgba(26, 31, 44, 0.8) !important; border: 1px solid #00c8ff !important; border-radius: 15px !important; }
+    /* Expander e Input con overlay per leggibilità */
+    .stExpander { 
+        background-color: rgba(26, 31, 44, 0.85) !important; 
+        border: 1px solid #ff9f43 !important; 
+        border-radius: 15px !important;
+        backdrop-filter: blur(5px); /* Sfocatura sfondo per leggibilità */
+    }
 
-    /* Bottoni Fluo */
+    /* Bottoni Fluo Western-Style */
     .btn-genera button { background: linear-gradient(45deg, #2ed573, #7bed9f) !important; color: black !important; font-family: 'Orbitron'; font-weight: 900; height: 65px !important; width: 100%; border: none !important; box-shadow: 0 4px 15px rgba(46,213,115,0.4) !important; }
     .btn-resetta button { background: linear-gradient(45deg, #ff4757, #ff6b81) !important; color: white !important; font-family: 'Orbitron'; font-weight: 900; height: 65px !important; width: 100%; border: none !important; box-shadow: 0 4px 15px rgba(255,71,87,0.4) !important; }
-    .btn-verifica button { background: linear-gradient(45deg, #00c8ff, #005f73) !important; color: white !important; font-family: 'Orbitron'; font-weight: 900; height: 65px !important; width: 100%; border: none !important; margin-top: 30px; box-shadow: 0 0 20px rgba(0,200,255,0.5) !important; }
+    .btn-verifica button { background: linear-gradient(45deg, #ff9f43, #ff6b81) !important; color: white !important; font-family: 'Orbitron'; font-weight: 900; height: 65px !important; width: 100%; border: none !important; margin-top: 30px; box-shadow: 0 0 20px rgba(255,159,67,0.5) !important; }
 
-    /* Card Animata */
+    /* Card Animata con overlay per leggibilità */
     .summary-card {
-        background: rgba(10, 10, 10, 0.85); border: 1px solid #333; padding: 20px; 
-        border-radius: 15px; position: relative; border-top: 3px solid #00c8ff;
+        background: rgba(10, 10, 10, 0.75); border: 1px solid #444; padding: 20px; 
+        border-radius: 15px; position: relative; border-top: 3px solid #ff9f43;
         transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        backdrop-filter: blur(5px);
+        backdrop-filter: blur(5px); /* Sfocatura sfondo per leggibilità */
     }
-    .summary-card:hover { transform: scale(1.05); border-color: #00c8ff; box-shadow: 0 10px 40px rgba(0, 200, 255, 0.5); background: rgba(20, 20, 20, 0.95); }
+    .summary-card:hover { transform: scale(1.05); border-color: #ff9f43; box-shadow: 0 10px 40px rgba(255, 159, 67, 0.5); background: rgba(20, 20, 20, 0.9); }
     
-    .day-label { color: #00c8ff; font-family: 'Orbitron'; font-weight: bold; text-align: center; margin-bottom: 12px; font-size: 1.1rem; }
+    .day-label { color: #ff9f43; font-family: 'Orbitron'; font-weight: bold; text-align: center; margin-bottom: 12px; font-size: 1.1rem; }
     .name-text { font-size: 1rem; font-weight: 800; text-align: center; text-transform: uppercase; margin: 4px 0; letter-spacing: 1px; }
 
     /* Ingranaggio Ghost */
     .popover-container { position: absolute; top: 10px; right: 10px; z-index: 100; }
-    div[data-testid="stPopover"] > button { background: transparent !important; border: none !important; color: rgba(255,255,255,0.2) !important; font-size: 1.2rem !important; }
-    div[data-testid="stPopover"] > button:hover { color: #00c8ff !important; transform: rotate(90deg); transition: 0.3s; }
+    div[data-testid="stPopover"] > button { background: transparent !important; border: none !important; color: rgba(255,255,255,0.4) !important; font-size: 1.2rem !important; }
+    div[data-testid="stPopover"] > button:hover { color: #ff9f43 !important; transform: rotate(90deg); transition: 0.3s; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -121,7 +127,7 @@ if 'master_cal' in st.session_state:
             <div class="summary-card">
                 <div class="day-label">GG {r['Giorno']}</div>
                 <div class="name-text" style="color:{c_col};">{r['Capo']}</div>
-                <div style="color:#555; font-size:0.6rem; text-align:center; margin: 5px 0;">TRAIN PASS</div>
+                <div style="color:#888; font-size:0.65rem; text-align:center; margin: 5px 0; font-weight: bold;">TRAIN PASS</div>
                 <div class="name-text" style="color:{p_col};">{r['Pass']}</div>
             """, unsafe_allow_html=True)
             
