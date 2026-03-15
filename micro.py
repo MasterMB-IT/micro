@@ -9,7 +9,7 @@ st.set_page_config(page_title="AOSR Train Manager - Deluxe Edition", layout="wid
 MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
             "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
 
-# --- CSS (Design Consolidato e Ottimizzato) ---
+# --- CSS (Design Consolidato) ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Rye&family=Montserrat:wght@700;900&display=swap');
@@ -24,7 +24,7 @@ st.markdown("""
     /* CARD SETTINGS */
     .summary-card { background: #fdf5e6; border: 3px solid #5d4037; padding: 12px 8px; border-radius: 6px; box-shadow: 6px 6px 12px rgba(0,0,0,0.5); color: #2b1d0e; margin-bottom: 5px; background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png'); display: flex; flex-direction: column; }
     .h-norm { height: 215px !important; }
-    .h-comp { height: 135px !important; padding: 5px 6px !important; border-width: 2px !important; }
+    .h-comp { height: 135px !important; padding: 5px 6px !important; border-width: 2px !important; margin-bottom: 10px !important; }
     
     .day-badge { background: #8b0000; color: white; font-family: 'Montserrat', sans-serif; font-weight: 900; padding: 2px 8px; border-radius: 3px; font-size: 0.9rem; width: fit-content; margin-bottom: 5px; }
     .badge-comp { font-size: 0.7rem !important; padding: 1px 5px !important; }
@@ -45,7 +45,6 @@ st.markdown("""
     .btn-assegna button { background: #1b4d3e !important; color: #2ecc71 !important; }
     .btn-resetta button { background: #a44a3f !important; color: white !important; }
     
-    /* Popover Adjustment */
     div[data-testid="stPopover"] > button { height: 28px !important; width: 100% !important; margin-top: 5px !important; padding: 0 !important; font-size: 0.8rem !important; }
     </style>
     """, unsafe_allow_html=True)
@@ -118,7 +117,7 @@ with cb4:
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
-view_mode = st.toggle("🎞️ VISIONE D'INSIEME (Vista Totale Compatta)", value=False)
+view_mode = st.toggle("🎞️ VISIONE D'INSIEME (Vista Totale Pulita)", value=False)
 st.markdown('</div>', unsafe_allow_html=True)
 
 # --- RENDERING GRIGLIA ---
@@ -147,10 +146,9 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
                 </div>
                 """, unsafe_allow_html=True)
                 
-                # ROTELLINA DI MODIFICA (Sempre presente tranne che in cronologia storica)
-                if not is_history:
+                # ROTELLINA: Solo se NON è in Visione d'Insieme (compact) e NON è storia
+                if not is_history and not compact:
                     with st.popover("⚙️", use_container_width=True):
-                        # Trova l'indice reale nel master_cal per la modifica
                         real_idx = next(idx for idx, item in enumerate(st.session_state['master_cal']) if item["Giorno"] == r['Giorno'])
                         nc = st.selectbox("Cambia Capo", all_names, index=all_names.index(r['Capo']), key=f"edit_c_{key_prefix}_{r['Giorno']}")
                         np = st.selectbox("Cambia Pass", all_names, index=all_names.index(r['Pass']), key=f"edit_p_{key_prefix}_{r['Giorno']}")
@@ -169,11 +167,9 @@ if st.session_state['history']:
         item = st.session_state['history'][idx]
         with st.expander(f"📦 CONVOGLIO: {item['data']} - {item['ts']}"):
             draw_grid(item['cal'], compact=True, is_history=True, key_prefix=f"hist_{idx}")
-            
             st.markdown("<br>", unsafe_allow_html=True)
             confirm_key = f"confirm_{idx}"
             if confirm_key not in st.session_state: st.session_state[confirm_key] = False
-            
             if not st.session_state[confirm_key]:
                 if st.button("🗑️ ELIMINA RECORD", key=f"btn_del_{idx}"):
                     st.session_state[confirm_key] = True
