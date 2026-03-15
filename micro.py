@@ -9,7 +9,7 @@ st.set_page_config(page_title="AOSR Train Manager - Deluxe Edition", layout="wid
 MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
             "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
 
-# --- CSS AVANZATO: MODALITÀ COMPATTA ---
+# --- CSS AVANZATO: MODALITÀ COMPATTA E BOLD ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Rye&family=Montserrat:wght@900&display=swap');
@@ -40,7 +40,7 @@ st.markdown("""
     .btn-genera button { background: linear-gradient(145deg, #d4a373, #b88655) !important; color: #2b1d0e !important; }
     .btn-resetta button { background: linear-gradient(145deg, #a44a3f, #7a3229) !important; color: white !important; }
 
-    /* CARD NORMALE */
+    /* CARD NORMALE (EDITABILE) */
     .summary-card {
         background: #fdf5e6; border: 3px solid #5d4037;
         padding: 10px; border-radius: 8px; 
@@ -50,56 +50,44 @@ st.markdown("""
         background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
     }
 
-    /* CARD COMPATTA (DIAPOSITIVA) */
+    /* CARD COMPATTA (VISTA TOTALE) */
     .compact-card {
         background: #fdf5e6; border: 2px solid #5d4037;
         padding: 6px 4px; border-radius: 5px; 
         box-shadow: 4px 4px 10px rgba(0,0,0,0.5);
         color: #2b1d0e; margin-bottom: 5px;
-        height: 145px; /* Molto più bassa */
+        height: 140px; 
         background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
-        font-size: 0.75rem;
     }
 
-    .compact-card .day-badge {
-        padding: 1px 6px; font-size: 0.7rem; margin-bottom: 4px;
-    }
-
-    .compact-card .role-label {
-        font-size: 0.55rem; margin-top: 2px;
-    }
-
-    .compact-card .name-container {
-        height: 28px;
-    }
-
-    .compact-card .name-text {
-        font-size: 0.7rem; border-left: 3px solid #d4a373; padding-left: 5px;
-    }
-
-    /* ELEMENTI CARD STANDARD */
     .day-badge {
         background: #8b0000; color: white;
         font-family: 'Montserrat', sans-serif; font-weight: 900;
-        padding: 2px 8px; border-radius: 4px; font-size: 0.85rem;
-        display: inline-block; margin-bottom: 8px;
+        padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;
+        display: inline-block; margin-bottom: 5px;
     }
+
     .role-label { 
         color: #5d4037; font-size: 0.6rem; letter-spacing: 1px;
         font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 800;
         border-bottom: 1px solid rgba(93, 64, 55, 0.2);
     }
-    .name-container { height: 35px; display: flex; align-items: center; overflow: hidden; }
+
+    .name-container { height: 32px; display: flex; align-items: center; overflow: hidden; }
+    
     .name-text { 
         font-family: 'Special Elite', cursive; font-size: 0.85rem; font-weight: 900; 
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;
+        border-left: 4px solid #d4a373; padding-left: 8px;
     }
+
+    .compact-card .name-text { font-size: 0.75rem; border-left-width: 3px; }
 
     hr { border-top: 2px solid #ffcc66 !important; opacity: 0.6; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- DATABASE ---
+# --- DATABASE (CON I TUOI NOMI AGGIORNATI) ---
 def init_db():
     leaders = ["Hool (R5)", "MASTER (R4)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", "Starbetty (R4)", "PEPPE (R4)", "Ricky Around (R4)", "uncle g (R4)", "09ALEX24 (R4)", "ShinyPasta (R4)", "Wall 7 (R4)"]
     r3 = ["G Erry", "Uncle g brother", "Goz", "Ghandal", "Aryron", "Tricheco", "Maメツ", "NOVEMBERGENZ", "Lalla 96", "Whale Panda", "GennaroM", "EchoZero", "EDDward", "AMY", "Resilienza", "Ana Bunny", "Giuseppec84", "Benito Muschiolini", "Pandino19", "xFlotchy", "MX63", "holdfast", "Ghost", "BadBigBoss", "Stefano00000", "PakII", "BANDOLERO26", "BlOOdyBlade", "Whale hunter Levve", "Aresxxx", "KingGruffalo", "Hulkspakka", "Joseppone", "ImAde", "Nysbie", "LeFada13", "Skiteto", "SPio24", "TomEnergy", "Markus Defender", "Sho0t3r", "Wolf006", "Zokra", "perseusxxx", "Bendico", "Obbyy", "ArLes", "Fatz87", "cruel neve", "Trivellatore", "Osgh00", "Slowfia ABOH", "Pontatinatore", "27Francesco", "MissDrinks", "krompir", "MaledettO"]
@@ -138,15 +126,24 @@ with st.expander("📝 UFFICIO ASSEGNAZIONI", expanded=True):
         if st.button("⚒️ GENERA"):
             pool_leaders = sel_leaders if sel_leaders else m_leaders
             pool_others = (sel_r3 if sel_r3 else m_r3) + (sel_r2 if sel_r2 else m_r2)
+            
+            random.shuffle(pool_leaders)
             random.shuffle(pool_others)
+            
             num_gg = (pd.Timestamp(year=st.session_state['sel_anno'], month=MESI_ITA.index(st.session_state['sel_mese'])+1, day=1) + pd.offsets.MonthEnd(0)).day
             st.session_state['master_cal'] = []
+            
             p_idx = 0
             for g in range(1, num_gg + 1):
                 if g <= 11:
-                    c = pool_leaders[(g-1)%len(pool_leaders)]; p = pool_others[p_idx % len(pool_others)]; p_idx += 1
+                    # Fix: Capo e Pass entrambi R4
+                    c = pool_leaders[(g-1) % len(pool_leaders)]
+                    p = pool_leaders[g % len(pool_leaders)]
                 else:
-                    c = pool_others[p_idx % len(pool_others)]; p = pool_others[(p_idx+1) % len(pool_others)]; p_idx += 2
+                    # Altri giorni: pescata doppia dai banditi
+                    c = pool_others[p_idx % len(pool_others)]
+                    p = pool_others[(p_idx + 1) % len(pool_others)]
+                    p_idx += 2
                 st.session_state['master_cal'].append({"Giorno": g, "Capo": c, "Pass": p})
         st.markdown('</div>', unsafe_allow_html=True)
     with cb2:
