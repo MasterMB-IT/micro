@@ -9,10 +9,10 @@ st.set_page_config(page_title="AOSR Train Manager - Deluxe Edition", layout="wid
 MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
             "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
 
-# --- CSS AVANZATO: BOLD & HARMONIOUS WEST ---
+# --- CSS AVANZATO: PULSANTI BOLD E CARDS CON EMOJI ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Rye&family=Montserrat:wght@700;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Rye&family=Montserrat:wght@900&display=swap');
 
     .stApp { 
         background: linear-gradient(rgba(30, 20, 10, 0.75), rgba(15, 10, 5, 0.92)), 
@@ -20,57 +20,79 @@ st.markdown("""
         background-size: cover; background-attachment: fixed;
     }
 
-    /* TITOLO TITANICO */
     .train-title {
         font-family: 'Rye', cursive;
         text-align: center; color: #ffcc66;
         text-shadow: 5px 5px 0px #4b2e1b;
-        font-size: 4rem; margin-bottom: 20px;
+        font-size: 3.5rem; margin-bottom: 20px;
     }
 
-    /* RIQUADRO ASSEGNAZIONI ARMONIOSO */
+    /* RIQUADRO ASSEGNAZIONI */
     .stExpander {
-        background: rgba(43, 29, 14, 0.9) !important;
+        background: rgba(43, 29, 14, 0.95) !important;
         border: 4px solid #ffcc66 !important;
         border-radius: 15px !important;
-        box-shadow: 0px 10px 30px rgba(0,0,0,0.8) !important;
-    }
-    
-    .stExpander details summary {
-        font-family: 'Rye', cursive !important;
-        color: #ffcc66 !important;
-        font-size: 1.5rem !important;
-        padding: 10px !important;
     }
 
-    /* CARD WANTED (VISTA CARDS) */
+    /* PULSANTI ACCATTIVANTI */
+    .stButton>button {
+        width: 100% !important;
+        height: 65px !important;
+        border-radius: 12px !important;
+        font-family: 'Montserrat', sans-serif !important;
+        font-weight: 900 !important;
+        font-size: 1.5rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 2px !important;
+        transition: all 0.2s ease !important;
+        border: 4px solid #2b1d0e !important;
+        box-shadow: 0px 6px 0px #1a1108 !important;
+    }
+
+    .btn-genera button {
+        background: linear-gradient(145deg, #d4a373, #b88655) !important;
+        color: #2b1d0e !important;
+    }
+
+    .btn-resetta button {
+        background: linear-gradient(145deg, #a44a3f, #7a3229) !important;
+        color: white !important;
+    }
+
+    .stButton>button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0px 8px 15px rgba(0,0,0,0.4) !important;
+    }
+
+    .stButton>button:active {
+        transform: translateY(4px) !important;
+        box-shadow: 0px 2px 0px #1a1108 !important;
+    }
+
+    /* CARDS WANTED */
     .summary-card {
         background: #fdf5e6; 
-        border: 4px solid #5d4037; /* Bordo più pieno */
+        border: 4px solid #5d4037;
         padding: 15px 10px; 
-        border-radius: 8px; 
+        border-radius: 10px; 
         box-shadow: 10px 10px 20px rgba(0,0,0,0.6);
         color: #2b1d0e; 
         margin-bottom: 15px;
         height: 220px;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png'); /* Texture carta */
+        background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
     }
 
     .day-badge {
         background: #8b0000; color: white;
         font-family: 'Montserrat', sans-serif; font-weight: 900;
-        padding: 4px 12px; border-radius: 4px; font-size: 1rem;
-        align-self: flex-start; margin-bottom: 10px;
-        box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+        padding: 4px 12px; border-radius: 5px; font-size: 1rem;
+        display: inline-block; margin-bottom: 10px;
     }
 
     .role-label { 
         color: #5d4037; font-size: 0.75rem; letter-spacing: 1.5px;
         font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 800;
-        margin-top: 6px; border-bottom: 2px solid rgba(93, 64, 55, 0.2);
+        border-bottom: 2px solid rgba(93, 64, 55, 0.2);
     }
 
     .name-container {
@@ -86,34 +108,7 @@ st.markdown("""
         border-left: 5px solid #d4a373; padding-left: 10px;
     }
 
-    /* BOTTONI PIÙ "PIENI" */
-    .stButton>button {
-        border-radius: 8px !important;
-        font-family: 'Rye', cursive !important;
-        font-size: 1.3rem !important;
-        height: 55px !important;
-        border: 3px solid #2b1d0e !important;
-        box-shadow: 0px 4px 0px #2b1d0e !important;
-        transition: all 0.1s !important;
-    }
-    
-    .stButton>button:active {
-        transform: translateY(4px) !important;
-        box-shadow: 0px 0px 0px !important;
-    }
-
-    .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; }
-    .btn-resetta button { background: #a44a3f !important; color: white !important; }
-    
-    /* Input Form Labels */
-    label p {
-        font-family: 'Montserrat', sans-serif !important;
-        color: #ffcc66 !important;
-        font-weight: 800 !important;
-        font-size: 1.1rem !important;
-    }
-
-    hr { border-top: 3px solid #ffcc66 !important; opacity: 0.8; margin: 30px 0; }
+    hr { border-top: 3px solid #ffcc66 !important; opacity: 0.8; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -136,9 +131,8 @@ all_names = sorted(db['Nome'].tolist())
 # --- TITOLO ---
 st.markdown('<div class="train-title">🚂 AOSR EXPRESS</div>', unsafe_allow_html=True)
 
-# --- PANEL REGISTRO (RIQUADRO ARMONIOSO) ---
+# --- PANEL REGISTRO ---
 with st.expander("📝 UFFICIO ASSEGNAZIONI", expanded=True):
-    # Layout più arioso
     c1, c2, c3, c4 = st.columns([1, 1.2, 1.2, 1.2])
     with c1:
         st.session_state['sel_mese'] = st.selectbox("Mese", MESI_ITA, index=MESI_ITA.index(st.session_state['sel_mese']))
@@ -172,7 +166,7 @@ with st.expander("📝 UFFICIO ASSEGNAZIONI", expanded=True):
         st.markdown('</div>', unsafe_allow_html=True)
     with cb2:
         st.markdown('<div class="btn-resetta">', unsafe_allow_html=True)
-        if st.button("🏜️ RESET"):
+        if st.button("🌵 RESET"):
             if 'master_cal' in st.session_state: del st.session_state['master_cal']
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
@@ -193,11 +187,11 @@ if 'master_cal' in st.session_state:
                     <div class="day-badge">GG {r['Giorno']}</div>
                     <div class="role-label">CAPOTRENO</div>
                     <div class="name-container">
-                        <div class="name-text" style="color:{c_col};">{r['Capo']}</div>
+                        <div class="name-text" style="color:{c_col};">🤠 {r['Capo']}</div>
                     </div>
                     <div class="role-label">PASSEGGERO</div>
                     <div class="name-container">
-                        <div class="name-text" style="color:{p_col};">{r['Pass']}</div>
+                        <div class="name-text" style="color:{p_col};">🐎 {r['Pass']}</div>
                     </div>
                 """, unsafe_allow_html=True)
                 with st.popover("⚙️"):
@@ -208,7 +202,7 @@ if 'master_cal' in st.session_state:
                 st.markdown('</div>', unsafe_allow_html=True)
 
     with tab_lista:
-        st.markdown('<div class="registro-box">', unsafe_allow_html=True)
+        st.markdown('<div style="background: rgba(253, 245, 230, 0.9); padding: 20px; border-radius: 10px; font-family: \'Special Elite\'; color: #2b1d0e;">', unsafe_allow_html=True)
         for r in st.session_state['master_cal']:
-            st.markdown(f"**Giorno {r['Giorno']}:** {r['Capo']} (Capotreno) ➔ {r['Pass']} (Passeggero)")
+            st.markdown(f"**Giorno {r['Giorno']}:** 🤠 {r['Capo']} ➔ 🐎 {r['Pass']}")
         st.markdown('</div>', unsafe_allow_html=True)
