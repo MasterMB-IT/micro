@@ -9,92 +9,33 @@ st.set_page_config(page_title="AOSR Train Manager - Deluxe Edition", layout="wid
 MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
             "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
 
-# --- CSS AVANZATO: OTTIMIZZAZIONE GRANDEZZE ---
+# --- CSS (Design Consolidato) ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Rye&family=Montserrat:wght@700;900&display=swap');
-
     .stApp { 
         background: linear-gradient(rgba(30, 20, 10, 0.75), rgba(15, 10, 5, 0.92)), 
                     url('https://images.unsplash.com/photo-1510524527013-0393282436da?q=80&w=1920&auto=format&fit=crop');
         background-size: cover; background-attachment: fixed;
     }
-
-    .train-title {
-        font-family: 'Rye', cursive; text-align: center; color: #ffcc66;
-        text-shadow: 5px 5px 0px #4b2e1b; font-size: 4rem; margin-bottom: 20px;
-    }
-
-    .sala-comando {
-        background: rgba(43, 29, 14, 0.9);
-        border: 4px solid #ffcc66;
-        border-radius: 15px; padding: 25px;
-        box-shadow: 0px 10px 30px rgba(0,0,0,0.8);
-        margin-bottom: 30px;
-    }
-
-    /* --- CARD MANAGEMENT --- */
-    .summary-card {
-        background: #fdf5e6; 
-        border: 3px solid #5d4037;
-        padding: 12px 8px; 
-        border-radius: 6px; 
-        box-shadow: 6px 6px 12px rgba(0,0,0,0.5);
-        color: #2b1d0e; 
-        margin-bottom: 10px;
-        background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
-        display: flex; flex-direction: column;
-        transition: transform 0.2s;
-    }
-
-    /* Grandezza normale */
+    .train-title { font-family: 'Rye', cursive; text-align: center; color: #ffcc66; text-shadow: 5px 5px 0px #4b2e1b; font-size: 4rem; margin-bottom: 20px; }
+    .sala-comando { background: rgba(43, 29, 14, 0.9); border: 4px solid #ffcc66; border-radius: 15px; padding: 25px; box-shadow: 0px 10px 30px rgba(0,0,0,0.8); margin-bottom: 30px; }
+    .summary-card { background: #fdf5e6; border: 3px solid #5d4037; padding: 12px 8px; border-radius: 6px; box-shadow: 6px 6px 12px rgba(0,0,0,0.5); color: #2b1d0e; margin-bottom: 10px; background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png'); display: flex; flex-direction: column; }
     .h-norm { height: 210px !important; }
-    
-    /* GRANDEZZA COMPATTA (Risoluzione del problema) */
-    .h-comp { 
-        height: 130px !important; 
-        padding: 5px 6px !important; 
-        border-width: 2px !important;
-    }
-
-    .day-badge {
-        background: #8b0000; color: white;
-        font-family: 'Montserrat', sans-serif; font-weight: 900;
-        padding: 2px 8px; border-radius: 3px; font-size: 0.9rem;
-        width: fit-content; margin-bottom: 5px;
-    }
-    
+    .h-comp { height: 130px !important; padding: 5px 6px !important; border-width: 2px !important; }
+    .day-badge { background: #8b0000; color: white; font-family: 'Montserrat', sans-serif; font-weight: 900; padding: 2px 8px; border-radius: 3px; font-size: 0.9rem; width: fit-content; margin-bottom: 5px; }
     .badge-comp { font-size: 0.7rem !important; padding: 1px 5px !important; }
-
-    .role-label { 
-        color: #5d4037; font-size: 0.7rem; letter-spacing: 1px;
-        font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 800;
-        border-bottom: 1px solid rgba(93, 64, 55, 0.2);
-    }
+    .role-label { color: #5d4037; font-size: 0.7rem; letter-spacing: 1px; font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 800; border-bottom: 1px solid rgba(93, 64, 55, 0.2); }
     .label-comp { font-size: 0.5rem !important; margin-top: 2px !important; }
-
     .name-container { height: 40px; display: flex; align-items: center; }
     .container-comp { height: 25px !important; }
-
-    .name-text { 
-        font-family: 'Special Elite', cursive; font-size: 0.95rem; font-weight: 900; 
-        text-transform: uppercase; line-height: 1.1;
-        border-left: 4px solid #d4a373; padding-left: 8px;
-        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
+    .name-text { font-family: 'Special Elite', cursive; font-size: 0.95rem; font-weight: 900; text-transform: uppercase; line-height: 1.1; border-left: 4px solid #d4a373; padding-left: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .text-comp { font-size: 0.7rem !important; border-left-width: 3px !important; padding-left: 5px !important; }
-
-    /* BOTTONI */
-    .stButton>button {
-        border-radius: 8px !important; font-family: 'Rye', cursive !important;
-        font-size: 1.1rem !important; height: 50px !important;
-        border: 3px solid #2b1d0e !important; width: 100%;
-    }
+    .stButton>button { border-radius: 8px !important; font-family: 'Rye', cursive !important; font-size: 1.1rem !important; height: 50px !important; border: 3px solid #2b1d0e !important; width: 100%; }
     .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; }
     .btn-verifica button { background: #5d4037 !important; color: #ffcc66 !important; }
     .btn-assegna button { background: #1b4d3e !important; color: #2ecc71 !important; }
     .btn-resetta button { background: #a44a3f !important; color: white !important; }
-
     hr { border-top: 3px solid #ffcc66 !important; opacity: 0.8; margin: 20px 0; }
     </style>
     """, unsafe_allow_html=True)
@@ -170,10 +111,9 @@ with cb4:
 view_mode = st.toggle("🎞️ VISIONE D'INSIEME (Vista Totale Compatta)", value=False)
 st.markdown('</div>', unsafe_allow_html=True)
 
-# --- RENDERING GRIGLIA ---
+# --- FUNZIONE RENDERING GRIGLIA ---
 def draw_grid(data, compact=False, is_history=False):
     n_cols = 10 if compact else 7
-    # Classi condizionali per le grandezze
     h_cls = "h-comp" if compact else "h-norm"
     b_cls = "badge-comp" if compact else ""
     l_cls = "label-comp" if compact else ""
@@ -196,20 +136,44 @@ def draw_grid(data, compact=False, is_history=False):
                     <div class="name-container {c_cls}"><div class="name-text {t_cls}" style="color:{p_c};">{r['Pass']}</div></div>
                 </div>
                 """, unsafe_allow_html=True)
-                if not is_history and not compact:
-                    with st.popover("⚙️", use_container_width=True):
-                        nc = st.selectbox("Capo", all_names, index=all_names.index(r['Capo']), key=f"c_{i}_{r['Giorno']}")
-                        np = st.selectbox("Pass", all_names, index=all_names.index(r['Pass']), key=f"p_{i}_{r['Giorno']}")
-                        if st.button("Salva", key=f"s_{i}_{r['Giorno']}"):
-                            idx = next(idx for idx, it in enumerate(st.session_state['master_cal']) if it["Giorno"] == r['Giorno'])
-                            st.session_state['master_cal'][idx].update({"Capo": nc, "Pass": np}); st.rerun()
 
+# --- DISPLAY ---
 if 'master_cal' in st.session_state:
     st.markdown(f"<h3 style='text-align:center; color:#ffcc66; font-family:Rye;'>📅 {st.session_state['sel_mese'].upper()}</h3>", unsafe_allow_html=True)
     draw_grid(st.session_state['master_cal'], compact=view_mode)
 
+# --- CRONOLOGIA CON SICUREZZA ---
 if st.session_state['history']:
     st.markdown("<hr><h2 style='color:#ffcc66; font-family:Rye; text-align:center;'>📜 ARCHIVIO</h2>", unsafe_allow_html=True)
-    for idx, item in enumerate(reversed(st.session_state['history'])):
+    
+    # Iteriamo in ordine inverso per mostrare l'ultimo salvato per primo
+    for idx in range(len(st.session_state['history']) - 1, -1, -1):
+        item = st.session_state['history'][idx]
         with st.expander(f"📦 CONVOGLIO: {item['data']} - {item['ts']}"):
             draw_grid(item['cal'], compact=True, is_history=True)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            col_del, col_empty = st.columns([1, 3])
+            
+            with col_del:
+                # Sistema di conferma eliminazione
+                confirm_key = f"confirm_{idx}"
+                if confirm_key not in st.session_state:
+                    st.session_state[confirm_key] = False
+                
+                if not st.session_state[confirm_key]:
+                    if st.button("🗑️ ELIMINA RECORD", key=f"btn_del_{idx}"):
+                        st.session_state[confirm_key] = True
+                        st.rerun()
+                else:
+                    st.warning("Vuoi davvero eliminare il calendario?")
+                    c_si, c_no = st.columns(2)
+                    with c_si:
+                        if st.button("✅ SÌ", key=f"yes_{idx}"):
+                            st.session_state['history'].pop(idx)
+                            del st.session_state[confirm_key]
+                            st.rerun()
+                    with c_no:
+                        if st.button("❌ NO", key=f"no_{idx}"):
+                            st.session_state[confirm_key] = False
+                            st.rerun()
