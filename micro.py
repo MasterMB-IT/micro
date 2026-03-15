@@ -9,7 +9,7 @@ st.set_page_config(page_title="AOSR Train Manager - Deluxe Edition", layout="wid
 MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
             "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
 
-# --- CSS AVANZATO: MODALITÀ COMPATTA E BOLD ---
+# --- CSS DEFINITIVO ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Rye&family=Montserrat:wght@900&display=swap');
@@ -40,7 +40,7 @@ st.markdown("""
     .btn-genera button { background: linear-gradient(145deg, #d4a373, #b88655) !important; color: #2b1d0e !important; }
     .btn-resetta button { background: linear-gradient(145deg, #a44a3f, #7a3229) !important; color: white !important; }
 
-    /* CARD NORMALE (EDITABILE) */
+    /* CARDS */
     .summary-card {
         background: #fdf5e6; border: 3px solid #5d4037;
         padding: 10px; border-radius: 8px; 
@@ -50,7 +50,6 @@ st.markdown("""
         background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
     }
 
-    /* CARD COMPATTA (VISTA TOTALE) */
     .compact-card {
         background: #fdf5e6; border: 2px solid #5d4037;
         padding: 6px 4px; border-radius: 5px; 
@@ -83,11 +82,22 @@ st.markdown("""
 
     .compact-card .name-text { font-size: 0.75rem; border-left-width: 3px; }
 
+    /* STILE REGISTRO TESTUALE */
+    .registro-text {
+        background: rgba(253, 245, 230, 0.95);
+        padding: 20px;
+        border-radius: 10px;
+        font-family: 'Special Elite', cursive;
+        color: #2b1d0e;
+        border: 2px solid #5d4037;
+        line-height: 1.6;
+    }
+
     hr { border-top: 2px solid #ffcc66 !important; opacity: 0.6; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- DATABASE (CON I TUOI NOMI AGGIORNATI) ---
+# --- DATABASE (Nomi immagini inclusi) ---
 def init_db():
     leaders = ["Hool (R5)", "MASTER (R4)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", "Starbetty (R4)", "PEPPE (R4)", "Ricky Around (R4)", "uncle g (R4)", "09ALEX24 (R4)", "ShinyPasta (R4)", "Wall 7 (R4)"]
     r3 = ["G Erry", "Uncle g brother", "Goz", "Ghandal", "Aryron", "Tricheco", "Maメツ", "NOVEMBERGENZ", "Lalla 96", "Whale Panda", "GennaroM", "EchoZero", "EDDward", "AMY", "Resilienza", "Ana Bunny", "Giuseppec84", "Benito Muschiolini", "Pandino19", "xFlotchy", "MX63", "holdfast", "Ghost", "BadBigBoss", "Stefano00000", "PakII", "BANDOLERO26", "BlOOdyBlade", "Whale hunter Levve", "Aresxxx", "KingGruffalo", "Hulkspakka", "Joseppone", "ImAde", "Nysbie", "LeFada13", "Skiteto", "SPio24", "TomEnergy", "Markus Defender", "Sho0t3r", "Wolf006", "Zokra", "perseusxxx", "Bendico", "Obbyy", "ArLes", "Fatz87", "cruel neve", "Trivellatore", "Osgh00", "Slowfia ABOH", "Pontatinatore", "27Francesco", "MissDrinks", "krompir", "MaledettO"]
@@ -126,21 +136,16 @@ with st.expander("📝 UFFICIO ASSEGNAZIONI", expanded=True):
         if st.button("⚒️ GENERA"):
             pool_leaders = sel_leaders if sel_leaders else m_leaders
             pool_others = (sel_r3 if sel_r3 else m_r3) + (sel_r2 if sel_r2 else m_r2)
-            
             random.shuffle(pool_leaders)
             random.shuffle(pool_others)
-            
             num_gg = (pd.Timestamp(year=st.session_state['sel_anno'], month=MESI_ITA.index(st.session_state['sel_mese'])+1, day=1) + pd.offsets.MonthEnd(0)).day
             st.session_state['master_cal'] = []
-            
             p_idx = 0
             for g in range(1, num_gg + 1):
                 if g <= 11:
-                    # Fix: Capo e Pass entrambi R4
                     c = pool_leaders[(g-1) % len(pool_leaders)]
                     p = pool_leaders[g % len(pool_leaders)]
                 else:
-                    # Altri giorni: pescata doppia dai banditi
                     c = pool_others[p_idx % len(pool_others)]
                     p = pool_others[(p_idx + 1) % len(pool_others)]
                     p_idx += 2
@@ -162,6 +167,7 @@ if 'master_cal' in st.session_state:
     
     if not view_mode:
         tab_cards, tab_lista = st.tabs(["🎴 VISTA EDITABILE", "📜 REGISTRO"])
+        
         with tab_cards:
             cols = st.columns(7)
             for i, r in enumerate(st.session_state['master_cal']):
@@ -181,8 +187,17 @@ if 'master_cal' in st.session_state:
                         if st.button("Salva", key=f"s_{i}"):
                             st.session_state['master_cal'][i].update({"Capo": nc, "Pass": np}); st.rerun()
                     st.markdown('</div>', unsafe_allow_html=True)
+        
+        with tab_lista:
+            # --- QUI HO AGGIUNTO IL CODICE PER IL REGISTRO ---
+            st.markdown('<div class="registro-text">', unsafe_allow_html=True)
+            st.subheader(f"📋 ORDINE DI SERVIZIO - {st.session_state['sel_mese'].upper()} {st.session_state['sel_anno']}")
+            for r in st.session_state['master_cal']:
+                st.markdown(f"**Giorno {r['Giorno']}** | 🤠 Capo: `{r['Capo']}` ➔ 🐎 Pass: `{r['Pass']}`")
+            st.markdown('</div>', unsafe_allow_html=True)
+
     else:
-        # VISTA TOTALE: 8 Colonne e card rimpicciolite
+        # VISTA TOTALE: 8 Colonne
         cols = st.columns(8)
         for i, r in enumerate(st.session_state['master_cal']):
             with cols[i % 8]:
