@@ -9,7 +9,7 @@ st.set_page_config(page_title="AOSR Train Manager - Deluxe Edition", layout="wid
 MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
             "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
 
-# --- CSS DEFINITIVO: NO WRAP & ELLIPSIS ---
+# --- CSS DEFINITIVO ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Rye&family=Montserrat:wght@900&display=swap');
@@ -27,7 +27,6 @@ st.markdown("""
         font-size: 3.5rem; margin-bottom: 20px;
     }
 
-    /* RIQUADRO ASSEGNAZIONI */
     .stExpander {
         background: rgba(43, 29, 14, 0.95) !important;
         border: 4px solid #ffcc66 !important;
@@ -37,14 +36,12 @@ st.markdown("""
     /* PULSANTI */
     .stButton>button {
         width: 100% !important;
-        height: 65px !important;
+        height: 60px !important;
         border-radius: 12px !important;
         font-family: 'Montserrat', sans-serif !important;
         font-weight: 900 !important;
-        font-size: 1.5rem !important;
+        font-size: 1.2rem !important;
         text-transform: uppercase !important;
-        letter-spacing: 2px !important;
-        transition: all 0.2s ease !important;
         border: 4px solid #2b1d0e !important;
         box-shadow: 0px 6px 0px #1a1108 !important;
     }
@@ -52,54 +49,40 @@ st.markdown("""
     .btn-genera button { background: linear-gradient(145deg, #d4a373, #b88655) !important; color: #2b1d0e !important; }
     .btn-resetta button { background: linear-gradient(145deg, #a44a3f, #7a3229) !important; color: white !important; }
 
-    /* CARDS WANTED - GESTIONE TESTO RIGIDA */
+    /* CARDS */
     .summary-card {
         background: #fdf5e6; 
         border: 4px solid #5d4037;
-        padding: 15px 10px; 
+        padding: 12px 10px; 
         border-radius: 10px; 
         box-shadow: 10px 10px 20px rgba(0,0,0,0.6);
         color: #2b1d0e; 
-        margin-bottom: 15px;
-        height: 220px;
-        overflow: hidden; /* Sicurezza extra per la card */
+        margin-bottom: 10px;
+        height: 210px;
         background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
     }
 
     .day-badge {
         background: #8b0000; color: white;
         font-family: 'Montserrat', sans-serif; font-weight: 900;
-        padding: 4px 12px; border-radius: 5px; font-size: 1rem;
-        display: inline-block; margin-bottom: 10px;
+        padding: 2px 10px; border-radius: 5px; font-size: 0.9rem;
+        display: inline-block; margin-bottom: 8px;
     }
 
     .role-label { 
-        color: #5d4037; font-size: 0.7rem; letter-spacing: 1.5px;
+        color: #5d4037; font-size: 0.65rem; letter-spacing: 1px;
         font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 800;
         border-bottom: 2px solid rgba(93, 64, 55, 0.2);
     }
 
     .name-container {
-        height: 40px; 
-        display: flex;
-        align-items: center;
-        margin-bottom: 5px;
-        overflow: hidden; /* Fondamentale per bloccare il testo */
+        height: 40px; display: flex; align-items: center; overflow: hidden;
     }
 
     .name-text { 
-        font-family: 'Special Elite', cursive; 
-        font-size: 0.9rem; /* Ridotto leggermente per far stare più lettere */
-        font-weight: 900; 
-        text-transform: uppercase;
-        border-left: 5px solid #d4a373; 
-        padding-left: 10px;
-        
-        /* REGOLE ANTI-A CAPO */
-        white-space: nowrap; 
-        overflow: hidden; 
-        text-overflow: ellipsis;
-        width: 100%;
+        font-family: 'Special Elite', cursive; font-size: 0.85rem; font-weight: 900; 
+        text-transform: uppercase; border-left: 5px solid #d4a373; padding-left: 8px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;
     }
 
     hr { border-top: 3px solid #ffcc66 !important; opacity: 0.8; }
@@ -134,13 +117,12 @@ with st.expander("📝 UFFICIO ASSEGNAZIONI", expanded=True):
     
     m_leaders = db[db['Grado'] == "R5/R4"]['Nome'].tolist()
     m_r3, m_r2 = db[db['Grado'] == "R3"]['Nome'].tolist(), db[db['Grado'] == "R2"]['Nome'].tolist()
-    
     with c2: sel_leaders = st.multiselect("Sceriffi R5/R4", m_leaders)
     with c3: sel_r3 = st.multiselect("Banditi R3", m_r3)
     with c4: sel_r2 = st.multiselect("Fuorilegge R2", m_r2)
 
     st.markdown("<br>", unsafe_allow_html=True)
-    cb1, cb2 = st.columns(2)
+    cb1, cb2, cb3 = st.columns([1, 1, 1.5])
     with cb1:
         st.markdown('<div class="btn-genera">', unsafe_allow_html=True)
         if st.button("⚒️ GENERA CONVOGLIO"):
@@ -164,13 +146,44 @@ with st.expander("📝 UFFICIO ASSEGNAZIONI", expanded=True):
             if 'master_cal' in st.session_state: del st.session_state['master_cal']
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
+    with cb3:
+        # --- VISIONE D'INSIEME ---
+        st.markdown("<br>", unsafe_allow_html=True)
+        view_mode = st.toggle("🎞️ DIAPOSITIVA (Visione Totale)", value=False)
 
 # --- VISUALIZZAZIONE ---
 if 'master_cal' in st.session_state:
     st.markdown("<hr>", unsafe_allow_html=True)
-    tab_cards, tab_lista = st.tabs(["🎴 VISTA CARDS", "📜 REGISTRO SEQUENZIALE"])
-
-    with tab_cards:
+    
+    if not view_mode:
+        tab_cards, tab_lista = st.tabs(["🎴 VISTA CARDS", "📜 REGISTRO SEQUENZIALE"])
+        with tab_cards:
+            cols = st.columns(7)
+            for i, r in enumerate(st.session_state['master_cal']):
+                with cols[i % 7]:
+                    c_col = "#8b0000" if any(db[(db['Nome'] == r['Capo']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
+                    p_col = "#8b0000" if any(db[(db['Nome'] == r['Pass']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
+                    st.markdown(f"""
+                    <div class="summary-card">
+                        <div class="day-badge">GG {r['Giorno']}</div>
+                        <div class="role-label">CAPOTRENO</div>
+                        <div class="name-container"><div class="name-text" style="color:{c_col};">🤠 {r['Capo']}</div></div>
+                        <div class="role-label">PASSEGGERO</div>
+                        <div class="name-container"><div class="name-text" style="color:{p_col};">🐎 {r['Pass']}</div></div>
+                    """, unsafe_allow_html=True)
+                    with st.popover("⚙️"):
+                        nc = st.selectbox("Capo", all_names, index=all_names.index(r['Capo']), key=f"c_{i}")
+                        np = st.selectbox("Pass", all_names, index=all_names.index(r['Pass']), key=f"p_{i}")
+                        if st.button("Salva", key=f"s_{i}"):
+                            st.session_state['master_cal'][i].update({"Capo": nc, "Pass": np}); st.rerun()
+                    st.markdown('</div>', unsafe_allow_html=True)
+        with tab_lista:
+            st.markdown('<div style="background: rgba(253, 245, 230, 0.9); padding: 20px; border-radius: 10px; color: #2b1d0e;">', unsafe_allow_html=True)
+            for r in st.session_state['master_cal']:
+                st.write(f"**Giorno {r['Giorno']}:** 🤠 {r['Capo']} ➔ 🐎 {r['Pass']}")
+            st.markdown('</div>', unsafe_allow_html=True)
+    else:
+        # MODALITÀ DIAPOSITIVA (Senza ingranaggi, perfetta per screenshot)
         cols = st.columns(7)
         for i, r in enumerate(st.session_state['master_cal']):
             with cols[i % 7]:
@@ -180,23 +193,8 @@ if 'master_cal' in st.session_state:
                 <div class="summary-card">
                     <div class="day-badge">GG {r['Giorno']}</div>
                     <div class="role-label">CAPOTRENO</div>
-                    <div class="name-container">
-                        <div class="name-text" style="color:{c_col};">🤠 {r['Capo']}</div>
-                    </div>
+                    <div class="name-container"><div class="name-text" style="color:{c_col};">🤠 {r['Capo']}</div></div>
                     <div class="role-label">PASSEGGERO</div>
-                    <div class="name-container">
-                        <div class="name-text" style="color:{p_col};">🐎 {r['Pass']}</div>
-                    </div>
+                    <div class="name-container"><div class="name-text" style="color:{p_col};">🐎 {r['Pass']}</div></div>
+                </div>
                 """, unsafe_allow_html=True)
-                with st.popover("⚙️"):
-                    nc = st.selectbox("Capotreno", all_names, index=all_names.index(r['Capo']), key=f"c_{i}")
-                    np = st.selectbox("Passeggero", all_names, index=all_names.index(r['Pass']), key=f"p_{i}")
-                    if st.button("💾 Salva", key=f"s_{i}"):
-                        st.session_state['master_cal'][i].update({"Capo": nc, "Pass": np}); st.rerun()
-                st.markdown('</div>', unsafe_allow_html=True)
-
-    with tab_lista:
-        st.markdown('<div style="background: rgba(253, 245, 230, 0.9); padding: 20px; border-radius: 10px; font-family: \'Special Elite\'; color: #2b1d0e;">', unsafe_allow_html=True)
-        for r in st.session_state['master_cal']:
-            st.markdown(f"**Giorno {r['Giorno']}:** 🤠 {r['Capo']} ➔ 🐎 {r['Pass']}")
-        st.markdown('</div>', unsafe_allow_html=True)
