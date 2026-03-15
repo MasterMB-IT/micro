@@ -9,7 +9,7 @@ st.set_page_config(page_title="AOSR Train Manager - Deluxe Edition", layout="wid
 MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
             "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
 
-# --- CSS AVANZATO: BOLD & HARMONIOUS WEST ---
+# --- CSS AVANZATO: OTTIMIZZAZIONE GRANDEZZE ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Rye&family=Montserrat:wght@700;900&display=swap');
@@ -25,75 +25,77 @@ st.markdown("""
         text-shadow: 5px 5px 0px #4b2e1b; font-size: 4rem; margin-bottom: 20px;
     }
 
-    /* RIQUADRO ASSEGNAZIONI SALA COMANDO */
     .sala-comando {
         background: rgba(43, 29, 14, 0.9);
         border: 4px solid #ffcc66;
-        border-radius: 15px;
-        padding: 25px;
+        border-radius: 15px; padding: 25px;
         box-shadow: 0px 10px 30px rgba(0,0,0,0.8);
         margin-bottom: 30px;
     }
 
-    /* CARD WANTED */
+    /* --- CARD MANAGEMENT --- */
     .summary-card {
         background: #fdf5e6; 
-        border: 4px solid #5d4037;
-        padding: 15px 10px; 
-        border-radius: 8px; 
-        box-shadow: 10px 10px 20px rgba(0,0,0,0.6);
+        border: 3px solid #5d4037;
+        padding: 12px 8px; 
+        border-radius: 6px; 
+        box-shadow: 6px 6px 12px rgba(0,0,0,0.5);
         color: #2b1d0e; 
-        margin-bottom: 15px;
-        height: 220px;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
+        margin-bottom: 10px;
         background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+        display: flex; flex-direction: column;
+        transition: transform 0.2s;
     }
 
-    /* ALTEZZA COMPATTA PER CRONOLOGIA */
-    .h-comp { height: 150px !important; }
-    .name-comp { font-size: 0.8rem !important; }
+    /* Grandezza normale */
+    .h-norm { height: 210px !important; }
+    
+    /* GRANDEZZA COMPATTA (Risoluzione del problema) */
+    .h-comp { 
+        height: 130px !important; 
+        padding: 5px 6px !important; 
+        border-width: 2px !important;
+    }
 
     .day-badge {
         background: #8b0000; color: white;
         font-family: 'Montserrat', sans-serif; font-weight: 900;
-        padding: 4px 12px; border-radius: 4px; font-size: 1rem;
-        align-self: flex-start; margin-bottom: 10px;
+        padding: 2px 8px; border-radius: 3px; font-size: 0.9rem;
+        width: fit-content; margin-bottom: 5px;
     }
+    
+    .badge-comp { font-size: 0.7rem !important; padding: 1px 5px !important; }
 
     .role-label { 
-        color: #5d4037; font-size: 0.75rem; letter-spacing: 1.5px;
+        color: #5d4037; font-size: 0.7rem; letter-spacing: 1px;
         font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 800;
-        margin-top: 6px; border-bottom: 2px solid rgba(93, 64, 55, 0.2);
+        border-bottom: 1px solid rgba(93, 64, 55, 0.2);
     }
+    .label-comp { font-size: 0.5rem !important; margin-top: 2px !important; }
 
-    .name-container { height: 45px; display: flex; align-items: center; margin-bottom: 5px; }
+    .name-container { height: 40px; display: flex; align-items: center; }
+    .container-comp { height: 25px !important; }
 
     .name-text { 
-        font-family: 'Special Elite', cursive; font-size: 1rem; font-weight: 900; 
+        font-family: 'Special Elite', cursive; font-size: 0.95rem; font-weight: 900; 
         text-transform: uppercase; line-height: 1.1;
-        border-left: 5px solid #d4a373; padding-left: 10px;
+        border-left: 4px solid #d4a373; padding-left: 8px;
         overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
+    .text-comp { font-size: 0.7rem !important; border-left-width: 3px !important; padding-left: 5px !important; }
 
-    /* BOTTONI DELUXE */
+    /* BOTTONI */
     .stButton>button {
         border-radius: 8px !important; font-family: 'Rye', cursive !important;
         font-size: 1.1rem !important; height: 50px !important;
-        border: 3px solid #2b1d0e !important;
-        box-shadow: 0px 4px 0px #2b1d0e !important;
-        transition: all 0.1s !important; width: 100%;
+        border: 3px solid #2b1d0e !important; width: 100%;
     }
-    
-    .stButton>button:active { transform: translateY(4px) !important; box-shadow: 0px 0px 0px !important; }
-
     .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; }
     .btn-verifica button { background: #5d4037 !important; color: #ffcc66 !important; }
     .btn-assegna button { background: #1b4d3e !important; color: #2ecc71 !important; }
     .btn-resetta button { background: #a44a3f !important; color: white !important; }
 
-    hr { border-top: 3px solid #ffcc66 !important; opacity: 0.8; margin: 30px 0; }
+    hr { border-top: 3px solid #ffcc66 !important; opacity: 0.8; margin: 20px 0; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -113,9 +115,8 @@ all_names = sorted(db['Nome'].tolist())
 # --- TITOLO ---
 st.markdown('<div class="train-title">🚂 AOSR EXPRESS</div>', unsafe_allow_html=True)
 
-# --- PANEL REGISTRO (SALA COMANDO) ---
+# --- PANEL SALA COMANDO ---
 st.markdown('<div class="sala-comando">', unsafe_allow_html=True)
-st.markdown("<h3 style='color:#ffcc66; font-family:Rye; margin-top:0;'>⚙️ UFFICIO ASSEGNAZIONI</h3>", unsafe_allow_html=True)
 c1, c2, c3, c4 = st.columns([1, 1.2, 1.2, 1.2])
 with c1:
     st.session_state['sel_mese'] = st.selectbox("Mese", MESI_ITA, index=datetime.now().month - 1)
@@ -130,15 +131,15 @@ cb1, cb2, cb3, cb4 = st.columns(4)
 with cb1:
     st.markdown('<div class="btn-genera">', unsafe_allow_html=True)
     if st.button("⚒️ GENERA"):
-        p_leaders = sel_leaders if sel_leaders else db[db['Grado'] == "R5/R4"]['Nome'].tolist()
-        p_others = (sel_r3 if sel_r3 else db[db['Grado'] == "R3"]['Nome'].tolist()) + (sel_r2 if sel_r2 else db[db['Grado'] == "R2"]['Nome'].tolist())
-        random.shuffle(p_leaders); random.shuffle(p_others)
+        p_l = sel_leaders if sel_leaders else db[db['Grado']=="R5/R4"]['Nome'].tolist()
+        p_o = (sel_r3 if sel_r3 else db[db['Grado']=="R3"]['Nome'].tolist()) + (sel_r2 if sel_r2 else db[db['Grado']=="R2"]['Nome'].tolist())
+        random.shuffle(p_l); random.shuffle(p_o)
         num_gg = (pd.Timestamp(year=st.session_state['sel_anno'], month=MESI_ITA.index(st.session_state['sel_mese'])+1, day=1) + pd.offsets.MonthEnd(0)).day
         st.session_state['master_cal'] = []
         p_idx = 0
         for g in range(1, num_gg + 1):
-            if g <= 11: c, p = p_leaders[(g-1)%len(p_leaders)], p_leaders[g%len(p_leaders)]
-            else: c, p = p_others[p_idx % len(p_others)], p_others[(p_idx+1) % len(p_others)]; p_idx += 2
+            if g <= 11: c, p = p_l[(g-1)%len(p_l)], p_l[g%len(p_l)]
+            else: c, p = p_o[p_idx % len(p_o)], p_o[(p_idx+1) % len(p_o)]; p_idx += 2
             st.session_state['master_cal'].append({"Giorno": g, "Capo": c, "Pass": p})
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -155,12 +156,8 @@ with cb3:
     st.markdown('<div class="btn-assegna">', unsafe_allow_html=True)
     if st.button("🟩 ASSEGNA"):
         if 'master_cal' in st.session_state:
-            st.session_state['history'].append({
-                "data": f"{st.session_state['sel_mese']} {st.session_state['sel_anno']}",
-                "ts": datetime.now().strftime("%d/%m/%Y %H:%M"),
-                "cal": list(st.session_state['master_cal'])
-            })
-            st.toast("Calendario consegnato all'Archivio!")
+            st.session_state['history'].append({"data": f"{st.session_state['sel_mese']} {st.session_state['sel_anno']}", "ts": datetime.now().strftime("%d/%m/%Y %H:%M"), "cal": list(st.session_state['master_cal'])})
+            st.toast("Salvato in Archivio!")
     st.markdown('</div>', unsafe_allow_html=True)
 
 with cb4:
@@ -170,49 +167,49 @@ with cb4:
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
-view_mode = st.toggle("🎞️ VISIONE D'INSIEME (Cards compatte)", value=False)
+view_mode = st.toggle("🎞️ VISIONE D'INSIEME (Vista Totale Compatta)", value=False)
 st.markdown('</div>', unsafe_allow_html=True)
 
-# --- FUNZIONE RENDERING GRIGLIA ---
+# --- RENDERING GRIGLIA ---
 def draw_grid(data, compact=False, is_history=False):
     n_cols = 10 if compact else 7
-    h_style = "h-comp" if compact else ""
-    n_style = "name-comp" if compact else ""
+    # Classi condizionali per le grandezze
+    h_cls = "h-comp" if compact else "h-norm"
+    b_cls = "badge-comp" if compact else ""
+    l_cls = "label-comp" if compact else ""
+    c_cls = "container-comp" if compact else ""
+    t_cls = "text-comp" if compact else ""
+    
     for i in range(0, len(data), n_cols):
         cols = st.columns(n_cols)
         chunk = data[i:i + n_cols]
         for j, r in enumerate(chunk):
             with cols[j]:
-                c_col = "#8b0000" if any(db[(db['Nome'] == r['Capo']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
-                p_col = "#8b0000" if any(db[(db['Nome'] == r['Pass']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
+                c_c = "#8b0000" if any(db[(db['Nome'] == r['Capo']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
+                p_c = "#8b0000" if any(db[(db['Nome'] == r['Pass']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
                 st.markdown(f"""
-                <div class="summary-card {h_style}">
-                    <div class="day-badge">GG {r['Giorno']}</div>
-                    <div class="role-label">CAPO</div>
-                    <div class="name-container"><div class="name-text {n_style}" style="color:{c_col};">{r['Capo']}</div></div>
-                    <div class="role-label">PASS</div>
-                    <div class="name-container"><div class="name-text {n_style}" style="color:{p_col};">{r['Pass']}</div></div>
+                <div class="summary-card {h_cls}">
+                    <div class="day-badge {b_cls}">GG {r['Giorno']}</div>
+                    <div class="role-label {l_cls}">CAPO</div>
+                    <div class="name-container {c_cls}"><div class="name-text {t_cls}" style="color:{c_c};">{r['Capo']}</div></div>
+                    <div class="role-label {l_cls}">PASS</div>
+                    <div class="name-container {c_cls}"><div class="name-text {t_cls}" style="color:{p_c};">{r['Pass']}</div></div>
                 </div>
                 """, unsafe_allow_html=True)
                 if not is_history and not compact:
                     with st.popover("⚙️", use_container_width=True):
-                        nc = st.selectbox("Cambia Capo", all_names, index=all_names.index(r['Capo']), key=f"c_{i}_{r['Giorno']}")
-                        np = st.selectbox("Cambia Pass", all_names, index=all_names.index(r['Pass']), key=f"p_{i}_{r['Giorno']}")
+                        nc = st.selectbox("Capo", all_names, index=all_names.index(r['Capo']), key=f"c_{i}_{r['Giorno']}")
+                        np = st.selectbox("Pass", all_names, index=all_names.index(r['Pass']), key=f"p_{i}_{r['Giorno']}")
                         if st.button("Salva", key=f"s_{i}_{r['Giorno']}"):
                             idx = next(idx for idx, it in enumerate(st.session_state['master_cal']) if it["Giorno"] == r['Giorno'])
                             st.session_state['master_cal'][idx].update({"Capo": nc, "Pass": np}); st.rerun()
 
-# --- DISPLAY ---
 if 'master_cal' in st.session_state:
     st.markdown(f"<h3 style='text-align:center; color:#ffcc66; font-family:Rye;'>📅 {st.session_state['sel_mese'].upper()}</h3>", unsafe_allow_html=True)
     draw_grid(st.session_state['master_cal'], compact=view_mode)
 
-# --- CRONOLOGIA ---
 if st.session_state['history']:
-    st.markdown("<hr>", unsafe_allow_html=True)
-    st.markdown("<h2 style='color:#ffcc66; font-family:Rye; text-align:center;'>📜 ARCHIVIO ASSEGNAZIONI</h2>", unsafe_allow_html=True)
+    st.markdown("<hr><h2 style='color:#ffcc66; font-family:Rye; text-align:center;'>📜 ARCHIVIO</h2>", unsafe_allow_html=True)
     for idx, item in enumerate(reversed(st.session_state['history'])):
-        with st.expander(f"📦 CONVOGLIO: {item['data']} (Creato il {item['ts']})"):
+        with st.expander(f"📦 CONVOGLIO: {item['data']} - {item['ts']}"):
             draw_grid(item['cal'], compact=True, is_history=True)
-            if st.button("ELIMINA RECORD", key=f"del_{idx}"):
-                st.session_state['history'].pop(-(idx+1)); st.rerun()
