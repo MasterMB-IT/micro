@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import random
+import json
+import os
 from datetime import datetime
 
 # --- CONFIGURAZIONE PAGINA ---
@@ -9,25 +11,44 @@ st.set_page_config(page_title="AOSR Train Manager - Deluxe Edition", layout="wid
 MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
             "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
 
-# --- CSS: IL DESIGN DEFINITIVO (Pannello Premium + Cards Adattive) ---
+DB_FILE = "cronologia_treni.json"
+
+# --- FUNZIONI DI PERSISTENZA ---
+def save_history():
+    """Salva la cronologia su file JSON"""
+    with open(DB_FILE, "w", encoding="utf-8") as f:
+        json.dump(st.session_state['history'], f, ensure_ascii=False, indent=4)
+
+def load_history():
+    """Carica la cronologia da file JSON se esiste"""
+    if os.path.exists(DB_FILE):
+        try:
+            with open(DB_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except:
+            return []
+    return []
+
+# --- INIZIALIZZAZIONE SESSION STATE ---
+if 'history' not in st.session_state:
+    st.session_state['history'] = load_history()
+
+# --- CSS: IL DESIGN DEFINITIVO ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Rye&family=Montserrat:wght@700;900&display=swap');
     
-    /* SFONDO GENERALE */
     .stApp { 
         background: linear-gradient(rgba(30, 20, 10, 0.75), rgba(15, 10, 5, 0.92)), 
                     url('https://images.unsplash.com/photo-1510524527013-0393282436da?q=80&w=1920&auto=format&fit=crop');
         background-size: cover; background-attachment: fixed;
     }
 
-    /* TITOLO PRINCIPALE */
     .train-title { 
         font-family: 'Rye', cursive; text-align: center; color: #ffcc66; 
         text-shadow: 5px 5px 0px #4b2e1b; font-size: 4rem; margin-bottom: 20px; 
     }
 
-    /* FINESTRA CONTENITIVA SALA COMANDO (Premium Look) */
     .sala-comando {
         background: rgba(25, 15, 5, 0.85);
         backdrop-filter: blur(10px);
@@ -44,7 +65,6 @@ st.markdown("""
         margin-bottom: 25px; display: flex; align-items: center; gap: 15px;
     }
 
-    /* CARD SETTINGS */
     .summary-card { 
         background: #fdf5e6; border: 3px solid #5d4037; padding: 12px 8px; 
         border-radius: 6px; box-shadow: 6px 6px 12px rgba(0,0,0,0.5); 
@@ -67,7 +87,6 @@ st.markdown("""
     .name-text { font-family: 'Special Elite', cursive; font-size: 0.95rem; font-weight: 900; text-transform: uppercase; line-height: 1.1; border-left: 4px solid #d4a373; padding-left: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .text-comp { font-size: 0.7rem !important; border-left-width: 3px !important; padding-left: 5px !important; }
 
-    /* BOTTONI */
     .stButton>button { border-radius: 8px !important; font-family: 'Rye', cursive !important; font-size: 1.1rem !important; height: 50px !important; border: 3px solid #2b1d0e !important; width: 100%; }
     .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; }
     .btn-verifica button { background: #5d4037 !important; color: #ffcc66 !important; }
@@ -76,7 +95,6 @@ st.markdown("""
     
     div[data-testid="stPopover"] > button { height: 28px !important; width: 100% !important; margin-top: 5px !important; padding: 0 !important; font-size: 0.8rem !important; }
     
-    /* INPUT STYLING */
     .stSelectbox label, .stMultiSelect label, .stNumberInput label { color: #d4a373 !important; font-family: 'Montserrat', sans-serif !important; font-weight: 700 !important; font-size: 0.85rem !important; }
     </style>
     """, unsafe_allow_html=True)
@@ -90,14 +108,13 @@ def init_db():
     return pd.DataFrame(data)
 
 if 'players_db' not in st.session_state: st.session_state['players_db'] = init_db()
-if 'history' not in st.session_state: st.session_state['history'] = []
 db = st.session_state['players_db']
 all_names = sorted(db['Nome'].tolist())
 
 # --- TITOLO ---
 st.markdown('<div class="train-title">🚂 AOSR EXPRESS</div>', unsafe_allow_html=True)
 
-# --- PANEL SALA COMANDO (Design Premium) ---
+# --- PANEL SALA COMANDO ---
 st.markdown('<div class="sala-comando">', unsafe_allow_html=True)
 st.markdown('<div class="section-header">📜 UFFICIO ASSEGNAZIONI</div>', unsafe_allow_html=True)
 
@@ -140,8 +157,14 @@ with cb3:
     st.markdown('<div class="btn-assegna">', unsafe_allow_html=True)
     if st.button("🟩 ASSEGNA", use_container_width=True):
         if 'master_cal' in st.session_state:
-            st.session_state['history'].append({"data": f"{st.session_state['sel_mese']} {st.session_state['sel_anno']}", "ts": datetime.now().strftime("%d/%m/%Y %H:%M"), "cal": [dict(d) for d in st.session_state['master_cal']]})
-            st.toast("Salvato in Archivio!")
+            new_entry = {
+                "data": f"{st.session_state['sel_mese']} {st.session_state['sel_anno']}", 
+                "ts": datetime.now().strftime("%d/%m/%Y %H:%M"), 
+                "cal": [dict(d) for d in st.session_state['master_cal']]
+            }
+            st.session_state['history'].append(new_entry)
+            save_history() # SALVATAGGIO SU FILE
+            st.toast("Salvato nel Registro Permanente!")
     st.markdown('</div>', unsafe_allow_html=True)
 
 with cb4:
@@ -194,7 +217,7 @@ if 'master_cal' in st.session_state:
     st.markdown(f"<h2 style='text-align:center; color:#ffcc66; font-family:Rye; margin-bottom:20px;'>📅 {st.session_state['sel_mese'].upper()}</h2>", unsafe_allow_html=True)
     draw_grid(st.session_state['master_cal'], compact=view_mode, key_prefix="master")
 
-# --- ARCHIVIO (Sicuro e Pulito) ---
+# --- ARCHIVIO ---
 if st.session_state['history']:
     st.markdown("<hr><h2 style='color:#ffcc66; font-family:Rye; text-align:center;'>📜 CRONOLOGIA ASSEGNAZIONI</h2>", unsafe_allow_html=True)
     for idx in range(len(st.session_state['history']) - 1, -1, -1):
@@ -215,6 +238,7 @@ if st.session_state['history']:
                 with c_si:
                     if st.button("✅ SÌ", key=f"yes_{idx}"):
                         st.session_state['history'].pop(idx)
+                        save_history() # AGGIORNA FILE DOPO ELIMINAZIONE
                         del st.session_state[confirm_key]
                         st.rerun()
                 with c_no:
