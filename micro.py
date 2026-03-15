@@ -9,7 +9,7 @@ st.set_page_config(page_title="AOSR Train Manager - Deluxe Edition", layout="wid
 MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
             "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
 
-# --- CSS AVANZATO: PULSANTI BOLD E CARDS CON EMOJI ---
+# --- CSS DEFINITIVO: NO WRAP & ELLIPSIS ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Rye&family=Montserrat:wght@900&display=swap');
@@ -34,7 +34,7 @@ st.markdown("""
         border-radius: 15px !important;
     }
 
-    /* PULSANTI ACCATTIVANTI */
+    /* PULSANTI */
     .stButton>button {
         width: 100% !important;
         height: 65px !important;
@@ -49,27 +49,10 @@ st.markdown("""
         box-shadow: 0px 6px 0px #1a1108 !important;
     }
 
-    .btn-genera button {
-        background: linear-gradient(145deg, #d4a373, #b88655) !important;
-        color: #2b1d0e !important;
-    }
+    .btn-genera button { background: linear-gradient(145deg, #d4a373, #b88655) !important; color: #2b1d0e !important; }
+    .btn-resetta button { background: linear-gradient(145deg, #a44a3f, #7a3229) !important; color: white !important; }
 
-    .btn-resetta button {
-        background: linear-gradient(145deg, #a44a3f, #7a3229) !important;
-        color: white !important;
-    }
-
-    .stButton>button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0px 8px 15px rgba(0,0,0,0.4) !important;
-    }
-
-    .stButton>button:active {
-        transform: translateY(4px) !important;
-        box-shadow: 0px 2px 0px #1a1108 !important;
-    }
-
-    /* CARDS WANTED */
+    /* CARDS WANTED - GESTIONE TESTO RIGIDA */
     .summary-card {
         background: #fdf5e6; 
         border: 4px solid #5d4037;
@@ -79,6 +62,7 @@ st.markdown("""
         color: #2b1d0e; 
         margin-bottom: 15px;
         height: 220px;
+        overflow: hidden; /* Sicurezza extra per la card */
         background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
     }
 
@@ -90,22 +74,32 @@ st.markdown("""
     }
 
     .role-label { 
-        color: #5d4037; font-size: 0.75rem; letter-spacing: 1.5px;
+        color: #5d4037; font-size: 0.7rem; letter-spacing: 1.5px;
         font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 800;
         border-bottom: 2px solid rgba(93, 64, 55, 0.2);
     }
 
     .name-container {
-        height: 45px; 
+        height: 40px; 
         display: flex;
         align-items: center;
         margin-bottom: 5px;
+        overflow: hidden; /* Fondamentale per bloccare il testo */
     }
 
     .name-text { 
-        font-family: 'Special Elite', cursive; font-size: 1rem; font-weight: 900; 
-        text-transform: uppercase; line-height: 1.1;
-        border-left: 5px solid #d4a373; padding-left: 10px;
+        font-family: 'Special Elite', cursive; 
+        font-size: 0.9rem; /* Ridotto leggermente per far stare più lettere */
+        font-weight: 900; 
+        text-transform: uppercase;
+        border-left: 5px solid #d4a373; 
+        padding-left: 10px;
+        
+        /* REGOLE ANTI-A CAPO */
+        white-space: nowrap; 
+        overflow: hidden; 
+        text-overflow: ellipsis;
+        width: 100%;
     }
 
     hr { border-top: 3px solid #ffcc66 !important; opacity: 0.8; }
