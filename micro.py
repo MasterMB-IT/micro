@@ -31,10 +31,14 @@ def load_history():
 if 'history' not in st.session_state:
     st.session_state['history'] = load_history()
 
-# --- DATABASE ---
+# --- DATABASE AGGIORNATO (Switch Uncle g / Uncle g brother) ---
 def init_db():
-    leaders = ["Hool (R5)", "MASTER (R4)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", "Starbetty (R4)", "PEPPE (R4)", "Ricky Around (R4)", "uncle g (R4)", "09ALEX24 (R4)", "ShinyPasta (R4)", "Wall 7 (R4)"]
-    r3 = ["G Erry", "Uncle g brother", "Goz", "Ghandal", "Aryron", "Tricheco", "Maメツ", "NOVEMBERGENZ", "Lalla 96", "Whale Panda", "GennaroM", "EchoZero", "EDDward", "AMY", "Resilienza", "Ana Bunny", "Giuseppec84", "Benito Muschiolini", "Pandino19", "xFlotchy", "MX63", "holdfast", "Ghost", "BadBigBoss", "Stefano00000", "PakII", "BANDOLERO26", "BlOOdyBlade", "Whale hunter Levve", "Aresxxx", "KingGruffalo", "Hulkspakka", "Joseone", "ImAde", "Nysbie", "LeFada13", "Skiteto", "SPio24", "TomEnergy", "Markus Defender", "Sho0t3r", "Wolf006", "Zokra", "perseusxxx", "Bendico", "Obbyy", "ArLes", "Fatz87", "cruel neve", "Trivellatore", "Osgh00", "Slowfia ABOH", "Pontatinatore", "27Francesco", "MissDrinks", "krompir", "MaledettO"]
+    # Uncle g brother promosso a R4, Uncle g rimosso dai leader
+    leaders = ["Hool (R5)", "MASTER (R4)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", "Starbetty (R4)", "PEPPE (R4)", "Ricky Around (R4)", "Uncle g brother (R4)", "09ALEX24 (R4)", "ShinyPasta (R4)", "Wall 7 (R4)"]
+    
+    # Uncle g ora è in R3
+    r3 = ["Uncle g", "G Erry", "Goz", "Ghandal", "Aryron", "Tricheco", "Maメツ", "NOVEMBERGENZ", "Lalla 96", "Whale Panda", "GennaroM", "EchoZero", "EDDward", "AMY", "Resilienza", "Ana Bunny", "Giuseppec84", "Benito Muschiolini", "Pandino19", "xFlotchy", "MX63", "holdfast", "Ghost", "BadBigBoss", "Stefano00000", "PakII", "BANDOLERO26", "BlOOdyBlade", "Whale hunter Levve", "Aresxxx", "KingGruffalo", "Hulkspakka", "Joseone", "ImAde", "Nysbie", "LeFada13", "Skiteto", "SPio24", "TomEnergy", "Markus Defender", "Sho0t3r", "Wolf006", "Zokra", "perseusxxx", "Bendico", "Obbyy", "ArLes", "Fatz87", "cruel neve", "Trivellatore", "Osgh00", "Slowfia ABOH", "Pontatinatore", "27Francesco", "MissDrinks", "krompir", "MaledettO"]
+    
     r2 = ["teomadh", "Bossnico", "Valecit", "FarmerHool", "camiiiii 08", "Doctor team", "Yass081", "Nuorifleming", "Vergabrio", "Frenk70", "Comandante Maveric", "Thor9000", "MrBolly", "BustaMaki", "S U C A", "StUnTmArK", "MONKEY D LUFFY 20", "CineSalentino", "Danylo98", "Ezechielefabianino", "BRNcommando", "LEONIDA", "elchicogyot", "erer1000", "Pupisnic", "Backfire1", "AnarchyBG", "Fabrizio1987", "JurdanS", "WiseR9", "Infinity8080"]
     
     data = [{"Nome": "---", "Grado": "Nessuno"}] + \
@@ -46,7 +50,6 @@ def init_db():
 if 'players_db' not in st.session_state: st.session_state['players_db'] = init_db()
 db = st.session_state['players_db']
 
-# Liste filtrate per la logica di selezione
 leaders_list = sorted(db[db['Grado'] == "R5/R4"]['Nome'].tolist())
 all_names_list = sorted(db['Nome'].tolist())
 
@@ -66,7 +69,7 @@ st.markdown("""
     .name-text { font-family: 'Special Elite', cursive; font-size: 0.95rem; font-weight: 900; text-transform: uppercase; border-left: 4px solid #d4a373; padding-left: 8px; overflow: hidden; white-space: nowrap; }
     .stButton>button { border-radius: 8px !important; font-family: 'Rye', cursive !important; font-size: 1.1rem !important; height: 50px !important; border: 3px solid #2b1d0e !important; width: 100%; }
     .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; }
-    .btn-vuoto button { background: #5a5a5a !important; color: white !important; }
+    .btn-vuoto button { background: #5a5a5a !important; color: white !important; border: 2px solid #ffffff !important; }
     .btn-verifica button { background: #5d4037 !important; color: #ffcc66 !important; }
     .btn-assegna button { background: #1b4d3e !important; color: #2ecc71 !important; }
     .btn-resetta button { background: #a44a3f !important; color: white !important; }
@@ -78,8 +81,6 @@ st.markdown("""
 def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
     n_cols = 10 if compact else 7
     h_cls = "h-comp" if compact else "h-norm"
-    
-    # Preparazione liste con segnaposto
     opts_leaders = ["---"] + leaders_list
     opts_all = ["---"] + all_names_list
 
@@ -89,6 +90,7 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
         for j, r in enumerate(chunk):
             giorno = r['Giorno']
             with cols[j]:
+                # Colore rosso per R4/R5, verde per gli altri
                 c_c = "#8b0000" if any(db[(db['Nome'] == r['Capo']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
                 p_c = "#8b0000" if any(db[(db['Nome'] == r['Pass']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
                 if r['Capo'] == "---": c_c = "#888888"
@@ -106,7 +108,7 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
                 
                 if not is_history and not compact:
                     with st.popover("⚙️ MODIFICA"):
-                        # LOGICA RICHIESTA: Se GG <= 11, solo R4/R5
+                        # Se giorno <= 11, mostra SOLO i leader (R4/R5)
                         current_opts = opts_leaders if giorno <= 11 else opts_all
                         
                         idx_c = current_opts.index(r['Capo']) if r['Capo'] in current_opts else 0
