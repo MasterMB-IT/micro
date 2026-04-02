@@ -4,12 +4,15 @@ import random
 import json
 import os
 from datetime import datetime
+import calendar
 
 # --- CONFIGURAZIONE PAGINA ---
 st.set_page_config(page_title="AOSR Train Manager - Deluxe Edition", layout="wide")
 
 MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
             "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
+
+GIORNI_SETTIMANA = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"]
 
 DB_FILE = "cronologia_treni.json"
 
@@ -31,14 +34,10 @@ def load_history():
 if 'history' not in st.session_state:
     st.session_state['history'] = load_history()
 
-# --- DATABASE AGGIORNATO (Switch Uncle g / Uncle g brother) ---
+# --- DATABASE ---
 def init_db():
-    # Uncle g brother promosso a R4, Uncle g rimosso dai leader
     leaders = ["Hool (R5)", "MASTER (R4)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", "Starbetty (R4)", "PEPPE (R4)", "Ricky Around (R4)", "Uncle g brother (R4)", "09ALEX24 (R4)", "ShinyPasta (R4)", "Wall 7 (R4)"]
-    
-    # Uncle g ora è in R3
     r3 = ["Uncle g", "G Erry", "Goz", "Ghandal", "Aryron", "Tricheco", "Maメツ", "NOVEMBERGENZ", "Lalla 96", "Whale Panda", "GennaroM", "EchoZero", "EDDward", "AMY", "Resilienza", "Ana Bunny", "Giuseppec84", "Benito Muschiolini", "Pandino19", "xFlotchy", "MX63", "holdfast", "Ghost", "BadBigBoss", "Stefano00000", "PakII", "BANDOLERO26", "BlOOdyBlade", "Whale hunter Levve", "Aresxxx", "KingGruffalo", "Hulkspakka", "Joseone", "ImAde", "Nysbie", "LeFada13", "Skiteto", "SPio24", "TomEnergy", "Markus Defender", "Sho0t3r", "Wolf006", "Zokra", "perseusxxx", "Bendico", "Obbyy", "ArLes", "Fatz87", "cruel neve", "Trivellatore", "Osgh00", "Slowfia ABOH", "Pontatinatore", "27Francesco", "MissDrinks", "krompir", "MaledettO"]
-    
     r2 = ["teomadh", "Bossnico", "Valecit", "FarmerHool", "camiiiii 08", "Doctor team", "Yass081", "Nuorifleming", "Vergabrio", "Frenk70", "Comandante Maveric", "Thor9000", "MrBolly", "BustaMaki", "S U C A", "StUnTmArK", "MONKEY D LUFFY 20", "CineSalentino", "Danylo98", "Ezechielefabianino", "BRNcommando", "LEONIDA", "elchicogyot", "erer1000", "Pupisnic", "Backfire1", "AnarchyBG", "Fabrizio1987", "JurdanS", "WiseR9", "Infinity8080"]
     
     data = [{"Nome": "---", "Grado": "Nessuno"}] + \
@@ -57,16 +56,16 @@ all_names_list = sorted(db['Nome'].tolist())
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Rye&family=Montserrat:wght@700;900&display=swap');
-    .stApp { background: linear-gradient(rgba(30, 20, 10, 0.75), rgba(15, 10, 5, 0.92)), url('https://images.unsplash.com/photo-1510524527013-0393282436da?q=80&w=1920&auto=format&fit=crop'); background-size: cover; background-attachment: fixed; }
+    .stApp { background: linear-gradient(rgba(30, 20, 10, 0.8), rgba(15, 10, 5, 0.95)), url('https://images.unsplash.com/photo-1510524527013-0393282436da?q=80&w=1920&auto=format&fit=crop'); background-size: cover; background-attachment: fixed; }
     .train-title { font-family: 'Rye', cursive; text-align: center; color: #ffcc66; text-shadow: 5px 5px 0px #4b2e1b; font-size: 4rem; margin-bottom: 20px; }
     .sala-comando { background: rgba(25, 15, 5, 0.85); backdrop-filter: blur(10px); border: 2px solid #ffcc66; border-radius: 20px; padding: 30px; box-shadow: 0px 15px 50px rgba(0,0,0,0.9); margin-bottom: 40px; border-top: 5px solid #ffcc66; }
     .section-header { font-family: 'Rye', cursive; color: #ffcc66; font-size: 1.8rem; margin-bottom: 25px; }
     .summary-card { background: #fdf5e6; border: 3px solid #5d4037; padding: 12px 8px; border-radius: 6px; box-shadow: 6px 6px 12px rgba(0,0,0,0.5); color: #2b1d0e; margin-bottom: 5px; background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png'); display: flex; flex-direction: column; }
-    .h-norm { height: 215px !important; }
-    .h-comp { height: 135px !important; padding: 5px 6px !important; }
-    .day-badge { background: #8b0000; color: white; font-family: 'Montserrat', sans-serif; font-weight: 900; padding: 2px 8px; border-radius: 3px; font-size: 0.9rem; width: fit-content; margin-bottom: 5px; }
-    .role-label { color: #5d4037; font-size: 0.7rem; font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 800; border-bottom: 1px solid rgba(93, 64, 55, 0.2); }
-    .name-text { font-family: 'Special Elite', cursive; font-size: 0.95rem; font-weight: 900; text-transform: uppercase; border-left: 4px solid #d4a373; padding-left: 8px; overflow: hidden; white-space: nowrap; }
+    .h-norm { height: 235px !important; }
+    .h-comp { height: 150px !important; padding: 5px 6px !important; }
+    .day-badge { background: #8b0000; color: white; font-family: 'Montserrat', sans-serif; font-weight: 900; padding: 2px 8px; border-radius: 3px; font-size: 0.8rem; width: fit-content; margin-bottom: 5px; }
+    .role-label { color: #5d4037; font-size: 0.65rem; font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 800; border-bottom: 1px solid rgba(93, 64, 55, 0.2); margin-top: 5px; }
+    .name-text { font-family: 'Special Elite', cursive; font-size: 0.9rem; font-weight: 900; text-transform: uppercase; border-left: 4px solid #d4a373; padding-left: 8px; overflow: hidden; white-space: nowrap; }
     .stButton>button { border-radius: 8px !important; font-family: 'Rye', cursive !important; font-size: 1.1rem !important; height: 50px !important; border: 3px solid #2b1d0e !important; width: 100%; }
     .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; }
     .btn-vuoto button { background: #5a5a5a !important; color: white !important; border: 2px solid #ffffff !important; }
@@ -76,6 +75,12 @@ st.markdown("""
     div[data-testid="stPopover"] > button { height: 28px !important; width: 100% !important; margin-top: 5px !important; font-size: 0.8rem !important; }
     </style>
     """, unsafe_allow_html=True)
+
+# --- FUNZIONE GIORNO SETTIMANA ---
+def get_weekday_name(day, month_name, year):
+    month_idx = MESI_ITA.index(month_name) + 1
+    dt = datetime(year, month_idx, day)
+    return GIORNI_SETTIMANA[dt.weekday()]
 
 # --- RENDERING GRIGLIA ---
 def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
@@ -89,8 +94,9 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
         chunk = data[i:i + n_cols]
         for j, r in enumerate(chunk):
             giorno = r['Giorno']
+            wd = get_weekday_name(giorno, st.session_state['sel_mese'], st.session_state['sel_anno'])
+            
             with cols[j]:
-                # Colore rosso per R4/R5, verde per gli altri
                 c_c = "#8b0000" if any(db[(db['Nome'] == r['Capo']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
                 p_c = "#8b0000" if any(db[(db['Nome'] == r['Pass']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
                 if r['Capo'] == "---": c_c = "#888888"
@@ -98,24 +104,26 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
 
                 st.markdown(f"""
                 <div class="summary-card {h_cls}">
-                    <div class="day-badge">GG {giorno}</div>
+                    <div class="day-badge">{wd} {giorno}</div>
                     <div class="role-label">CAPOTRENO {"⭐" if giorno <= 11 else ""}</div>
                     <div class="name-text" style="color:{c_c};">{r['Capo']}</div>
-                    <div class="role-label" style="margin-top:10px;">PASSEGGERO {"⭐" if giorno <= 11 else ""}</div>
+                    <div class="role-label">PASSEGGERO</div>
                     <div class="name-text" style="color:{p_c};">{r['Pass']}</div>
                 </div>
                 """, unsafe_allow_html=True)
                 
                 if not is_history and not compact:
                     with st.popover("⚙️ MODIFICA"):
-                        # Se giorno <= 11, mostra SOLO i leader (R4/R5)
-                        current_opts = opts_leaders if giorno <= 11 else opts_all
+                        # CAPOTRENO: Solo Leader se GG <= 11
+                        # PASSEGGERO: Sempre Tutti
+                        opts_capo = opts_leaders if giorno <= 11 else opts_all
+                        opts_pass = opts_all
                         
-                        idx_c = current_opts.index(r['Capo']) if r['Capo'] in current_opts else 0
-                        idx_p = current_opts.index(r['Pass']) if r['Pass'] in current_opts else 0
+                        idx_c = opts_capo.index(r['Capo']) if r['Capo'] in opts_capo else 0
+                        idx_p = opts_pass.index(r['Pass']) if r['Pass'] in opts_pass else 0
                         
-                        nc = st.selectbox(f"Capo GG {giorno}", current_opts, index=idx_c, key=f"c_{key_prefix}_{giorno}")
-                        np = st.selectbox(f"Pass GG {giorno}", current_opts, index=idx_p, key=f"p_{key_prefix}_{giorno}")
+                        nc = st.selectbox(f"Capo ({wd} {giorno})", opts_capo, index=idx_c, key=f"c_{key_prefix}_{giorno}")
+                        np = st.selectbox(f"Pass ({wd} {giorno})", opts_pass, index=idx_p, key=f"p_{key_prefix}_{giorno}")
                         
                         if st.button("SALVA", key=f"s_{key_prefix}_{giorno}"):
                             for idx, item in enumerate(st.session_state['master_cal']):
@@ -150,7 +158,7 @@ with cb1:
         st.session_state['master_cal'] = []
         p_idx = 0
         for g in range(1, num_gg + 1):
-            if g <= 11: c, p = p_l[(g-1)%len(p_l)], p_l[g%len(p_l)]
+            if g <= 11: c, p = p_l[(g-1)%len(p_l)], p_o[g%len(p_o)] # Passeggero ora attinge da tutti
             else: c, p = p_o[p_idx % len(p_o)], p_o[(p_idx+1) % len(p_o)]; p_idx += 2
             st.session_state['master_cal'].append({"Giorno": g, "Capo": c, "Pass": p})
     st.markdown('</div>', unsafe_allow_html=True)
@@ -166,9 +174,9 @@ with cb2:
     st.markdown('<div class="btn-verifica">', unsafe_allow_html=True)
     if st.button("🔍 VERIFICA", use_container_width=True):
         if 'master_cal' in st.session_state:
-            err_g = [f"GG {r['Giorno']}" for r in st.session_state['master_cal'] if r['Giorno'] <= 11 and (r['Capo'] not in leaders_list or r['Pass'] not in leaders_list) and r['Capo'] != "---"]
+            err_g = [f"GG {r['Giorno']}" for r in st.session_state['master_cal'] if r['Giorno'] <= 11 and r['Capo'] not in leaders_list and r['Capo'] != "---"]
             err_d = [f"GG {r['Giorno']}" for r in st.session_state['master_cal'] if r['Capo'] == r['Pass'] and r['Capo'] != "---"]
-            if err_g: st.error(f"Violazione Gradi (1-11): {', '.join(err_g)}")
+            if err_g: st.error(f"Capotreno non R4/R5 (GG 1-11): {', '.join(err_g)}")
             if err_d: st.error(f"Nomi Duplicati: {', '.join(err_d)}")
             if not err_g and not err_d: st.success("Tutto perfetto!")
 
@@ -192,7 +200,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 
 # --- VISUALIZZAZIONE ---
 if 'master_cal' in st.session_state:
-    st.markdown(f"<h2 style='text-align:center; color:#ffcc66; font-family:Rye;'>📅 {st.session_state['sel_mese'].upper()}</h2>", unsafe_allow_html=True)
+    st.markdown(f"<h2 style='text-align:center; color:#ffcc66; font-family:Rye;'>📅 {st.session_state['sel_mese'].upper()} {st.session_state['sel_anno']}</h2>", unsafe_allow_html=True)
     draw_grid(st.session_state['master_cal'], compact=view_mode, key_prefix="master")
 
 # --- ARCHIVIO ---
