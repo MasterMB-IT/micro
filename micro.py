@@ -37,7 +37,7 @@ if 'history' not in st.session_state:
 # --- DATABASE ---
 def init_db():
     leaders = ["Hool (R5)", "MASTER (R4)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", "Starbetty (R4)", "PEPPE (R4)", "Ricky Around (R4)", "Uncle g brother (R4)", "09ALEX24 (R4)", "ShinyPasta (R4)", "Wall 7 (R4)"]
-    # NOTA: JOSEONE è stato sostituito con JOSEPPONE qui sotto
+    # JOSEONE rimosso, JOSEPPONE aggiunto
     r3 = ["Uncle g", "G Erry", "Goz", "Ghandal", "Aryron", "Tricheco", "Maメツ", "NOVEMBERGENZ", "Lalla 96", "Whale Panda", "GennaroM", "EchoZero", "EDDward", "AMY", "Resilienza", "Ana Bunny", "Giuseppec84", "Benito Muschiolini", "Pandino19", "xFlotchy", "MX63", "holdfast", "Ghost", "BadBigBoss", "Stefano00000", "PakII", "BANDOLERO26", "BlOOdyBlade", "Whale hunter Levve", "Aresxxx", "KingGruffalo", "Hulkspakka", "JOSEPPONE", "ImAde", "Nysbie", "LeFada13", "Skiteto", "SPio24", "TomEnergy", "Markus Defender", "Sho0t3r", "Wolf006", "Zokra", "perseusxxx", "Bendico", "Obbyy", "ArLes", "Fatz87", "cruel neve", "Trivellatore", "Osgh00", "Slowfia ABOH", "Pontatinatore", "27Francesco", "MissDrinks", "krompir", "MaledettO"]
     r2 = ["teomadh", "Bossnico", "Valecit", "FarmerHool", "camiiiii 08", "Doctor team", "Yass081", "Nuorifleming", "Vergabrio", "Frenk70", "Comandante Maveric", "Thor9000", "MrBolly", "BustaMaki", "S U C A", "StUnTmArK", "MONKEY D LUFFY 20", "CineSalentino", "Danylo98", "Ezechielefabianino", "BRNcommando", "LEONIDA", "elchicogyot", "erer1000", "Pupisnic", "Backfire1", "AnarchyBG", "Fabrizio1987", "JurdanS", "WiseR9", "Infinity8080"]
     
@@ -47,7 +47,8 @@ def init_db():
            [{"Nome": n, "Grado": "R2"} for n in r2]
     return pd.DataFrame(data)
 
-if 'players_db' not in st.session_state: st.session_state['players_db'] = init_db()
+# Forza l'aggiornamento del DB a ogni ricaricamento
+st.session_state['players_db'] = init_db()
 db = st.session_state['players_db']
 
 leaders_list = sorted(db[db['Grado'] == "R5/R4"]['Nome'].tolist())
@@ -101,10 +102,8 @@ def get_weekday_idx(day, month_name, year):
     month_idx = MESI_ITA.index(month_name) + 1
     return datetime(year, month_idx, day).weekday()
 
-# --- RENDERING GRIGLIA ---
 def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
     first_day_wd = get_weekday_idx(1, st.session_state['sel_mese'], st.session_state['sel_anno'])
-    
     full_display_list = [{"type": "empty"}] * first_day_wd
     for item in data:
         full_display_list.append({"type": "data", "content": item})
@@ -123,31 +122,34 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
                     st.markdown(f'<div class="calendar-cell card-placeholder {h_cls}"></div>', unsafe_allow_html=True)
                 else:
                     r = item["content"]
+                    # Correzione al volo dei nomi nel calendario se carichi dalla cronologia nomi vecchi
+                    capo_n = "JOSEPPONE" if r['Capo'] == "JOSEONE" else r['Capo']
+                    pass_n = "JOSEPPONE" if r['Pass'] == "JOSEONE" else r['Pass']
+
                     giorno = r['Giorno']
                     wd_idx = get_weekday_idx(giorno, st.session_state['sel_mese'], st.session_state['sel_anno'])
                     wd_display = GIORNI_ABBR[wd_idx] if compact else GIORNI_SETTIMANA[wd_idx]
                     
-                    c_c = "#8b0000" if any(db[(db['Nome'] == r['Capo']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
-                    p_c = "#8b0000" if any(db[(db['Nome'] == r['Pass']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
-                    if r['Capo'] == "---": c_c = "#888888"
-                    if r['Pass'] == "---": p_c = "#888888"
+                    c_c = "#8b0000" if any(db[(db['Nome'] == capo_n) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
+                    p_c = "#8b0000" if any(db[(db['Nome'] == pass_n) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
+                    if capo_n == "---": c_c = "#888888"
+                    if pass_n == "---": p_c = "#888888"
 
                     st.markdown(f"""
                     <div class="calendar-cell {h_cls}">
                         <div class="day-badge">{wd_display} {giorno}</div>
                         <div class="role-label">CAPO {"⭐" if giorno <= 11 else ""}</div>
-                        <div class="name-text" style="color:{c_c};">{r['Capo']}</div>
+                        <div class="name-text" style="color:{c_c};">{capo_n}</div>
                         <div class="role-label">PASSEGGERO</div>
-                        <div class="name-text" style="color:{p_c};">{r['Pass']}</div>
+                        <div class="name-text" style="color:{p_c};">{pass_n}</div>
                     </div>
                     """, unsafe_allow_html=True)
                     
                     if not is_history and not compact:
                         with st.popover("MODIFICA"):
                             opts_capo = opts_leaders if giorno <= 11 else opts_all
-                            # Gestione indice sicuro in caso di nomi cambiati
-                            idx_c = opts_capo.index(r['Capo']) if r['Capo'] in opts_capo else 0
-                            idx_p = opts_all.index(r['Pass']) if r['Pass'] in opts_all else 0
+                            idx_c = opts_capo.index(capo_n) if capo_n in opts_capo else 0
+                            idx_p = opts_all.index(pass_n) if pass_n in opts_all else 0
                             nc = st.selectbox(f"Capo {giorno}", opts_capo, index=idx_c, key=f"c_{key_prefix}_{giorno}")
                             np = st.selectbox(f"Pass {giorno}", opts_all, index=idx_p, key=f"p_{key_prefix}_{giorno}")
                             if st.button("SALVA", key=f"s_{key_prefix}_{giorno}"):
