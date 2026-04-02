@@ -13,6 +13,7 @@ MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
             "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
 
 GIORNI_SETTIMANA = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"]
+GIORNI_ABBR = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"]
 
 DB_FILE = "cronologia_treni.json"
 
@@ -58,20 +59,20 @@ st.markdown("""
     .stApp { background: linear-gradient(rgba(30, 20, 10, 0.8), rgba(15, 10, 5, 0.95)), url('https://images.unsplash.com/photo-1510524527013-0393282436da?q=80&w=1920&auto=format&fit=crop'); background-size: cover; background-attachment: fixed; }
     .train-title { font-family: 'Rye', cursive; text-align: center; color: #ffcc66; text-shadow: 5px 5px 0px #4b2e1b; font-size: 4rem; margin-bottom: 20px; }
     .sala-comando { background: rgba(25, 15, 5, 0.85); backdrop-filter: blur(10px); border: 2px solid #ffcc66; border-radius: 20px; padding: 25px; box-shadow: 0px 15px 50px rgba(0,0,0,0.9); margin-bottom: 30px; border-top: 5px solid #ffcc66; }
-    .summary-card { background: #fdf5e6; border: 3px solid #5d4037; padding: 10px; border-radius: 6px; box-shadow: 6px 6px 12px rgba(0,0,0,0.5); color: #2b1d0e; margin-bottom: 5px; background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png'); display: flex; flex-direction: column; transition: 0.3s; }
+    .summary-card { background: #fdf5e6; border: 3px solid #5d4037; padding: 10px; border-radius: 6px; box-shadow: 6px 6px 12px rgba(0,0,0,0.5); color: #2b1d0e; margin-bottom: 8px; background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png'); display: flex; flex-direction: column; transition: 0.3s; }
     .h-norm { height: 230px !important; }
-    .h-comp { height: 140px !important; padding: 5px !important; }
-    .card-placeholder { background: rgba(0,0,0,0.2); border: 2px dashed rgba(255,204,102,0.2); border-radius: 6px; margin-bottom: 5px; }
+    .h-comp { height: 165px !important; padding: 8px !important; } /* Aumentata altezza compatta */
+    .card-placeholder { background: rgba(0,0,0,0.2); border: 2px dashed rgba(255,204,102,0.2); border-radius: 6px; margin-bottom: 8px; }
     .day-badge { background: #8b0000; color: white; font-family: 'Montserrat', sans-serif; font-weight: 900; padding: 2px 8px; border-radius: 3px; font-size: 0.75rem; width: fit-content; margin-bottom: 4px; }
     .role-label { color: #5d4037; font-size: 0.6rem; font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 800; border-bottom: 1px solid rgba(93, 64, 55, 0.2); margin-top: 4px; }
     .name-text { font-family: 'Special Elite', cursive; font-size: 0.85rem; font-weight: 900; text-transform: uppercase; border-left: 4px solid #d4a373; padding-left: 6px; overflow: hidden; white-space: nowrap; }
-    .text-comp { font-size: 0.75rem !important; }
+    .text-comp { font-size: 0.8rem !important; }
     .stButton>button { border-radius: 8px !important; font-family: 'Rye', cursive !important; border: 3px solid #2b1d0e !important; width: 100%; }
     .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; }
     .btn-vuoto button { background: #5a5a5a !important; color: white !important; }
     .btn-verifica button { background: #5d4037 !important; color: #ffcc66 !important; }
     .btn-assegna button { background: #1b4d3e !important; color: #2ecc71 !important; }
-    div[data-testid="stPopover"] > button { height: 26px !important; width: 100% !important; margin-top: 4px !important; font-size: 0.75rem !important; }
+    div[data-testid="stPopover"] > button { height: 26px !important; width: 100% !important; margin-top: 6px !important; font-size: 0.75rem !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -81,7 +82,6 @@ def get_weekday_idx(day, month_name, year):
 
 # --- RENDERING GRIGLIA ---
 def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
-    # Calcolo offset per il 1° del mese
     first_day_wd = get_weekday_idx(1, st.session_state['sel_mese'], st.session_state['sel_anno'])
     
     full_display_list = [{"type": "empty"}] * first_day_wd
@@ -103,7 +103,9 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
                 else:
                     r = item["content"]
                     giorno = r['Giorno']
-                    wd_name = GIORNI_SETTIMANA[get_weekday_idx(giorno, st.session_state['sel_mese'], st.session_state['sel_anno'])]
+                    wd_idx = get_weekday_idx(giorno, st.session_state['sel_mese'], st.session_state['sel_anno'])
+                    wd_full = GIORNI_SETTIMANA[wd_idx]
+                    wd_short = GIORNI_ABBR[wd_idx]
                     
                     c_c = "#8b0000" if any(db[(db['Nome'] == r['Capo']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
                     p_c = "#8b0000" if any(db[(db['Nome'] == r['Pass']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
@@ -112,7 +114,7 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
 
                     st.markdown(f"""
                     <div class="summary-card {h_cls}">
-                        <div class="day-badge">{"GG" if compact else wd_name} {giorno}</div>
+                        <div class="day-badge">{wd_short if compact else wd_full} {giorno}</div>
                         <div class="role-label">CAPO {"⭐" if giorno <= 11 else ""}</div>
                         <div class="name-text {"text-comp" if compact else ""}" style="color:{c_c};">{r['Capo']}</div>
                         <div class="role-label">PASS</div>
@@ -194,7 +196,7 @@ with cb4:
         st.rerun()
 
 st.write("")
-view_mode = st.toggle("🎞️ VISTA COMPATTA (Timeline)", value=False)
+view_mode = st.toggle("🎞️ VISTA COMPATTA (10 Colonne)", value=False)
 st.markdown('</div>', unsafe_allow_html=True)
 
 # --- VISUALIZZAZIONE ---
