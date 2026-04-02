@@ -52,34 +52,29 @@ db = st.session_state['players_db']
 leaders_list = sorted(db[db['Grado'] == "R5/R4"]['Nome'].tolist())
 all_names_list = sorted(db['Nome'].tolist())
 
-# --- CSS PER GRIGLIA "ATTACCATA" ---
+# --- CSS PER GRIGLIA ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Rye&family=Montserrat:wght@700;900&display=swap');
     
     .stApp { background: linear-gradient(rgba(30, 20, 10, 0.8), rgba(15, 10, 5, 0.95)), url('https://images.unsplash.com/photo-1510524527013-0393282436da?q=80&w=1920&auto=format&fit=crop'); background-size: cover; background-attachment: fixed; }
     
-    /* Titolo */
     .train-title { font-family: 'Rye', cursive; text-align: center; color: #ffcc66; text-shadow: 5px 5px 0px #4b2e1b; font-size: 4rem; margin-bottom: 20px; }
-    
-    /* Pannello Comando */
     .sala-comando { background: rgba(25, 15, 5, 0.85); backdrop-filter: blur(10px); border: 2px solid #ffcc66; border-radius: 20px; padding: 25px; margin-bottom: 30px; border-top: 5px solid #ffcc66; }
 
-    /* Rimuove lo spazio tra le colonne di Streamlit per la griglia */
     [data-testid="column"] { padding: 0px !important; margin: 0px !important; }
     div[data-testid="stHorizontalBlock"] { gap: 0px !important; }
 
-    /* Card Stile Calendario */
     .calendar-cell { 
         background: #fdf5e6; 
-        border: 1px solid rgba(93, 64, 55, 0.4); /* Bordo di demarcazione */
+        border: 1px solid rgba(93, 64, 55, 0.4); 
         padding: 12px 8px; 
         color: #2b1d0e; 
         background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png'); 
         display: flex; 
         flex-direction: column; 
         transition: 0.2s;
-        margin: -0.5px; /* Sovrappone leggermente i bordi per non raddoppiarli */
+        margin: -0.5px;
     }
     .calendar-cell:hover { background-color: #fff9f0; z-index: 10; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); }
     
@@ -92,13 +87,11 @@ st.markdown("""
     .role-label { color: #5d4037; font-size: 0.6rem; font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 800; border-bottom: 1px solid rgba(93, 64, 55, 0.15); margin-top: 6px; }
     .name-text { font-family: 'Special Elite', cursive; font-size: 0.88rem; font-weight: 900; text-transform: uppercase; border-left: 3px solid #d4a373; padding-left: 6px; overflow: hidden; white-space: nowrap; margin-top: 2px; }
     
-    /* Bottoni */
     .stButton>button { border-radius: 6px !important; font-family: 'Rye', cursive !important; border: 2px solid #2b1d0e !important; }
     .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; }
     .btn-vuoto button { background: #5a5a5a !important; color: white !important; }
     .btn-assegna button { background: #1b4d3e !important; color: #2ecc71 !important; }
     
-    /* Popover Adjustments */
     div[data-testid="stPopover"] > button { height: 24px !important; width: 100% !important; margin-top: 8px !important; font-size: 0.7rem !important; border: 1px solid #d4a373 !important;}
     </style>
     """, unsafe_allow_html=True)
@@ -107,10 +100,8 @@ def get_weekday_idx(day, month_name, year):
     month_idx = MESI_ITA.index(month_name) + 1
     return datetime(year, month_idx, day).weekday()
 
-# --- RENDERING GRIGLIA ---
 def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
     first_day_wd = get_weekday_idx(1, st.session_state['sel_mese'], st.session_state['sel_anno'])
-    
     full_display_list = [{"type": "empty"}] * first_day_wd
     for item in data:
         full_display_list.append({"type": "data", "content": item})
@@ -225,7 +216,8 @@ st.markdown('</div>', unsafe_allow_html=True)
 
 # --- VISUALIZZAZIONE ---
 if 'master_cal' in st.session_state:
-    st.markdown(f"<h2 style='text-align:center; color:#ffcc66; font-family:Rye; margin-bottom:0px;'>{st.session_state['sel_mese'].upper()} {st.session_state['sel_anno']}</h2>", unsafe_allow_html=True)
+    # AGGIUNTO IL TRENINO QUI SOTTO
+    st.markdown(f"<h2 style='text-align:center; color:#ffcc66; font-family:Rye; margin-bottom:0px;'>🚂 {st.session_state['sel_mese'].upper()} {st.session_state['sel_anno']} 🚂</h2>", unsafe_allow_html=True)
     draw_grid(st.session_state['master_cal'], compact=view_mode, key_prefix="master")
 
 # --- ARCHIVIO ---
