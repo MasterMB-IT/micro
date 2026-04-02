@@ -31,7 +31,7 @@ def load_history():
 if 'history' not in st.session_state:
     st.session_state['history'] = load_history()
 
-# --- CSS: IL DESIGN DEFINITIVO (Pannello Premium + Cards Adattive) ---
+# --- CSS: IL DESIGN DEFINITIVO ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Rye&family=Montserrat:wght@700;900&display=swap');
@@ -87,6 +87,7 @@ st.markdown("""
 
     .stButton>button { border-radius: 8px !important; font-family: 'Rye', cursive !important; font-size: 1.1rem !important; height: 50px !important; border: 3px solid #2b1d0e !important; width: 100%; }
     .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; }
+    .btn-vuoto button { background: #5a5a5a !important; color: #ffffff !important; border-color: #ffffff !important; }
     .btn-verifica button { background: #5d4037 !important; color: #ffcc66 !important; }
     .btn-assegna button { background: #1b4d3e !important; color: #2ecc71 !important; }
     .btn-resetta button { background: #a44a3f !important; color: white !important; }
@@ -97,14 +98,16 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- DATABASE AGGIORNATO ---
+# --- DATABASE ---
 def init_db():
     leaders = ["Hool (R5)", "MASTER (R4)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", "Starbetty (R4)", "PEPPE (R4)", "Ricky Around (R4)", "uncle g (R4)", "09ALEX24 (R4)", "ShinyPasta (R4)", "Wall 7 (R4)"]
-    # Modificati: Goz, Skiteto
     r3 = ["G Erry", "Uncle g brother", "Goz", "Ghandal", "Aryron", "Tricheco", "Maメツ", "NOVEMBERGENZ", "Lalla 96", "Whale Panda", "GennaroM", "EchoZero", "EDDward", "AMY", "Resilienza", "Ana Bunny", "Giuseppec84", "Benito Muschiolini", "Pandino19", "xFlotchy", "MX63", "holdfast", "Ghost", "BadBigBoss", "Stefano00000", "PakII", "BANDOLERO26", "BlOOdyBlade", "Whale hunter Levve", "Aresxxx", "KingGruffalo", "Hulkspakka", "Joseone", "ImAde", "Nysbie", "LeFada13", "Skiteto", "SPio24", "TomEnergy", "Markus Defender", "Sho0t3r", "Wolf006", "Zokra", "perseusxxx", "Bendico", "Obbyy", "ArLes", "Fatz87", "cruel neve", "Trivellatore", "Osgh00", "Slowfia ABOH", "Pontatinatore", "27Francesco", "MissDrinks", "krompir", "MaledettO"]
-    # Modificato: S U C A
     r2 = ["teomadh", "Bossnico", "Valecit", "FarmerHool", "camiiiii 08", "Doctor team", "Yass081", "Nuorifleming", "Vergabrio", "Frenk70", "Comandante Maveric", "Thor9000", "MrBolly", "BustaMaki", "S U C A", "StUnTmArK", "MONKEY D LUFFY 20", "CineSalentino", "Danylo98", "Ezechielefabianino", "BRNcommando", "LEONIDA", "elchicogyot", "erer1000", "Pupisnic", "Backfire1", "AnarchyBG", "Fabrizio1987", "JurdanS", "WiseR9", "Infinity8080"]
-    data = [{"Nome": n, "Grado": "R5/R4"} for n in leaders] + [{"Nome": n, "Grado": "R3"} for n in r3] + [{"Nome": n, "Grado": "R2"} for n in r2]
+    # Aggiunto un utente segnaposto "DA ASSEGNARE" per le card vuote
+    data = [{"Nome": "---", "Grado": "Nessuno"}] + \
+           [{"Nome": n, "Grado": "R5/R4"} for n in leaders] + \
+           [{"Nome": n, "Grado": "R3"} for n in r3] + \
+           [{"Nome": n, "Grado": "R2"} for n in r2]
     return pd.DataFrame(data)
 
 if 'players_db' not in st.session_state: st.session_state['players_db'] = init_db()
@@ -127,11 +130,11 @@ with c3: sel_r3 = st.multiselect("🌵 BANDITI R3", db[db['Grado'] == "R3"]['Nom
 with c4: sel_r2 = st.multiselect("🐎 FUORILEGGE R2", db[db['Grado'] == "R2"]['Nome'].tolist(), placeholder="Reclute")
 
 st.markdown('<div style="margin-top:30px; border-top:1px solid rgba(255,204,102,0.2); padding-top:20px;">', unsafe_allow_html=True)
-cb1, cb2, cb3, cb4 = st.columns(4)
+cb1, cb1b, cb2, cb3, cb4 = st.columns(5)
 
 with cb1:
     st.markdown('<div class="btn-genera">', unsafe_allow_html=True)
-    if st.button("⚒️ GENERA CONVOGLIO", use_container_width=True):
+    if st.button("⚒️ GENERA", use_container_width=True):
         p_l = sel_leaders if sel_leaders else db[db['Grado']=="R5/R4"]['Nome'].tolist()
         p_o = (sel_r3 if sel_r3 else db[db['Grado']=="R3"]['Nome'].tolist()) + (sel_r2 if sel_r2 else db[db['Grado']=="R2"]['Nome'].tolist())
         random.shuffle(p_l); random.shuffle(p_o)
@@ -144,15 +147,27 @@ with cb1:
             st.session_state['master_cal'].append({"Giorno": g, "Capo": c, "Pass": p})
     st.markdown('</div>', unsafe_allow_html=True)
 
+with cb1b:
+    st.markdown('<div class="btn-vuoto">', unsafe_allow_html=True)
+    if st.button("🆕 CREA VUOTO", use_container_width=True):
+        num_gg = (pd.Timestamp(year=st.session_state['sel_anno'], month=MESI_ITA.index(st.session_state['sel_mese'])+1, day=1) + pd.offsets.MonthEnd(0)).day
+        st.session_state['master_cal'] = []
+        for g in range(1, num_gg + 1):
+            st.session_state['master_cal'].append({"Giorno": g, "Capo": "---", "Pass": "---"})
+    st.markdown('</div>', unsafe_allow_html=True)
+
 with cb2:
     st.markdown('<div class="btn-verifica">', unsafe_allow_html=True)
     if st.button("🔍 VERIFICA", use_container_width=True):
         if 'master_cal' in st.session_state:
-            err = [f"GG {r['Giorno']}" for r in st.session_state['master_cal'] if r['Capo'] == r['Pass']]
-            if err: st.error(f"Conflitti: {', '.join(err)}")
-            else: st.success("Ispezione vagoni: OK!")
+            err = [f"GG {r['Giorno']}" for r in st.session_state['master_cal'] if r['Capo'] == r['Pass'] and r['Capo'] != "---"]
+            vuoti = [f"GG {r['Giorno']}" for r in st.session_state['master_cal'] if r['Capo'] == "---" or r['Pass'] == "---"]
+            if err: st.error(f"Conflitti (stesso nome): {', '.join(err)}")
+            if vuoti: st.warning(f"Card non completate: {', '.join(vuoti)}")
+            if not err and not vuoti: st.success("Ispezione vagoni: OK!")
     st.markdown('</div>', unsafe_allow_html=True)
 
+# ... (Il resto del codice cb3, cb4 e funzioni di rendering rimangono uguali) ...
 with cb3:
     st.markdown('<div class="btn-assegna">', unsafe_allow_html=True)
     if st.button("🟩 ASSEGNA", use_container_width=True):
@@ -194,6 +209,10 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
             with cols[j]:
                 c_c = "#8b0000" if any(db[(db['Nome'] == r['Capo']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
                 p_c = "#8b0000" if any(db[(db['Nome'] == r['Pass']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
+                # Grigio per i vuoti
+                if r['Capo'] == "---": c_c = "#888888"
+                if r['Pass'] == "---": p_c = "#888888"
+
                 st.markdown(f"""
                 <div class="summary-card {h_cls}">
                     <div class="day-badge {b_cls}">GG {r['Giorno']}</div>
