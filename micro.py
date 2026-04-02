@@ -51,43 +51,45 @@ db = st.session_state['players_db']
 leaders_list = sorted(db[db['Grado'] == "R5/R4"]['Nome'].tolist())
 all_names_list = sorted(db['Nome'].tolist())
 
-# --- CSS ---
+# --- CSS AGGIORNATO ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Rye&family=Montserrat:wght@700;900&display=swap');
     .stApp { background: linear-gradient(rgba(30, 20, 10, 0.8), rgba(15, 10, 5, 0.95)), url('https://images.unsplash.com/photo-1510524527013-0393282436da?q=80&w=1920&auto=format&fit=crop'); background-size: cover; background-attachment: fixed; }
     .train-title { font-family: 'Rye', cursive; text-align: center; color: #ffcc66; text-shadow: 5px 5px 0px #4b2e1b; font-size: 4rem; margin-bottom: 20px; }
-    .sala-comando { background: rgba(25, 15, 5, 0.85); backdrop-filter: blur(10px); border: 2px solid #ffcc66; border-radius: 20px; padding: 30px; box-shadow: 0px 15px 50px rgba(0,0,0,0.9); margin-bottom: 40px; border-top: 5px solid #ffcc66; }
-    .summary-card { background: #fdf5e6; border: 3px solid #5d4037; padding: 12px 8px; border-radius: 6px; box-shadow: 6px 6px 12px rgba(0,0,0,0.5); color: #2b1d0e; margin-bottom: 5px; background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png'); display: flex; flex-direction: column; }
-    .card-placeholder { background: rgba(0,0,0,0.2); border: 2px dashed rgba(255,204,102,0.3); border-radius: 6px; height: 235px; margin-bottom: 5px; }
-    .h-norm { height: 235px !important; }
-    .day-badge { background: #8b0000; color: white; font-family: 'Montserrat', sans-serif; font-weight: 900; padding: 2px 8px; border-radius: 3px; font-size: 0.8rem; width: fit-content; margin-bottom: 5px; }
-    .role-label { color: #5d4037; font-size: 0.65rem; font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 800; border-bottom: 1px solid rgba(93, 64, 55, 0.2); margin-top: 5px; }
-    .name-text { font-family: 'Special Elite', cursive; font-size: 0.9rem; font-weight: 900; text-transform: uppercase; border-left: 4px solid #d4a373; padding-left: 8px; overflow: hidden; white-space: nowrap; }
-    .stButton>button { border-radius: 8px !important; font-family: 'Rye', cursive !important; font-size: 1.1rem !important; height: 50px !important; border: 3px solid #2b1d0e !important; width: 100%; }
+    .sala-comando { background: rgba(25, 15, 5, 0.85); backdrop-filter: blur(10px); border: 2px solid #ffcc66; border-radius: 20px; padding: 25px; box-shadow: 0px 15px 50px rgba(0,0,0,0.9); margin-bottom: 30px; border-top: 5px solid #ffcc66; }
+    .summary-card { background: #fdf5e6; border: 3px solid #5d4037; padding: 10px; border-radius: 6px; box-shadow: 6px 6px 12px rgba(0,0,0,0.5); color: #2b1d0e; margin-bottom: 5px; background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png'); display: flex; flex-direction: column; transition: 0.3s; }
+    .h-norm { height: 230px !important; }
+    .h-comp { height: 140px !important; padding: 5px !important; }
+    .card-placeholder { background: rgba(0,0,0,0.2); border: 2px dashed rgba(255,204,102,0.2); border-radius: 6px; margin-bottom: 5px; }
+    .day-badge { background: #8b0000; color: white; font-family: 'Montserrat', sans-serif; font-weight: 900; padding: 2px 8px; border-radius: 3px; font-size: 0.75rem; width: fit-content; margin-bottom: 4px; }
+    .role-label { color: #5d4037; font-size: 0.6rem; font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 800; border-bottom: 1px solid rgba(93, 64, 55, 0.2); margin-top: 4px; }
+    .name-text { font-family: 'Special Elite', cursive; font-size: 0.85rem; font-weight: 900; text-transform: uppercase; border-left: 4px solid #d4a373; padding-left: 6px; overflow: hidden; white-space: nowrap; }
+    .text-comp { font-size: 0.75rem !important; }
+    .stButton>button { border-radius: 8px !important; font-family: 'Rye', cursive !important; border: 3px solid #2b1d0e !important; width: 100%; }
     .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; }
     .btn-vuoto button { background: #5a5a5a !important; color: white !important; }
     .btn-verifica button { background: #5d4037 !important; color: #ffcc66 !important; }
     .btn-assegna button { background: #1b4d3e !important; color: #2ecc71 !important; }
+    div[data-testid="stPopover"] > button { height: 26px !important; width: 100% !important; margin-top: 4px !important; font-size: 0.75rem !important; }
     </style>
     """, unsafe_allow_html=True)
 
-def get_weekday_name(day, month_name, year):
+def get_weekday_idx(day, month_name, year):
     month_idx = MESI_ITA.index(month_name) + 1
     return datetime(year, month_idx, day).weekday()
 
-# --- RENDERING GRIGLIA CON OFFSET ---
+# --- RENDERING GRIGLIA ---
 def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
-    # Calcoliamo l'offset del primo giorno del mese
-    first_day_wd = get_weekday_name(1, st.session_state['sel_mese'], st.session_state['sel_anno'])
+    # Calcolo offset per il 1° del mese
+    first_day_wd = get_weekday_idx(1, st.session_state['sel_mese'], st.session_state['sel_anno'])
     
-    # Creiamo una lista completa che include i placeholder
     full_display_list = [{"type": "empty"}] * first_day_wd
     for item in data:
         full_display_list.append({"type": "data", "content": item})
     
-    n_cols = 7 
-    h_cls = "h-norm"
+    n_cols = 10 if compact else 7
+    h_cls = "h-comp" if compact else "h-norm"
     opts_leaders = ["---"] + leaders_list
     opts_all = ["---"] + all_names_list
 
@@ -97,11 +99,11 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
         for j, item in enumerate(chunk):
             with cols[j]:
                 if item["type"] == "empty":
-                    st.markdown('<div class="card-placeholder"></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="card-placeholder {h_cls}"></div>', unsafe_allow_html=True)
                 else:
                     r = item["content"]
                     giorno = r['Giorno']
-                    wd_name = GIORNI_SETTIMANA[get_weekday_name(giorno, st.session_state['sel_mese'], st.session_state['sel_anno'])]
+                    wd_name = GIORNI_SETTIMANA[get_weekday_idx(giorno, st.session_state['sel_mese'], st.session_state['sel_anno'])]
                     
                     c_c = "#8b0000" if any(db[(db['Nome'] == r['Capo']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
                     p_c = "#8b0000" if any(db[(db['Nome'] == r['Pass']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
@@ -110,23 +112,21 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
 
                     st.markdown(f"""
                     <div class="summary-card {h_cls}">
-                        <div class="day-badge">{wd_name} {giorno}</div>
-                        <div class="role-label">CAPOTRENO {"⭐" if giorno <= 11 else ""}</div>
-                        <div class="name-text" style="color:{c_c};">{r['Capo']}</div>
-                        <div class="role-label">PASSEGGERO</div>
-                        <div class="name-text" style="color:{p_c};">{r['Pass']}</div>
+                        <div class="day-badge">{"GG" if compact else wd_name} {giorno}</div>
+                        <div class="role-label">CAPO {"⭐" if giorno <= 11 else ""}</div>
+                        <div class="name-text {"text-comp" if compact else ""}" style="color:{c_c};">{r['Capo']}</div>
+                        <div class="role-label">PASS</div>
+                        <div class="name-text {"text-comp" if compact else ""}" style="color:{p_c};">{r['Pass']}</div>
                     </div>
                     """, unsafe_allow_html=True)
                     
-                    if not is_history:
+                    if not is_history and not compact:
                         with st.popover("⚙️"):
                             opts_capo = opts_leaders if giorno <= 11 else opts_all
                             idx_c = opts_capo.index(r['Capo']) if r['Capo'] in opts_capo else 0
                             idx_p = opts_all.index(r['Pass']) if r['Pass'] in opts_all else 0
-                            
-                            nc = st.selectbox(f"Capo GG {giorno}", opts_capo, index=idx_c, key=f"c_{key_prefix}_{giorno}")
-                            np = st.selectbox(f"Pass GG {giorno}", opts_all, index=idx_p, key=f"p_{key_prefix}_{giorno}")
-                            
+                            nc = st.selectbox(f"Capo {giorno}", opts_capo, index=idx_c, key=f"c_{key_prefix}_{giorno}")
+                            np = st.selectbox(f"Pass {giorno}", opts_all, index=idx_p, key=f"p_{key_prefix}_{giorno}")
                             if st.button("SALVA", key=f"s_{key_prefix}_{giorno}"):
                                 for idx, m_item in enumerate(st.session_state['master_cal']):
                                     if m_item["Giorno"] == giorno:
@@ -176,7 +176,7 @@ with cb2:
     if st.button("🔍 VERIFICA", use_container_width=True):
         if 'master_cal' in st.session_state:
             err_g = [f"GG {r['Giorno']}" for r in st.session_state['master_cal'] if r['Giorno'] <= 11 and r['Capo'] not in leaders_list and r['Capo'] != "---"]
-            if err_g: st.error(f"Capotreno Errato (1-11): {', '.join(err_g)}")
+            if err_g: st.error(f"Capo errato (1-11): {', '.join(err_g)}")
             else: st.success("Tutto perfetto!")
 
 with cb3:
@@ -193,14 +193,22 @@ with cb4:
         if 'master_cal' in st.session_state: del st.session_state['master_cal']
         st.rerun()
 
+st.write("")
+view_mode = st.toggle("🎞️ VISTA COMPATTA (Timeline)", value=False)
 st.markdown('</div>', unsafe_allow_html=True)
 
+# --- VISUALIZZAZIONE ---
 if 'master_cal' in st.session_state:
     st.markdown(f"<h2 style='text-align:center; color:#ffcc66; font-family:Rye;'>📅 {st.session_state['sel_mese'].upper()} {st.session_state['sel_anno']}</h2>", unsafe_allow_html=True)
-    draw_grid(st.session_state['master_cal'], key_prefix="master")
+    draw_grid(st.session_state['master_cal'], compact=view_mode, key_prefix="master")
 
+# --- ARCHIVIO ---
 if st.session_state['history']:
     st.markdown("<hr><h2 style='color:#ffcc66; font-family:Rye; text-align:center;'>📜 CRONOLOGIA</h2>", unsafe_allow_html=True)
     for idx, item in enumerate(reversed(st.session_state['history'])):
         with st.expander(f"📦 {item['data']} (Creato il {item['ts']})"):
-            draw_grid(item['cal'], is_history=True, key_prefix=f"hist_{idx}")
+            draw_grid(item['cal'], compact=True, is_history=True, key_prefix=f"hist_{idx}")
+            if st.button("ELIMINA", key=f"del_{idx}"):
+                st.session_state['history'].pop(len(st.session_state['history'])-1-idx)
+                save_history()
+                st.rerun()
