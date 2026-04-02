@@ -30,7 +30,6 @@ def load_history():
             return []
     return []
 
-# --- INIZIALIZZAZIONE SESSION STATE ---
 if 'history' not in st.session_state:
     st.session_state['history'] = load_history()
 
@@ -59,83 +58,85 @@ st.markdown("""
     .stApp { background: linear-gradient(rgba(30, 20, 10, 0.8), rgba(15, 10, 5, 0.95)), url('https://images.unsplash.com/photo-1510524527013-0393282436da?q=80&w=1920&auto=format&fit=crop'); background-size: cover; background-attachment: fixed; }
     .train-title { font-family: 'Rye', cursive; text-align: center; color: #ffcc66; text-shadow: 5px 5px 0px #4b2e1b; font-size: 4rem; margin-bottom: 20px; }
     .sala-comando { background: rgba(25, 15, 5, 0.85); backdrop-filter: blur(10px); border: 2px solid #ffcc66; border-radius: 20px; padding: 30px; box-shadow: 0px 15px 50px rgba(0,0,0,0.9); margin-bottom: 40px; border-top: 5px solid #ffcc66; }
-    .section-header { font-family: 'Rye', cursive; color: #ffcc66; font-size: 1.8rem; margin-bottom: 25px; }
     .summary-card { background: #fdf5e6; border: 3px solid #5d4037; padding: 12px 8px; border-radius: 6px; box-shadow: 6px 6px 12px rgba(0,0,0,0.5); color: #2b1d0e; margin-bottom: 5px; background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png'); display: flex; flex-direction: column; }
+    .card-placeholder { background: rgba(0,0,0,0.2); border: 2px dashed rgba(255,204,102,0.3); border-radius: 6px; height: 235px; margin-bottom: 5px; }
     .h-norm { height: 235px !important; }
-    .h-comp { height: 150px !important; padding: 5px 6px !important; }
     .day-badge { background: #8b0000; color: white; font-family: 'Montserrat', sans-serif; font-weight: 900; padding: 2px 8px; border-radius: 3px; font-size: 0.8rem; width: fit-content; margin-bottom: 5px; }
     .role-label { color: #5d4037; font-size: 0.65rem; font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 800; border-bottom: 1px solid rgba(93, 64, 55, 0.2); margin-top: 5px; }
     .name-text { font-family: 'Special Elite', cursive; font-size: 0.9rem; font-weight: 900; text-transform: uppercase; border-left: 4px solid #d4a373; padding-left: 8px; overflow: hidden; white-space: nowrap; }
     .stButton>button { border-radius: 8px !important; font-family: 'Rye', cursive !important; font-size: 1.1rem !important; height: 50px !important; border: 3px solid #2b1d0e !important; width: 100%; }
     .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; }
-    .btn-vuoto button { background: #5a5a5a !important; color: white !important; border: 2px solid #ffffff !important; }
+    .btn-vuoto button { background: #5a5a5a !important; color: white !important; }
     .btn-verifica button { background: #5d4037 !important; color: #ffcc66 !important; }
     .btn-assegna button { background: #1b4d3e !important; color: #2ecc71 !important; }
-    .btn-resetta button { background: #a44a3f !important; color: white !important; }
-    div[data-testid="stPopover"] > button { height: 28px !important; width: 100% !important; margin-top: 5px !important; font-size: 0.8rem !important; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- FUNZIONE GIORNO SETTIMANA ---
 def get_weekday_name(day, month_name, year):
     month_idx = MESI_ITA.index(month_name) + 1
-    dt = datetime(year, month_idx, day)
-    return GIORNI_SETTIMANA[dt.weekday()]
+    return datetime(year, month_idx, day).weekday()
 
-# --- RENDERING GRIGLIA ---
+# --- RENDERING GRIGLIA CON OFFSET ---
 def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
-    n_cols = 10 if compact else 7
-    h_cls = "h-comp" if compact else "h-norm"
+    # Calcoliamo l'offset del primo giorno del mese
+    first_day_wd = get_weekday_name(1, st.session_state['sel_mese'], st.session_state['sel_anno'])
+    
+    # Creiamo una lista completa che include i placeholder
+    full_display_list = [{"type": "empty"}] * first_day_wd
+    for item in data:
+        full_display_list.append({"type": "data", "content": item})
+    
+    n_cols = 7 
+    h_cls = "h-norm"
     opts_leaders = ["---"] + leaders_list
     opts_all = ["---"] + all_names_list
 
-    for i in range(0, len(data), n_cols):
+    for i in range(0, len(full_display_list), n_cols):
         cols = st.columns(n_cols)
-        chunk = data[i:i + n_cols]
-        for j, r in enumerate(chunk):
-            giorno = r['Giorno']
-            wd = get_weekday_name(giorno, st.session_state['sel_mese'], st.session_state['sel_anno'])
-            
+        chunk = full_display_list[i:i + n_cols]
+        for j, item in enumerate(chunk):
             with cols[j]:
-                c_c = "#8b0000" if any(db[(db['Nome'] == r['Capo']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
-                p_c = "#8b0000" if any(db[(db['Nome'] == r['Pass']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
-                if r['Capo'] == "---": c_c = "#888888"
-                if r['Pass'] == "---": p_c = "#888888"
+                if item["type"] == "empty":
+                    st.markdown('<div class="card-placeholder"></div>', unsafe_allow_html=True)
+                else:
+                    r = item["content"]
+                    giorno = r['Giorno']
+                    wd_name = GIORNI_SETTIMANA[get_weekday_name(giorno, st.session_state['sel_mese'], st.session_state['sel_anno'])]
+                    
+                    c_c = "#8b0000" if any(db[(db['Nome'] == r['Capo']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
+                    p_c = "#8b0000" if any(db[(db['Nome'] == r['Pass']) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
+                    if r['Capo'] == "---": c_c = "#888888"
+                    if r['Pass'] == "---": p_c = "#888888"
 
-                st.markdown(f"""
-                <div class="summary-card {h_cls}">
-                    <div class="day-badge">{wd} {giorno}</div>
-                    <div class="role-label">CAPOTRENO {"⭐" if giorno <= 11 else ""}</div>
-                    <div class="name-text" style="color:{c_c};">{r['Capo']}</div>
-                    <div class="role-label">PASSEGGERO</div>
-                    <div class="name-text" style="color:{p_c};">{r['Pass']}</div>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                if not is_history and not compact:
-                    with st.popover("⚙️ MODIFICA"):
-                        # CAPOTRENO: Solo Leader se GG <= 11
-                        # PASSEGGERO: Sempre Tutti
-                        opts_capo = opts_leaders if giorno <= 11 else opts_all
-                        opts_pass = opts_all
-                        
-                        idx_c = opts_capo.index(r['Capo']) if r['Capo'] in opts_capo else 0
-                        idx_p = opts_pass.index(r['Pass']) if r['Pass'] in opts_pass else 0
-                        
-                        nc = st.selectbox(f"Capo ({wd} {giorno})", opts_capo, index=idx_c, key=f"c_{key_prefix}_{giorno}")
-                        np = st.selectbox(f"Pass ({wd} {giorno})", opts_pass, index=idx_p, key=f"p_{key_prefix}_{giorno}")
-                        
-                        if st.button("SALVA", key=f"s_{key_prefix}_{giorno}"):
-                            for idx, item in enumerate(st.session_state['master_cal']):
-                                if item["Giorno"] == giorno:
-                                    st.session_state['master_cal'][idx].update({"Capo": nc, "Pass": np})
-                                    break
-                            st.rerun()
+                    st.markdown(f"""
+                    <div class="summary-card {h_cls}">
+                        <div class="day-badge">{wd_name} {giorno}</div>
+                        <div class="role-label">CAPOTRENO {"⭐" if giorno <= 11 else ""}</div>
+                        <div class="name-text" style="color:{c_c};">{r['Capo']}</div>
+                        <div class="role-label">PASSEGGERO</div>
+                        <div class="name-text" style="color:{p_c};">{r['Pass']}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    if not is_history:
+                        with st.popover("⚙️"):
+                            opts_capo = opts_leaders if giorno <= 11 else opts_all
+                            idx_c = opts_capo.index(r['Capo']) if r['Capo'] in opts_capo else 0
+                            idx_p = opts_all.index(r['Pass']) if r['Pass'] in opts_all else 0
+                            
+                            nc = st.selectbox(f"Capo GG {giorno}", opts_capo, index=idx_c, key=f"c_{key_prefix}_{giorno}")
+                            np = st.selectbox(f"Pass GG {giorno}", opts_all, index=idx_p, key=f"p_{key_prefix}_{giorno}")
+                            
+                            if st.button("SALVA", key=f"s_{key_prefix}_{giorno}"):
+                                for idx, m_item in enumerate(st.session_state['master_cal']):
+                                    if m_item["Giorno"] == giorno:
+                                        st.session_state['master_cal'][idx].update({"Capo": nc, "Pass": np})
+                                        break
+                                st.rerun()
 
-# --- TITOLO E PANNELLO ---
+# --- INTERFACCIA ---
 st.markdown('<div class="train-title">🚂 AOSR EXPRESS</div>', unsafe_allow_html=True)
 st.markdown('<div class="sala-comando">', unsafe_allow_html=True)
-st.markdown('<div class="section-header">📜 UFFICIO ASSEGNAZIONI</div>', unsafe_allow_html=True)
 
 c1, c2, c3, c4 = st.columns([1, 1.2, 1.2, 1.2])
 with c1:
@@ -145,7 +146,7 @@ with c2: sel_leaders = st.multiselect("🤠 R5/R4", leaders_list)
 with c3: sel_r3 = st.multiselect("🌵 R3", db[db['Grado'] == "R3"]['Nome'].tolist())
 with c4: sel_r2 = st.multiselect("🐎 R2", db[db['Grado'] == "R2"]['Nome'].tolist())
 
-st.markdown('<div style="margin-top:30px; border-top:1px solid rgba(255,204,102,0.2); padding-top:20px;">', unsafe_allow_html=True)
+st.markdown('<div style="margin-top:20px; padding-top:20px; border-top:1px solid rgba(255,204,102,0.2)">', unsafe_allow_html=True)
 cb1, cb1b, cb2, cb3, cb4 = st.columns(5)
 
 with cb1:
@@ -154,11 +155,11 @@ with cb1:
         p_l = sel_leaders if sel_leaders else leaders_list
         p_o = (sel_r3 if sel_r3 else db[db['Grado']=="R3"]['Nome'].tolist()) + (sel_r2 if sel_r2 else db[db['Grado']=="R2"]['Nome'].tolist())
         random.shuffle(p_l); random.shuffle(p_o)
-        num_gg = (pd.Timestamp(year=st.session_state['sel_anno'], month=MESI_ITA.index(st.session_state['sel_mese'])+1, day=1) + pd.offsets.MonthEnd(0)).day
+        num_gg = calendar.monthrange(st.session_state['sel_anno'], MESI_ITA.index(st.session_state['sel_mese'])+1)[1]
         st.session_state['master_cal'] = []
         p_idx = 0
         for g in range(1, num_gg + 1):
-            if g <= 11: c, p = p_l[(g-1)%len(p_l)], p_o[g%len(p_o)] # Passeggero ora attinge da tutti
+            if g <= 11: c, p = p_l[(g-1)%len(p_l)], p_o[g%len(p_o)]
             else: c, p = p_o[p_idx % len(p_o)], p_o[(p_idx+1) % len(p_o)]; p_idx += 2
             st.session_state['master_cal'].append({"Giorno": g, "Capo": c, "Pass": p})
     st.markdown('</div>', unsafe_allow_html=True)
@@ -166,7 +167,7 @@ with cb1:
 with cb1b:
     st.markdown('<div class="btn-vuoto">', unsafe_allow_html=True)
     if st.button("🆕 CREA VUOTO", use_container_width=True):
-        num_gg = (pd.Timestamp(year=st.session_state['sel_anno'], month=MESI_ITA.index(st.session_state['sel_mese'])+1, day=1) + pd.offsets.MonthEnd(0)).day
+        num_gg = calendar.monthrange(st.session_state['sel_anno'], MESI_ITA.index(st.session_state['sel_mese'])+1)[1]
         st.session_state['master_cal'] = [{"Giorno": g, "Capo": "---", "Pass": "---"} for g in range(1, num_gg + 1)]
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -175,10 +176,8 @@ with cb2:
     if st.button("🔍 VERIFICA", use_container_width=True):
         if 'master_cal' in st.session_state:
             err_g = [f"GG {r['Giorno']}" for r in st.session_state['master_cal'] if r['Giorno'] <= 11 and r['Capo'] not in leaders_list and r['Capo'] != "---"]
-            err_d = [f"GG {r['Giorno']}" for r in st.session_state['master_cal'] if r['Capo'] == r['Pass'] and r['Capo'] != "---"]
-            if err_g: st.error(f"Capotreno non R4/R5 (GG 1-11): {', '.join(err_g)}")
-            if err_d: st.error(f"Nomi Duplicati: {', '.join(err_d)}")
-            if not err_g and not err_d: st.success("Tutto perfetto!")
+            if err_g: st.error(f"Capotreno Errato (1-11): {', '.join(err_g)}")
+            else: st.success("Tutto perfetto!")
 
 with cb3:
     st.markdown('<div class="btn-assegna">', unsafe_allow_html=True)
@@ -195,22 +194,13 @@ with cb4:
         st.rerun()
 
 st.markdown('</div>', unsafe_allow_html=True)
-view_mode = st.toggle("🎞️ VISTA COMPATTA", value=False)
-st.markdown('</div>', unsafe_allow_html=True)
 
-# --- VISUALIZZAZIONE ---
 if 'master_cal' in st.session_state:
     st.markdown(f"<h2 style='text-align:center; color:#ffcc66; font-family:Rye;'>📅 {st.session_state['sel_mese'].upper()} {st.session_state['sel_anno']}</h2>", unsafe_allow_html=True)
-    draw_grid(st.session_state['master_cal'], compact=view_mode, key_prefix="master")
+    draw_grid(st.session_state['master_cal'], key_prefix="master")
 
-# --- ARCHIVIO ---
 if st.session_state['history']:
     st.markdown("<hr><h2 style='color:#ffcc66; font-family:Rye; text-align:center;'>📜 CRONOLOGIA</h2>", unsafe_allow_html=True)
-    for idx in range(len(st.session_state['history']) - 1, -1, -1):
-        item = st.session_state['history'][idx]
+    for idx, item in enumerate(reversed(st.session_state['history'])):
         with st.expander(f"📦 {item['data']} (Creato il {item['ts']})"):
-            draw_grid(item['cal'], compact=True, is_history=True, key_prefix=f"hist_{idx}")
-            if st.button("ELIMINA", key=f"del_{idx}"):
-                st.session_state['history'].pop(idx)
-                save_history()
-                st.rerun()
+            draw_grid(item['cal'], is_history=True, key_prefix=f"hist_{idx}")
