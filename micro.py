@@ -37,7 +37,8 @@ if 'history' not in st.session_state:
 # --- DATABASE ---
 def init_db():
     leaders = ["Hool (R5)", "MASTER (R4)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", "Starbetty (R4)", "PEPPE (R4)", "Ricky Around (R4)", "Uncle g brother (R4)", "09ALEX24 (R4)", "ShinyPasta (R4)", "Wall 7 (R4)"]
-    r3 = ["Uncle g", "G Erry", "Goz", "Ghandal", "Aryron", "Tricheco", "Maメツ", "NOVEMBERGENZ", "Lalla 96", "Whale Panda", "GennaroM", "EchoZero", "EDDward", "AMY", "Resilienza", "Ana Bunny", "Giuseppec84", "Benito Muschiolini", "Pandino19", "xFlotchy", "MX63", "holdfast", "Ghost", "BadBigBoss", "Stefano00000", "PakII", "BANDOLERO26", "BlOOdyBlade", "Whale hunter Levve", "Aresxxx", "KingGruffalo", "Hulkspakka", "Joseone", "ImAde", "Nysbie", "LeFada13", "Skiteto", "SPio24", "TomEnergy", "Markus Defender", "Sho0t3r", "Wolf006", "Zokra", "perseusxxx", "Bendico", "Obbyy", "ArLes", "Fatz87", "cruel neve", "Trivellatore", "Osgh00", "Slowfia ABOH", "Pontatinatore", "27Francesco", "MissDrinks", "krompir", "MaledettO"]
+    # NOTA: JOSEONE è stato sostituito con JOSEPPONE qui sotto
+    r3 = ["Uncle g", "G Erry", "Goz", "Ghandal", "Aryron", "Tricheco", "Maメツ", "NOVEMBERGENZ", "Lalla 96", "Whale Panda", "GennaroM", "EchoZero", "EDDward", "AMY", "Resilienza", "Ana Bunny", "Giuseppec84", "Benito Muschiolini", "Pandino19", "xFlotchy", "MX63", "holdfast", "Ghost", "BadBigBoss", "Stefano00000", "PakII", "BANDOLERO26", "BlOOdyBlade", "Whale hunter Levve", "Aresxxx", "KingGruffalo", "Hulkspakka", "JOSEPPONE", "ImAde", "Nysbie", "LeFada13", "Skiteto", "SPio24", "TomEnergy", "Markus Defender", "Sho0t3r", "Wolf006", "Zokra", "perseusxxx", "Bendico", "Obbyy", "ArLes", "Fatz87", "cruel neve", "Trivellatore", "Osgh00", "Slowfia ABOH", "Pontatinatore", "27Francesco", "MissDrinks", "krompir", "MaledettO"]
     r2 = ["teomadh", "Bossnico", "Valecit", "FarmerHool", "camiiiii 08", "Doctor team", "Yass081", "Nuorifleming", "Vergabrio", "Frenk70", "Comandante Maveric", "Thor9000", "MrBolly", "BustaMaki", "S U C A", "StUnTmArK", "MONKEY D LUFFY 20", "CineSalentino", "Danylo98", "Ezechielefabianino", "BRNcommando", "LEONIDA", "elchicogyot", "erer1000", "Pupisnic", "Backfire1", "AnarchyBG", "Fabrizio1987", "JurdanS", "WiseR9", "Infinity8080"]
     
     data = [{"Nome": "---", "Grado": "Nessuno"}] + \
@@ -59,27 +60,22 @@ st.markdown("""
     
     .stApp { background: linear-gradient(rgba(30, 20, 10, 0.8), rgba(15, 10, 5, 0.95)), url('https://images.unsplash.com/photo-1510524527013-0393282436da?q=80&w=1920&auto=format&fit=crop'); background-size: cover; background-attachment: fixed; }
     
-    /* Titolo */
     .train-title { font-family: 'Rye', cursive; text-align: center; color: #ffcc66; text-shadow: 5px 5px 0px #4b2e1b; font-size: 4rem; margin-bottom: 20px; }
-    
-    /* Pannello Comando */
     .sala-comando { background: rgba(25, 15, 5, 0.85); backdrop-filter: blur(10px); border: 2px solid #ffcc66; border-radius: 20px; padding: 25px; margin-bottom: 30px; border-top: 5px solid #ffcc66; }
 
-    /* Rimuove lo spazio tra le colonne di Streamlit per la griglia */
     [data-testid="column"] { padding: 0px !important; margin: 0px !important; }
     div[data-testid="stHorizontalBlock"] { gap: 0px !important; }
 
-    /* Card Stile Calendario */
     .calendar-cell { 
         background: #fdf5e6; 
-        border: 1px solid rgba(93, 64, 55, 0.4); /* Bordo di demarcazione */
+        border: 1px solid rgba(93, 64, 55, 0.4); 
         padding: 12px 8px; 
         color: #2b1d0e; 
         background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png'); 
         display: flex; 
         flex-direction: column; 
         transition: 0.2s;
-        margin: -0.5px; /* Sovrappone leggermente i bordi per non raddoppiarli */
+        margin: -0.5px; 
     }
     .calendar-cell:hover { background-color: #fff9f0; z-index: 10; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); }
     
@@ -92,13 +88,11 @@ st.markdown("""
     .role-label { color: #5d4037; font-size: 0.6rem; font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 800; border-bottom: 1px solid rgba(93, 64, 55, 0.15); margin-top: 6px; }
     .name-text { font-family: 'Special Elite', cursive; font-size: 0.88rem; font-weight: 900; text-transform: uppercase; border-left: 3px solid #d4a373; padding-left: 6px; overflow: hidden; white-space: nowrap; margin-top: 2px; }
     
-    /* Bottoni */
     .stButton>button { border-radius: 6px !important; font-family: 'Rye', cursive !important; border: 2px solid #2b1d0e !important; }
     .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; }
     .btn-vuoto button { background: #5a5a5a !important; color: white !important; }
     .btn-assegna button { background: #1b4d3e !important; color: #2ecc71 !important; }
     
-    /* Popover Adjustments */
     div[data-testid="stPopover"] > button { height: 24px !important; width: 100% !important; margin-top: 8px !important; font-size: 0.7rem !important; border: 1px solid #d4a373 !important;}
     </style>
     """, unsafe_allow_html=True)
@@ -151,6 +145,7 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
                     if not is_history and not compact:
                         with st.popover("MODIFICA"):
                             opts_capo = opts_leaders if giorno <= 11 else opts_all
+                            # Gestione indice sicuro in caso di nomi cambiati
                             idx_c = opts_capo.index(r['Capo']) if r['Capo'] in opts_capo else 0
                             idx_p = opts_all.index(r['Pass']) if r['Pass'] in opts_all else 0
                             nc = st.selectbox(f"Capo {giorno}", opts_capo, index=idx_c, key=f"c_{key_prefix}_{giorno}")
