@@ -6,13 +6,13 @@ import os
 from datetime import datetime
 import calendar
 
-# --- CONFIGURAZIONE PAGINA (MODALITÀ CINEMA) ---
-st.set_page_config(page_title="AOSR Train Manager - 16:9 Vision", layout="wide")
+# --- CONFIGURAZIONE PAGINA ---
+st.set_page_config(page_title="AOSR Train Manager - Cinema Edition", layout="wide")
 
 MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
             "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
 
-GIORNI_SETTIMANA = ["LUNEDÌ", "MARTEDÌ", "MERCOLEDÌ", "GIOVEDÌ", "VENERDÌ", "SABATO", "DOMENICA"]
+GIORNI_SETTIMANA = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"]
 
 DB_FILE = "cronologia_treni.json"
 
@@ -30,7 +30,7 @@ def load_history():
 
 if 'history' not in st.session_state: st.session_state['history'] = load_history()
 
-# --- DATABASE (Con JOSEPPONE aggiornato) ---
+# --- DATABASE ---
 def init_db():
     leaders = ["Hool (R5)", "MASTER (R4)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", "Starbetty (R4)", "PEPPE (R4)", "Ricky Around (R4)", "Uncle g brother (R4)", "09ALEX24 (R4)", "ShinyPasta (R4)", "Wall 7 (R4)"]
     r3 = ["Uncle g", "G Erry", "Goz", "Ghandal", "Aryron", "Tricheco", "Maメツ", "NOVEMBERGENZ", "Lalla 96", "Whale Panda", "GennaroM", "EchoZero", "EDDward", "AMY", "Resilienza", "Ana Bunny", "Giuseppec84", "Benito Muschiolini", "Pandino19", "xFlotchy", "MX63", "holdfast", "Ghost", "BadBigBoss", "Stefano00000", "PakII", "BANDOLERO26", "BlOOdyBlade", "Whale hunter Levve", "Aresxxx", "KingGruffalo", "Hulkspakka", "JOSEPPONE", "ImAde", "Nysbie", "LeFada13", "Skiteto", "SPio24", "TomEnergy", "Markus Defender", "Sho0t3r", "Wolf006", "Zokra", "perseusxxx", "Bendico", "Obbyy", "ArLes", "Fatz87", "cruel neve", "Trivellatore", "Osgh00", "Slowfia ABOH", "Pontatinatore", "27Francesco", "MissDrinks", "krompir", "MaledettO"]
@@ -43,116 +43,106 @@ db = st.session_state['players_db']
 leaders_list = sorted(db[db['Grado'] == "R5/R4"]['Nome'].tolist())
 all_names_list = sorted(db['Nome'].tolist())
 
-# --- CSS DEFINITIVO VISIONE D'INSIEME ---
+# --- CSS INTEGRATO ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Rye&family=Montserrat:wght@800;900&display=swap');
     
-    /* Forza l'app a usare il 100% della larghezza e rimuovi padding */
-    .main .block-container { max-width: 100% !important; padding: 0.5rem 1rem !important; }
-    
-    .stApp { background: #1a120b; background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://www.transparenttextures.com/patterns/dark-leather.png'); }
+    .main .block-container { max-width: 100% !important; padding: 1rem !important; }
+    .stApp { background: #1a120b; background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://www.transparenttextures.com/patterns/dark-leather.png'); }
 
-    /* Titolo Grande */
-    .title-banner { font-family: 'Rye', cursive; color: #ffcc66; text-align: center; font-size: 3.5rem; text-shadow: 3px 3px 0px #4b2e1b; margin-bottom: 5px; }
+    .main-title { font-family: 'Rye', cursive; color: #ffcc66; text-align: center; font-size: 3rem; margin-bottom: 20px; text-shadow: 3px 3px 0px #4b2e1b; }
 
-    /* Testata Settimana */
-    .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 2px; }
-    .week-day { background: #5d4037; color: #ffcc66; font-family: 'Rye', cursive; text-align: center; padding: 10px; border: 1px solid #3e2723; font-size: 1rem; }
+    /* Header Settimana */
+    .week-header-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 5px; }
+    .week-day-label { background: #5d4037; color: #ffcc66; font-family: 'Rye', cursive; text-align: center; padding: 12px; border: 1px solid #3e2723; font-size: 1.1rem; }
 
-    /* Celle Calendario */
-    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
-    .cal-cell { 
+    /* Griglia Visione Insieme */
+    .cinema-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+    .cinema-cell { 
         background: #fdf5e6; background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
-        height: 140px; border: 1px solid #d7ccc8; padding: 8px; position: relative; overflow: hidden;
+        height: 160px; border: 1px solid #d7ccc8; padding: 10px; position: relative; transition: 0.3s;
     }
-    .cal-cell:hover { background-color: #ffffff; z-index: 2; box-shadow: 0 0 15px rgba(255,204,102,0.4); }
-    .cell-empty { background: rgba(255,255,255,0.05); height: 140px; border: 1px solid rgba(255,255,255,0.1); }
+    .cinema-cell:hover { transform: scale(1.02); z-index: 5; box-shadow: 0 0 20px rgba(255,204,102,0.5); }
+    .cinema-cell-empty { background: rgba(255,255,255,0.05); height: 160px; border: 1px solid rgba(255,255,255,0.1); }
 
-    .day-num { background: #8b0000; color: white; font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 0.8rem; padding: 2px 6px; width: fit-content; margin-bottom: 10px; border-radius: 2px; }
-    .role { color: #5d4037; font-family: 'Montserrat', sans-serif; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; margin-bottom: 0px; }
-    .name { font-family: 'Special Elite', cursive; font-size: 0.95rem; font-weight: 900; text-transform: uppercase; line-height: 1.1; margin-bottom: 5px; border-left: 3px solid #d4a373; padding-left: 5px; }
+    .day-num { background: #8b0000; color: white; font-family: 'Montserrat', sans-serif; font-weight: 900; padding: 2px 8px; width: fit-content; margin-bottom: 10px; border-radius: 2px; }
+    .role-text { color: #5d4037; font-family: 'Montserrat', sans-serif; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; margin-bottom: 2px; }
+    .name-display { font-family: 'Special Elite', cursive; font-size: 1rem; font-weight: 900; text-transform: uppercase; border-left: 3px solid #d4a373; padding-left: 6px; margin-bottom: 5px; color: #2b1d0e; white-space: nowrap; overflow: hidden; }
     
-    /* Popover */
-    div[data-testid="stPopover"] > button { position: absolute; bottom: 5px; right: 5px; height: 20px !important; font-size: 0.6rem !important; opacity: 0.6; }
+    /* Toggle Style */
+    .stCheckbox { background: rgba(255,204,102,0.1); padding: 10px; border-radius: 10px; border: 1px solid #ffcc66; color: white !important; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- RENDERING ---
-def draw_overview(data):
-    st.markdown(f"<div class='title-banner'>🚂 {st.session_state['sel_mese'].upper()} {st.session_state['sel_anno']} 🚂</div>", unsafe_allow_html=True)
+# --- FUNZIONE LOGICA CALENDARIO ---
+def draw_calendar_view(data, overview_mode=True):
+    st.markdown(f"<div class='main-title'>🚂 {st.session_state['sel_mese'].upper()} {st.session_state['sel_anno']} 🚂</div>", unsafe_allow_html=True)
     
-    # Testata giorni
-    st.markdown("<div class='week-grid'>" + "".join([f"<div class='week-day'>{d}</div>" for d in GIORNI_SETTIMANA]) + "</div>", unsafe_allow_html=True)
+    # Testata Giorni
+    st.markdown("<div class='week-header-row'>" + "".join([f"<div class='week-day-label'>{d}</div>" for d in GIORNI_SETTIMANA]) + "</div>", unsafe_allow_html=True)
     
-    # Calcolo Logica Griglia
     first_wd = datetime(st.session_state['sel_anno'], MESI_ITA.index(st.session_state['sel_mese'])+1, 1).weekday()
-    
-    # Inizio Griglia
-    st.markdown("<div class='cal-grid'>", unsafe_allow_html=True)
-    
-    # Colonne Streamlit per gestire i popover (purtroppo i popover richiedono contenitori Streamlit)
     full_days = [{"type": "empty"}] * first_wd + [{"type": "data", "content": d} for d in data]
-    
-    # Dividiamo in righe da 7
+
+    # Griglia a 7 colonne
     for i in range(0, len(full_days), 7):
         cols = st.columns(7)
         chunk = full_days[i:i+7]
         for idx, item in enumerate(chunk):
             with cols[idx]:
                 if item["type"] == "empty":
-                    st.markdown('<div class="cell-empty"></div>', unsafe_allow_html=True)
+                    st.markdown('<div class="cinema-cell-empty"></div>', unsafe_allow_html=True)
                 else:
                     r = item["content"]
                     g = r['Giorno']
-                    capo = r['Capo']
-                    passg = r['Pass']
                     
                     st.markdown(f"""
-                        <div class="cal-cell">
+                        <div class="cinema-cell">
                             <div class="day-num">{g}</div>
-                            <div class="role">CAPOTRENO {"⭐" if g <= 11 else ""}</div>
-                            <div class="name" style="color:#8b0000;">{capo}</div>
-                            <div class="role">PASSEGGERO</div>
-                            <div class="name" style="color:#1b4d3e;">{passg}</div>
+                            <div class="role-text">CAPO {"⭐" if g <= 11 else ""}</div>
+                            <div class="name-display" style="color:#8b0000;">{r['Capo']}</div>
+                            <div class="role-text">PASSEGGERO</div>
+                            <div class="name-display" style="color:#1b4d3e;">{r['Pass']}</div>
                         </div>
                     """, unsafe_allow_html=True)
                     
-                    with st.popover("⚙️"):
-                        opts_c = ["---"] + (leaders_list if g <= 11 else all_names_list)
-                        new_c = st.selectbox(f"Capo G{g}", opts_c, index=opts_c.index(capo) if capo in opts_c else 0, key=f"c_{g}")
-                        new_p = st.selectbox(f"Pass G{g}", ["---"]+all_names_list, index=(["---"]+all_names_list).index(passg) if passg in (["---"]+all_names_list) else 0, key=f"p_{g}")
-                        if st.button("OK", key=f"b_{g}"):
-                            for i_m, m in enumerate(st.session_state['master_cal']):
-                                if m['Giorno'] == g:
-                                    st.session_state['master_cal'][i_m].update({"Capo": new_c, "Pass": new_p})
-                                    st.rerun()
+                    # Se NON siamo in sola visione, aggiungi il tasto modifica
+                    if not overview_mode:
+                        with st.popover("MODIFICA"):
+                            opts_c = ["---"] + (leaders_list if g <= 11 else all_names_list)
+                            nc = st.selectbox(f"C {g}", opts_c, index=opts_c.index(r['Capo']) if r['Capo'] in opts_c else 0, key=f"ec_{g}")
+                            np = st.selectbox(f"P {g}", ["---"]+all_names_list, index=(["---"]+all_names_list).index(r['Pass']) if r['Pass'] in (["---"]+all_names_list) else 0, key=f"ep_{g}")
+                            if st.button("OK", key=f"save_{g}"):
+                                for i_m, m in enumerate(st.session_state['master_cal']):
+                                    if m['Giorno'] == g:
+                                        st.session_state['master_cal'][i_m].update({"Capo": nc, "Pass": np})
+                                        st.rerun()
 
-# --- COMANDI ---
+# --- SIDEBAR E COMANDI ---
 with st.sidebar:
-    st.title("🤠 COMANDI")
+    st.markdown("<h2 style='color:#ffcc66; font-family:Rye;'>⚙️ PANNELLO</h2>", unsafe_allow_html=True)
     st.session_state['sel_mese'] = st.selectbox("Mese", MESI_ITA, index=datetime.now().month - 1)
     st.session_state['sel_anno'] = st.number_input("Anno", 2024, 2030, 2026)
     
-    if st.button("⚒️ GENERA AUTO", use_container_width=True):
+    st.write("---")
+    if st.button("⚒️ GENERA NUOVO", use_container_width=True):
         num_gg = calendar.monthrange(st.session_state['sel_anno'], MESI_ITA.index(st.session_state['sel_mese'])+1)[1]
-        st.session_state['master_cal'] = []
-        for g in range(1, num_gg + 1):
-            st.session_state['master_cal'].append({
-                "Giorno": g, 
-                "Capo": random.choice(leaders_list) if g <= 11 else random.choice(all_names_list), 
-                "Pass": random.choice(all_names_list)
-            })
+        st.session_state['master_cal'] = [{"Giorno": g, "Capo": random.choice(leaders_list) if g <= 11 else "---", "Pass": "---"} for g in range(1, num_gg + 1)]
         st.rerun()
-
-    if st.button("🟩 SALVA E ARCHIVIA", use_container_width=True):
+    
+    if st.button("🟩 SALVA IN CRONOLOGIA", use_container_width=True):
         if 'master_cal' in st.session_state:
-            st.session_state['history'].append({"data": f"{st.session_state['sel_mese']} {st.session_state['sel_anno']}", "ts": datetime.now().strftime("%d/%m %H:%M"), "cal": st.session_state['master_cal']})
+            st.session_state['history'].append({"data": f"{st.session_state['sel_mese']} {st.session_state['sel_anno']}", "ts": datetime.now().strftime("%H:%M"), "cal": st.session_state['master_cal']})
             save_history()
-            st.toast("Salvato!")
+            st.success("Archiviato!")
 
-# --- DISPLAY ---
+# --- AREA PRINCIPALE ---
 if 'master_cal' in st.session_state:
-    draw_overview(st.session_state['master_cal'])
+    # PULSANTE VISIONE D'INSIEME (Toggle)
+    mode = st.toggle("🎞️ ATTIVA VISIONE D'INSIEME (Sola Lettura)", value=True)
+    
+    # Rendering del calendario basato sul toggle
+    draw_calendar_view(st.session_state['master_cal'], overview_mode=mode)
 else:
-    st.markdown("<h2 style='text-align:center; color:#ffcc66; margin-top:20%; font-family:Rye;'>🚂 BENVENUTO CAPOTRENO!<br>Usa i comandi a sinistra per iniziare.</h2>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align:center; margin-top:150px; color:#ffcc66; font-family:Rye; font-size:2rem;'>🚂 USA IL MENU A SINISTRA PER GENERARE IL TRENO</div>", unsafe_allow_html=True)
