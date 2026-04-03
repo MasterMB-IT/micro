@@ -6,14 +6,13 @@ import os
 from datetime import datetime
 import calendar
 
-# --- CONFIGURAZIONE PAGINA ---
-st.set_page_config(page_title="AOSR Train Manager - Deluxe Edition", layout="wide")
+# --- CONFIGURAZIONE PAGINA (WIDE MODE PER 16:9) ---
+st.set_page_config(page_title="AOSR Train Manager - Cinema Edition", layout="wide")
 
 MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
             "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
 
 GIORNI_SETTIMANA = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"]
-GIORNI_ABBR = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"]
 
 DB_FILE = "cronologia_treni.json"
 
@@ -27,17 +26,16 @@ def load_history():
         try:
             with open(DB_FILE, "r", encoding="utf-8") as f:
                 return json.load(f)
-        except:
-            return []
+        except: return []
     return []
 
 if 'history' not in st.session_state:
     st.session_state['history'] = load_history()
 
-# --- DATABASE ---
+# --- DATABASE (Con JOSEPPONE) ---
 def init_db():
     leaders = ["Hool (R5)", "MASTER (R4)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", "Starbetty (R4)", "PEPPE (R4)", "Ricky Around (R4)", "Uncle g brother (R4)", "09ALEX24 (R4)", "ShinyPasta (R4)", "Wall 7 (R4)"]
-    # JOSEONE rimosso, JOSEPPONE aggiunto
+    # Correzione: JOSEONE -> JOSEPPONE
     r3 = ["Uncle g", "G Erry", "Goz", "Ghandal", "Aryron", "Tricheco", "Maメツ", "NOVEMBERGENZ", "Lalla 96", "Whale Panda", "GennaroM", "EchoZero", "EDDward", "AMY", "Resilienza", "Ana Bunny", "Giuseppec84", "Benito Muschiolini", "Pandino19", "xFlotchy", "MX63", "holdfast", "Ghost", "BadBigBoss", "Stefano00000", "PakII", "BANDOLERO26", "BlOOdyBlade", "Whale hunter Levve", "Aresxxx", "KingGruffalo", "Hulkspakka", "JOSEPPONE", "ImAde", "Nysbie", "LeFada13", "Skiteto", "SPio24", "TomEnergy", "Markus Defender", "Sho0t3r", "Wolf006", "Zokra", "perseusxxx", "Bendico", "Obbyy", "ArLes", "Fatz87", "cruel neve", "Trivellatore", "Osgh00", "Slowfia ABOH", "Pontatinatore", "27Francesco", "MissDrinks", "krompir", "MaledettO"]
     r2 = ["teomadh", "Bossnico", "Valecit", "FarmerHool", "camiiiii 08", "Doctor team", "Yass081", "Nuorifleming", "Vergabrio", "Frenk70", "Comandante Maveric", "Thor9000", "MrBolly", "BustaMaki", "S U C A", "StUnTmArK", "MONKEY D LUFFY 20", "CineSalentino", "Danylo98", "Ezechielefabianino", "BRNcommando", "LEONIDA", "elchicogyot", "erer1000", "Pupisnic", "Backfire1", "AnarchyBG", "Fabrizio1987", "JurdanS", "WiseR9", "Infinity8080"]
     
@@ -47,54 +45,88 @@ def init_db():
            [{"Nome": n, "Grado": "R2"} for n in r2]
     return pd.DataFrame(data)
 
-# Forza l'aggiornamento del DB a ogni ricaricamento
 st.session_state['players_db'] = init_db()
 db = st.session_state['players_db']
-
 leaders_list = sorted(db[db['Grado'] == "R5/R4"]['Nome'].tolist())
 all_names_list = sorted(db['Nome'].tolist())
 
-# --- CSS PER GRIGLIA "ATTACCATA" ---
+# --- CSS INTEGRATO (Vintage + Layout 16:9) ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Rye&family=Montserrat:wght@700;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Rye&family=Montserrat:wght@800;900&display=swap');
     
-    .stApp { background: linear-gradient(rgba(30, 20, 10, 0.8), rgba(15, 10, 5, 0.95)), url('https://images.unsplash.com/photo-1510524527013-0393282436da?q=80&w=1920&auto=format&fit=crop'); background-size: cover; background-attachment: fixed; }
-    
-    .train-title { font-family: 'Rye', cursive; text-align: center; color: #ffcc66; text-shadow: 5px 5px 0px #4b2e1b; font-size: 4rem; margin-bottom: 20px; }
-    .sala-comando { background: rgba(25, 15, 5, 0.85); backdrop-filter: blur(10px); border: 2px solid #ffcc66; border-radius: 20px; padding: 25px; margin-bottom: 30px; border-top: 5px solid #ffcc66; }
+    /* Espansione Totale Schermo */
+    .block-container { padding: 1rem 1rem; max-width: 100% !important; }
+    .stApp { background: linear-gradient(rgba(30, 20, 10, 0.85), rgba(15, 10, 5, 0.98)), url('https://images.unsplash.com/photo-1510524527013-0393282436da?q=80&w=1920&auto=format&fit=crop'); background-size: cover; background-attachment: fixed; }
 
+    /* Testata Giorni Settimana */
+    .week-header {
+        background-color: rgba(93, 64, 55, 0.95);
+        color: #ffcc66;
+        text-align: center;
+        padding: 10px;
+        font-family: 'Rye', cursive;
+        border: 1px solid #4b2e1b;
+        font-size: 1.2rem;
+        margin-bottom: -1px;
+    }
+
+    /* Griglia Senza Spazi */
     [data-testid="column"] { padding: 0px !important; margin: 0px !important; }
     div[data-testid="stHorizontalBlock"] { gap: 0px !important; }
 
     .calendar-cell { 
         background: #fdf5e6; 
-        border: 1px solid rgba(93, 64, 55, 0.4); 
-        padding: 12px 8px; 
+        border: 1px solid rgba(93, 64, 55, 0.5); 
+        padding: 10px; 
         color: #2b1d0e; 
         background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png'); 
         display: flex; 
         flex-direction: column; 
+        height: 165px; 
+        margin: -0.5px;
         transition: 0.2s;
-        margin: -0.5px; 
     }
-    .calendar-cell:hover { background-color: #fff9f0; z-index: 10; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); }
+    .calendar-cell:hover { background-color: #fff9f0; z-index: 10; box-shadow: inset 0 0 15px rgba(0,0,0,0.15); }
     
-    .h-norm { height: 230px !important; }
-    .h-comp { height: 175px !important; }
+    .cell-empty { background: rgba(0,0,0,0.3); border: 1px solid rgba(93, 64, 55, 0.2); height: 165px; margin: -0.5px; }
 
-    .card-placeholder { background: rgba(0,0,0,0.1); border: 1px solid rgba(93, 64, 55, 0.2); }
+    .day-badge { 
+        background: #8b0000; 
+        color: white; 
+        font-family: 'Montserrat', sans-serif; 
+        padding: 2px 8px; 
+        font-size: 0.9rem; 
+        font-weight: 900;
+        width: fit-content; 
+        margin-bottom: 12px;
+        border-radius: 2px;
+    }
 
-    .day-badge { background: #8b0000; color: white; font-family: 'Montserrat', sans-serif; font-weight: 900; padding: 2px 8px; border-radius: 2px; font-size: 0.75rem; width: fit-content; margin-bottom: 6px; }
-    .role-label { color: #5d4037; font-size: 0.6rem; font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 800; border-bottom: 1px solid rgba(93, 64, 55, 0.15); margin-top: 6px; }
-    .name-text { font-family: 'Special Elite', cursive; font-size: 0.88rem; font-weight: 900; text-transform: uppercase; border-left: 3px solid #d4a373; padding-left: 6px; overflow: hidden; white-space: nowrap; margin-top: 2px; }
+    .role-label { color: #5d4037; font-size: 0.65rem; font-family: 'Montserrat', sans-serif; font-weight: 800; text-transform: uppercase; opacity: 0.7; margin-top: 4px; }
     
-    .stButton>button { border-radius: 6px !important; font-family: 'Rye', cursive !important; border: 2px solid #2b1d0e !important; }
-    .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; }
-    .btn-vuoto button { background: #5a5a5a !important; color: white !important; }
-    .btn-assegna button { background: #1b4d3e !important; color: #2ecc71 !important; }
+    .name-text { 
+        font-family: 'Special Elite', cursive; 
+        font-size: 1.05rem; 
+        font-weight: 900; 
+        text-transform: uppercase; 
+        border-left: 3px solid #d4a373; 
+        padding-left: 6px; 
+        margin-bottom: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+    }
     
-    div[data-testid="stPopover"] > button { height: 24px !important; width: 100% !important; margin-top: 8px !important; font-size: 0.7rem !important; border: 1px solid #d4a373 !important;}
+    .main-title { font-family: 'Rye', cursive; text-align: center; color: #ffcc66; font-size: 3.5rem; text-shadow: 4px 4px 0px #4b2e1b; margin-bottom: 10px; }
+    
+    /* Popover button adjustment */
+    div[data-testid="stPopover"] > button { 
+        padding: 0px 5px !important; 
+        height: 22px !important; 
+        font-size: 0.6rem !important; 
+        border: 1px solid #d4a373 !important;
+        background: rgba(212, 163, 115, 0.1) !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -102,136 +134,103 @@ def get_weekday_idx(day, month_name, year):
     month_idx = MESI_ITA.index(month_name) + 1
     return datetime(year, month_idx, day).weekday()
 
-def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
-    first_day_wd = get_weekday_idx(1, st.session_state['sel_mese'], st.session_state['sel_anno'])
-    full_display_list = [{"type": "empty"}] * first_day_wd
-    for item in data:
-        full_display_list.append({"type": "data", "content": item})
+# --- LOGICA RENDERING ---
+def draw_cinema_calendar(data):
+    st.markdown(f"<div class='main-title'>🚂 {st.session_state['sel_mese'].upper()} {st.session_state['sel_anno']} 🚂</div>", unsafe_allow_html=True)
     
-    n_cols = 10 if compact else 7
-    h_cls = "h-comp" if compact else "h-norm"
-    opts_leaders = ["---"] + leaders_list
-    opts_all = ["---"] + all_names_list
-
-    for i in range(0, len(full_display_list), n_cols):
-        cols = st.columns(n_cols)
-        chunk = full_display_list[i:i + n_cols]
+    # Header Giorni (Lunedì -> Domenica)
+    h_cols = st.columns(7)
+    for idx, day in enumerate(GIORNI_SETTIMANA):
+        h_cols[idx].markdown(f"<div class='week-header'>{day}</div>", unsafe_allow_html=True)
+    
+    # Calcolo offset per iniziare il mese al giorno giusto
+    first_wd = get_weekday_idx(1, st.session_state['sel_mese'], st.session_state['sel_anno'])
+    full_list = [{"type": "empty"}] * first_wd + [{"type": "data", "content": d} for d in data]
+    
+    # Disegno righe (7 colonne fisse)
+    for i in range(0, len(full_list), 7):
+        cols = st.columns(7)
+        chunk = full_list[i:i + 7]
         for j, item in enumerate(chunk):
             with cols[j]:
                 if item["type"] == "empty":
-                    st.markdown(f'<div class="calendar-cell card-placeholder {h_cls}"></div>', unsafe_allow_html=True)
+                    st.markdown('<div class="cell-empty"></div>', unsafe_allow_html=True)
                 else:
                     r = item["content"]
-                    # Correzione al volo dei nomi nel calendario se carichi dalla cronologia nomi vecchi
-                    capo_n = "JOSEPPONE" if r['Capo'] == "JOSEONE" else r['Capo']
-                    pass_n = "JOSEPPONE" if r['Pass'] == "JOSEONE" else r['Pass']
-
-                    giorno = r['Giorno']
-                    wd_idx = get_weekday_idx(giorno, st.session_state['sel_mese'], st.session_state['sel_anno'])
-                    wd_display = GIORNI_ABBR[wd_idx] if compact else GIORNI_SETTIMANA[wd_idx]
+                    g = r['Giorno']
                     
-                    c_c = "#8b0000" if any(db[(db['Nome'] == capo_n) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
-                    p_c = "#8b0000" if any(db[(db['Nome'] == pass_n) & (db['Grado'] == "R5/R4")]['Nome']) else "#1b4d3e"
-                    if capo_n == "---": c_c = "#888888"
-                    if pass_n == "---": p_c = "#888888"
-
+                    # Colori dinamici
+                    c_color = "#8b0000" if r['Capo'] != "---" else "#888"
+                    p_color = "#1b4d3e" if r['Pass'] != "---" else "#888"
+                    
                     st.markdown(f"""
-                    <div class="calendar-cell {h_cls}">
-                        <div class="day-badge">{wd_display} {giorno}</div>
-                        <div class="role-label">CAPO {"⭐" if giorno <= 11 else ""}</div>
-                        <div class="name-text" style="color:{c_c};">{capo_n}</div>
+                    <div class="calendar-cell">
+                        <div class="day-badge">{g}</div>
+                        <div class="role-label">CAPOTRENO {"⭐" if g <= 11 else ""}</div>
+                        <div class="name-text" style="color:{c_color};">{r['Capo']}</div>
                         <div class="role-label">PASSEGGERO</div>
-                        <div class="name-text" style="color:{p_c};">{pass_n}</div>
+                        <div class="name-text" style="color:{p_color};">{r['Pass']}</div>
                     </div>
                     """, unsafe_allow_html=True)
                     
-                    if not is_history and not compact:
-                        with st.popover("MODIFICA"):
-                            opts_capo = opts_leaders if giorno <= 11 else opts_all
-                            idx_c = opts_capo.index(capo_n) if capo_n in opts_capo else 0
-                            idx_p = opts_all.index(pass_n) if pass_n in opts_all else 0
-                            nc = st.selectbox(f"Capo {giorno}", opts_capo, index=idx_c, key=f"c_{key_prefix}_{giorno}")
-                            np = st.selectbox(f"Pass {giorno}", opts_all, index=idx_p, key=f"p_{key_prefix}_{giorno}")
-                            if st.button("SALVA", key=f"s_{key_prefix}_{giorno}"):
-                                for idx, m_item in enumerate(st.session_state['master_cal']):
-                                    if m_item["Giorno"] == giorno:
-                                        st.session_state['master_cal'][idx].update({"Capo": nc, "Pass": np})
-                                        break
-                                st.rerun()
+                    # Popover di modifica rapida
+                    with st.popover("📝", help="Modifica"):
+                        opts_c = ["---"] + (leaders_list if g <= 11 else all_names_list)
+                        opts_p = ["---"] + all_names_list
+                        
+                        # Fix indici sicuri per JOSEPPONE
+                        idx_c = opts_c.index(r['Capo']) if r['Capo'] in opts_c else 0
+                        idx_p = opts_p.index(r['Pass']) if r['Pass'] in opts_p else 0
+                        
+                        new_c = st.selectbox(f"Capo G{g}", opts_c, index=idx_c, key=f"sel_c_{g}")
+                        new_p = st.selectbox(f"Pass G{g}", opts_p, index=idx_p, key=f"sel_p_{g}")
+                        if st.button("AGGIORNA", key=f"btn_up_{g}"):
+                            for idx, m in enumerate(st.session_state['master_cal']):
+                                if m['Giorno'] == g:
+                                    st.session_state['master_cal'][idx].update({"Capo": new_c, "Pass": new_p})
+                                    st.rerun()
 
-# --- INTERFACCIA ---
-st.markdown('<div class="train-title">🚂 AOSR EXPRESS</div>', unsafe_allow_html=True)
-st.markdown('<div class="sala-comando">', unsafe_allow_html=True)
-
-c1, c2, c3, c4 = st.columns([1, 1.2, 1.2, 1.2])
-with c1:
-    st.session_state['sel_mese'] = st.selectbox("📅 MESE", MESI_ITA, index=datetime.now().month - 1)
-    st.session_state['sel_anno'] = st.number_input("📆 ANNO", 2024, 2030, 2026)
-with c2: sel_leaders = st.multiselect("🤠 R5/R4", leaders_list)
-with c3: sel_r3 = st.multiselect("🌵 R3", db[db['Grado'] == "R3"]['Nome'].tolist())
-with c4: sel_r2 = st.multiselect("🐎 R2", db[db['Grado'] == "R2"]['Nome'].tolist())
-
-st.markdown('<div style="margin-top:20px; padding-top:20px; border-top:1px solid rgba(255,204,102,0.2)">', unsafe_allow_html=True)
-cb1, cb1b, cb2, cb3, cb4 = st.columns(5)
-
-with cb1:
-    st.markdown('<div class="btn-genera">', unsafe_allow_html=True)
-    if st.button("⚒️ GENERA AUTO", use_container_width=True):
-        p_l = sel_leaders if sel_leaders else leaders_list
-        p_o = (sel_r3 if sel_r3 else db[db['Grado']=="R3"]['Nome'].tolist()) + (sel_r2 if sel_r2 else db[db['Grado']=="R2"]['Nome'].tolist())
-        random.shuffle(p_l); random.shuffle(p_o)
-        num_gg = calendar.monthrange(st.session_state['sel_anno'], MESI_ITA.index(st.session_state['sel_mese'])+1)[1]
-        st.session_state['master_cal'] = []
-        p_idx = 0
-        for g in range(1, num_gg + 1):
-            if g <= 11: c, p = p_l[(g-1)%len(p_l)], p_o[g%len(p_o)]
-            else: c, p = p_o[p_idx % len(p_o)], p_o[(p_idx+1) % len(p_o)]; p_idx += 2
-            st.session_state['master_cal'].append({"Giorno": g, "Capo": c, "Pass": p})
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with cb1b:
-    st.markdown('<div class="btn-vuoto">', unsafe_allow_html=True)
-    if st.button("🆕 CREA VUOTO", use_container_width=True):
-        num_gg = calendar.monthrange(st.session_state['sel_anno'], MESI_ITA.index(st.session_state['sel_mese'])+1)[1]
-        st.session_state['master_cal'] = [{"Giorno": g, "Capo": "---", "Pass": "---"} for g in range(1, num_gg + 1)]
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with cb2:
-    if st.button("🔍 VERIFICA", use_container_width=True):
-        if 'master_cal' in st.session_state:
-            err_g = [f"GG {r['Giorno']}" for r in st.session_state['master_cal'] if r['Giorno'] <= 11 and r['Capo'] not in leaders_list and r['Capo'] != "---"]
-            if err_g: st.error(f"Capo errato (1-11): {', '.join(err_g)}")
-            else: st.success("Tutto perfetto!")
-
-with cb3:
-    st.markdown('<div class="btn-assegna">', unsafe_allow_html=True)
-    if st.button("🟩 ASSEGNA", use_container_width=True):
-        if 'master_cal' in st.session_state:
-            st.session_state['history'].append({"data": f"{st.session_state['sel_mese']} {st.session_state['sel_anno']}", "ts": datetime.now().strftime("%d/%m/%Y %H:%M"), "cal": [dict(d) for d in st.session_state['master_cal']]})
-            save_history()
-            st.toast("Calendario Salvato!")
-
-with cb4:
-    if st.button("🏜️ RESET", use_container_width=True):
-        if 'master_cal' in st.session_state: del st.session_state['master_cal']
-        st.rerun()
-
-st.write("")
-view_mode = st.toggle("🎞️ VISTA COMPATTA (Tabellare)", value=False)
-st.markdown('</div>', unsafe_allow_html=True)
-
-# --- VISUALIZZAZIONE ---
-if 'master_cal' in st.session_state:
-    st.markdown(f"<h2 style='text-align:center; color:#ffcc66; font-family:Rye; margin-bottom:0px;'>{st.session_state['sel_mese'].upper()} {st.session_state['sel_anno']}</h2>", unsafe_allow_html=True)
-    draw_grid(st.session_state['master_cal'], compact=view_mode, key_prefix="master")
-
-# --- ARCHIVIO ---
-if st.session_state['history']:
-    st.markdown("<br><br><h2 style='color:#ffcc66; font-family:Rye; text-align:center;'>📜 CRONOLOGIA</h2>", unsafe_allow_html=True)
-    for idx, item in enumerate(reversed(st.session_state['history'])):
-        with st.expander(f"📦 {item['data']} (Creato il {item['ts']})"):
-            draw_grid(item['cal'], compact=True, is_history=True, key_prefix=f"hist_{idx}")
-            if st.button("ELIMINA", key=f"del_{idx}"):
-                st.session_state['history'].pop(len(st.session_state['history'])-1-idx)
+# --- INTERFACCIA COMANDI ---
+with st.expander("🤠 SALA COMANDO (Configurazione)", expanded=False):
+    c1, c2, c3, c4 = st.columns([1,1,1,1])
+    with c1:
+        st.session_state['sel_mese'] = st.selectbox("Mese", MESI_ITA, index=datetime.now().month - 1)
+        st.session_state['sel_anno'] = st.number_input("Anno", 2024, 2030, 2026)
+    with c2:
+        if st.button("⚒️ GENERA AUTO", use_container_width=True):
+            num_gg = calendar.monthrange(st.session_state['sel_anno'], MESI_ITA.index(st.session_state['sel_mese'])+1)[1]
+            st.session_state['master_cal'] = []
+            for g in range(1, num_gg + 1):
+                st.session_state['master_cal'].append({
+                    "Giorno": g, 
+                    "Capo": random.choice(leaders_list) if g <= 11 else random.choice(all_names_list), 
+                    "Pass": random.choice(all_names_list)
+                })
+            st.rerun()
+    with c3:
+        if st.button("🟩 SALVA TURNO", use_container_width=True):
+            if 'master_cal' in st.session_state:
+                st.session_state['history'].append({
+                    "data": f"{st.session_state['sel_mese']} {st.session_state['sel_anno']}", 
+                    "ts": datetime.now().strftime("%d/%m %H:%M"), 
+                    "cal": st.session_state['master_cal']
+                })
                 save_history()
-                st.rerun()
+                st.success("Calendario archiviato!")
+    with c4:
+        if st.button("🏜️ RESET", use_container_width=True):
+            if 'master_cal' in st.session_state: del st.session_state['master_cal']
+            st.rerun()
+
+# --- MAIN ---
+if 'master_cal' in st.session_state:
+    draw_cinema_calendar(st.session_state['master_cal'])
+else:
+    st.markdown("<div style='text-align:center; color:#ffcc66; font-family:Rye; font-size:2rem; margin-top:100px;'>🚂 Benvenuto Capotreno! Genera un nuovo calendario dal pannello in alto.</div>", unsafe_allow_html=True)
+
+# Cronologia in fondo
+if st.session_state['history']:
+    st.markdown("---")
+    with st.expander("📜 Cronologia Calendari"):
+        for h in reversed(st.session_state['history']):
+            st.write(f"📅 {h['data']} - Creato alle {h['ts']}")
