@@ -37,7 +37,8 @@ if 'history' not in st.session_state:
 # --- DATABASE ---
 def init_db():
     leaders = ["Hool (R5)", "MASTER (R4)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", "Starbetty (R4)", "PEPPE (R4)", "Ricky Around (R4)", "Uncle g brother (R4)", "09ALEX24 (R4)", "ShinyPasta (R4)", "Wall 7 (R4)"]
-    r3 = ["Uncle g", "G Erry", "Goz", "Ghandal", "Aryron", "Tricheco", "Maメツ", "NOVEMBERGENZ", "Lalla 96", "Whale Panda", "GennaroM", "EchoZero", "EDDward", "AMY", "Resilienza", "Ana Bunny", "Giuseppec84", "Benito Muschiolini", "Pandino19", "xFlotchy", "MX63", "holdfast", "Ghost", "BadBigBoss", "Stefano00000", "PakII", "BANDOLERO26", "BlOOdyBlade", "Whale hunter Levve", "Aresxxx", "KingGruffalo", "Hulkspakka", "Joseone", "ImAde", "Nysbie", "LeFada13", "Skiteto", "SPio24", "TomEnergy", "Markus Defender", "Sho0t3r", "Wolf006", "Zokra", "perseusxxx", "Bendico", "Obbyy", "ArLes", "Fatz87", "cruel neve", "Trivellatore", "Osgh00", "Slowfia ABOH", "Pontatinatore", "27Francesco", "MissDrinks", "krompir", "MaledettO"]
+    # Corretto JOSEONE in JOSEPPONE
+    r3 = ["Uncle g", "G Erry", "Goz", "Ghandal", "Aryron", "Tricheco", "Maメツ", "NOVEMBERGENZ", "Lalla 96", "Whale Panda", "GennaroM", "EchoZero", "EDDward", "AMY", "Resilienza", "Ana Bunny", "Giuseppec84", "Benito Muschiolini", "Pandino19", "xFlotchy", "MX63", "holdfast", "Ghost", "BadBigBoss", "Stefano00000", "PakII", "BANDOLERO26", "BlOOdyBlade", "Whale hunter Levve", "Aresxxx", "KingGruffalo", "Hulkspakka", "Joseppone", "ImAde", "Nysbie", "LeFada13", "Skiteto", "SPio24", "TomEnergy", "Markus Defender", "Sho0t3r", "Wolf006", "Zokra", "perseusxxx", "Bendico", "Obbyy", "ArLes", "Fatz87", "cruel neve", "Trivellatore", "Osgh00", "Slowfia ABOH", "Pontatinatore", "27Francesco", "MissDrinks", "krompir", "MaledettO"]
     r2 = ["teomadh", "Bossnico", "Valecit", "FarmerHool", "camiiiii 08", "Doctor team", "Yass081", "Nuorifleming", "Vergabrio", "Frenk70", "Comandante Maveric", "Thor9000", "MrBolly", "BustaMaki", "S U C A", "StUnTmArK", "MONKEY D LUFFY 20", "CineSalentino", "Danylo98", "Ezechielefabianino", "BRNcommando", "LEONIDA", "elchicogyot", "erer1000", "Pupisnic", "Backfire1", "AnarchyBG", "Fabrizio1987", "JurdanS", "WiseR9", "Infinity8080"]
     
     data = [{"Nome": "---", "Grado": "Nessuno"}] + \
@@ -51,7 +52,6 @@ db = st.session_state['players_db']
 
 leaders_list = sorted(db[db['Grado'] == "R5/R4"]['Nome'].tolist())
 r3_list = sorted(db[db['Grado'] == "R3"]['Nome'].tolist())
-# La lista per i primi 11 giorni ora include R5, R4 e R3
 early_leaders_list = sorted(leaders_list + r3_list)
 all_names_list = sorted(db['Nome'].tolist())
 
@@ -110,7 +110,6 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
                     wd_idx = get_weekday_idx(giorno, st.session_state['sel_mese'], st.session_state['sel_anno'])
                     wd_display = GIORNI_ABBR[wd_idx] if compact else GIORNI_SETTIMANA[wd_idx]
                     
-                    # Colore dinamico: Rosso se R5/R4/R3, Verde altrimenti
                     c_c = "#8b0000" if any(db[(db['Nome'] == r['Capo']) & (db['Grado'].isin(["R5/R4", "R3"]))]['Nome']) else "#1b4d3e"
                     p_c = "#8b0000" if any(db[(db['Nome'] == r['Pass']) & (db['Grado'].isin(["R5/R4", "R3"]))]['Nome']) else "#1b4d3e"
                     if r['Capo'] == "---": c_c = "#888888"
@@ -158,9 +157,7 @@ cb1, cb1b, cb2, cb3, cb4 = st.columns(5)
 with cb1:
     st.markdown('<div class="btn-genera">', unsafe_allow_html=True)
     if st.button("⚒️ GENERA AUTO", use_container_width=True):
-        # Pool per i primi 11 giorni: R5/R4 e R3 selezionati (o tutti se vuoto)
         p_l = (sel_leaders if sel_leaders else leaders_list) + (sel_r3 if sel_r3 else r3_list)
-        # Pool per il resto dei giorni: R3 e R2 selezionati
         p_o = (sel_r3 if sel_r3 else r3_list) + (sel_r2 if sel_r2 else db[db['Grado']=="R2"]['Nome'].tolist())
         
         random.shuffle(p_l); random.shuffle(p_o)
@@ -188,7 +185,6 @@ with cb1b:
 with cb2:
     if st.button("🔍 VERIFICA", use_container_width=True):
         if 'master_cal' in st.session_state:
-            # Verifica che nei primi 11 giorni il capo sia almeno R3 o superiore
             err_g = [f"GG {r['Giorno']}" for r in st.session_state['master_cal'] if r['Giorno'] <= 11 and r['Capo'] not in early_leaders_list and r['Capo'] != "---"]
             if err_g: st.error(f"Capo non autorizzato (1-11): {', '.join(err_g)}")
             else: st.success("Tutto perfetto! R5, R4 e R3 sono ai posti di comando.")
