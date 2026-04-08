@@ -37,10 +37,7 @@ if 'history' not in st.session_state:
 # --- DATABASE ---
 def init_db():
     leaders = ["Hool (R5)", "MASTER (R4)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", "Starbetty (R4)", "PEPPE (R4)", "Ricky Around (R4)", "Uncle g brother (R4)", "09ALEX24 (R4)", "ShinyPasta (R4)", "Wall 7 (R4)"]
-    
-    # FIX: Inserito Joseppone al posto di Joseone
     r3 = ["Uncle g", "G Erry", "Goz", "Ghandal", "Aryron", "Tricheco", "Maメツ", "NOVEMBERGENZ", "Lalla 96", "Whale Panda", "GennaroM", "EchoZero", "EDDward", "AMY", "Resilienza", "Ana Bunny", "Giuseppec84", "Benito Muschiolini", "Pandino19", "xFlotchy", "MX63", "holdfast", "Ghost", "BadBigBoss", "Stefano00000", "PakII", "BANDOLERO26", "BlOOdyBlade", "Whale hunter Levve", "Aresxxx", "KingGruffalo", "Hulkspakka", "Joseppone", "ImAde", "Nysbie", "LeFada13", "Skiteto", "SPio24", "TomEnergy", "Markus Defender", "Sho0t3r", "Wolf006", "Zokra", "perseusxxx", "Bendico", "Obbyy", "ArLes", "Fatz87", "cruel neve", "Trivellatore", "Osgh00", "Slowfia ABOH", "Pontatinatore", "27Francesco", "MissDrinks", "krompir", "MaledettO"]
-    
     r2 = ["teomadh", "Bossnico", "Valecit", "FarmerHool", "camiiiii 08", "Doctor team", "Yass081", "Nuorifleming", "Vergabrio", "Frenk70", "Comandante Maveric", "Thor9000", "MrBolly", "BustaMaki", "S U C A", "StUnTmArK", "MONKEY D LUFFY 20", "CineSalentino", "Danylo98", "Ezechielefabianino", "BRNcommando", "LEONIDA", "elchicogyot", "erer1000", "Pupisnic", "Backfire1", "AnarchyBG", "Fabrizio1987", "JurdanS", "WiseR9", "Infinity8080"]
     
     data = [{"Nome": "---", "Grado": "Nessuno"}] + \
@@ -89,7 +86,11 @@ def get_weekday_idx(day, month_name, year):
 
 # --- RENDERING GRIGLIA ---
 def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
-    first_day_wd = get_weekday_idx(1, st.session_state['sel_mese'], st.session_state['sel_anno'])
+    # Cerchiamo di dedurre mese e anno dai dati se siamo in history
+    mese = st.session_state.get('sel_mese', "Gennaio")
+    anno = st.session_state.get('sel_anno', 2026)
+    
+    first_day_wd = get_weekday_idx(1, mese, anno)
     full_display_list = [{"type": "empty"}] * first_day_wd
     for item in data:
         full_display_list.append({"type": "data", "content": item})
@@ -109,7 +110,7 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
                 else:
                     r = item["content"]
                     giorno = r['Giorno']
-                    wd_idx = get_weekday_idx(giorno, st.session_state['sel_mese'], st.session_state['sel_anno'])
+                    wd_idx = get_weekday_idx(giorno, mese, anno)
                     wd_display = GIORNI_ABBR[wd_idx] if compact else GIORNI_SETTIMANA[wd_idx]
                     
                     c_c = "#8b0000" if any(db[(db['Nome'] == r['Capo']) & (db['Grado'].isin(["R5/R4", "R3"]))]['Nome']) else "#1b4d3e"
@@ -195,7 +196,14 @@ with cb3:
     st.markdown('<div class="btn-assegna">', unsafe_allow_html=True)
     if st.button("🟩 ASSEGNA", use_container_width=True):
         if 'master_cal' in st.session_state:
-            st.session_state['history'].append({"data": f"{st.session_state['sel_mese']} {st.session_state['sel_anno']}", "ts": datetime.now().strftime("%d/%m/%Y %H:%M"), "cal": [dict(d) for d in st.session_state['master_cal']]})
+            # Salviamo mese e anno nel record della cronologia
+            st.session_state['history'].append({
+                "data": f"{st.session_state['sel_mese']} {st.session_state['sel_anno']}",
+                "mese": st.session_state['sel_mese'],
+                "anno": st.session_state['sel_anno'],
+                "ts": datetime.now().strftime("%d/%m/%Y %H:%M"), 
+                "cal": [dict(d) for d in st.session_state['master_cal']]
+            })
             save_history()
             st.toast("Calendario Salvato!")
 
@@ -217,9 +225,20 @@ if 'master_cal' in st.session_state:
 if st.session_state['history']:
     st.markdown("<br><br><h2 style='color:#ffcc66; font-family:Rye; text-align:center;'>📜 CRONOLOGIA</h2>", unsafe_allow_html=True)
     for idx, item in enumerate(reversed(st.session_state['history'])):
+        real_idx = len(st.session_state['history']) - 1 - idx
         with st.expander(f"📦 {item['data']} (Creato il {item['ts']})"):
-            draw_grid(item['cal'], compact=True, is_history=True, key_prefix=f"hist_{idx}")
-            if st.button("ELIMINA", key=f"del_{idx}"):
-                st.session_state['history'].pop(len(st.session_state['history'])-1-idx)
-                save_history()
-                st.rerun()
+            draw_grid(item['cal'], compact=True, is_history=True, key_prefix=f"hist_{real_idx}")
+            
+            col_btn1, col_btn2 = st.columns(2)
+            with col_btn1:
+                # FUNZIONE DI CARICAMENTO PER MODIFICA
+                if st.button("📝 MODIFICA QUESTO", key=f"edit_{real_idx}", use_container_width=True):
+                    st.session_state['master_cal'] = [dict(d) for d in item['cal']]
+                    st.session_state['sel_mese'] = item.get('mese', st.session_state['sel_mese'])
+                    st.session_state['sel_anno'] = item.get('anno', st.session_state['sel_anno'])
+                    st.rerun()
+            with col_btn2:
+                if st.button("🗑️ ELIMINA", key=f"del_{real_idx}", use_container_width=True):
+                    st.session_state['history'].pop(real_idx)
+                    save_history()
+                    st.rerun()
