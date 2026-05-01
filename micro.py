@@ -52,64 +52,46 @@ db = st.session_state['players_db']
 leaders_list = sorted(db[db['Grado'] == "R5/R4"]['Nome'].tolist())
 all_names_list = sorted(db['Nome'].tolist())
 
-# --- CSS AGGIORNATO PER GRIGLIA COMPATTA ---
+# --- CSS ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Rye&family=Montserrat:wght@700;900&display=swap');
     
     .stApp { background: linear-gradient(rgba(30, 20, 10, 0.8), rgba(15, 10, 5, 0.95)), url('https://images.unsplash.com/photo-1510524527013-0393282436da?q=80&w=1920&auto=format&fit=crop'); background-size: cover; background-attachment: fixed; }
-    
-    /* Titolo Principale */
     .train-title { font-family: 'Rye', cursive; text-align: center; color: #ffcc66; text-shadow: 5px 5px 0px #4b2e1b; font-size: 4rem; margin-bottom: 20px; }
-    
-    /* Intestazione Calendario con Treno */
     .cal-header-container { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: -10px; }
     .cal-header-text { font-family: 'Rye', cursive; color: #ffcc66; font-size: 2.5rem; margin: 0; }
     .train-icon { font-size: 3rem; color: #ffcc66; }
-
-    /* Pannello Comando */
     .sala-comando { background: rgba(25, 15, 5, 0.85); backdrop-filter: blur(10px); border: 2px solid #ffcc66; border-radius: 20px; padding: 25px; margin-bottom: 30px; border-top: 5px solid #ffcc66; }
 
-    /* --- LOGICA PER GRIGLIA "ATTACCATA" --- */
-    /* Rimuove lo spazio tra le colonne di Streamlit */
     [data-testid="column"] { padding: 0px !important; margin: 0px !important; }
-    /* Rimuove lo spazio tra le righe di colonne (se presenti) */
     div[data-testid="stHorizontalBlock"] { gap: 0px !important; }
 
-    /* Card Stile Calendario - Modificata per attaccarsi */
     .calendar-cell { 
         background: #fdf5e6; 
-        border: 1px solid rgba(93, 64, 55, 0.4); /* Bordo di demarcazione */
+        border: 1px solid rgba(93, 64, 55, 0.4);
         padding: 12px 8px; 
         color: #2b1d0e; 
         background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png'); 
         display: flex; 
         flex-direction: column; 
         transition: 0.2s;
-        margin: -0.5px; /* Sovrappone leggermente i bordi per non raddoppiarli */
+        margin: -0.5px;
     }
     .calendar-cell:hover { background-color: #fff9f0; z-index: 10; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); }
-    
-    .h-norm { height: 230px !important; }
-    .h-comp { height: 175px !important; }
-
-    /* Placeholder grigio per celle vuote all'inizio del mese, attaccato */
+    .h-norm { min-height: 230px !important; }
+    .h-comp { min-height: 175px !important; }
     .card-placeholder { background: rgba(0,0,0,0.1); border: 1px solid rgba(93, 64, 55, 0.2); }
-
     .day-badge { background: #8b0000; color: white; font-family: 'Montserrat', sans-serif; font-weight: 900; padding: 2px 8px; border-radius: 2px; font-size: 0.75rem; width: fit-content; margin-bottom: 6px; }
     .role-label { color: #5d4037; font-size: 0.6rem; font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 800; border-bottom: 1px solid rgba(93, 64, 55, 0.15); margin-top: 6px; }
-    
-    /* Forza Nomi Neri */
     .name-text { font-family: 'Special Elite', cursive; font-size: 0.88rem; font-weight: 900; text-transform: uppercase; border-left: 3px solid #d4a373; padding-left: 6px; overflow: hidden; white-space: nowrap; margin-top: 2px; color: #000000 !important; }
     
-    /* Bottoni */
     .stButton>button { border-radius: 6px !important; font-family: 'Rye', cursive !important; border: 2px solid #2b1d0e !important; }
     .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; }
     .btn-vuoto button { background: #5a5a5a !important; color: white !important; }
     .btn-assegna button { background: #1b4d3e !important; color: #2ecc71 !important; }
     
-    /* Popover Adjustments */
-    div[data-testid="stPopover"] > button { height: 24px !important; width: 100% !important; margin-top: 8px !important; font-size: 0.7rem !important; border: 1px solid #d4a373 !important;}
+    div[data-testid="stPopover"] > button { height: 26px !important; width: 100% !important; margin-top: 8px !important; font-size: 0.75rem !important; border: 1px solid #d4a373 !important;}
     </style>
     """, unsafe_allow_html=True)
 
@@ -119,7 +101,6 @@ def get_weekday_idx(day, month_name, year):
 
 # --- RENDERING GRIGLIA ---
 def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
-    # Cerchiamo di dedurre mese e anno dai dati se siamo in history
     mese_nom = st.session_state.get('sel_mese', "Gennaio")
     anno_val = st.session_state.get('sel_anno', 2026)
     
@@ -130,7 +111,6 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
     
     n_cols = 10 if compact else 7
     h_cls = "h-comp" if compact else "h-norm"
-    opts_leaders = ["---"] + leaders_list
     opts_all = ["---"] + all_names_list
 
     for i in range(0, len(full_display_list), n_cols):
@@ -139,7 +119,6 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
         for j, item in enumerate(chunk):
             with cols[j]:
                 if item["type"] == "empty":
-                    # Cella vuota attaccata
                     st.markdown(f'<div class="calendar-cell card-placeholder {h_cls}"></div>', unsafe_allow_html=True)
                 else:
                     r = item["content"]
@@ -158,13 +137,19 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
                     """, unsafe_allow_html=True)
                     
                     if not is_history and not compact:
-                        with st.popover("MODIFICA"):
-                            opts_capo = opts_leaders if giorno <= 11 else opts_all
-                            idx_c = opts_capo.index(r['Capo']) if r['Capo'] in opts_capo else 0
-                            idx_p = opts_all.index(r['Pass']) if r['Pass'] in opts_all else 0
-                            nc = st.selectbox(f"Capo {giorno}", opts_capo, index=idx_c, key=f"c_{key_prefix}_{giorno}")
-                            np = st.selectbox(f"Pass {giorno}", opts_all, index=idx_p, key=f"p_{key_prefix}_{giorno}")
-                            if st.button("SALVA", key=f"s_{key_prefix}_{giorno}"):
+                        with st.popover("✍️ SCRIVI"):
+                            st.caption(f"Modifica Giorno {giorno}")
+                            # Scelta tra lista o manuale
+                            metodo = st.radio("Metodo", ["Lista", "Manuale"], key=f"met_{key_prefix}_{giorno}", horizontal=True)
+                            
+                            if metodo == "Lista":
+                                nc = st.selectbox("Capo", opts_all, index=opts_all.index(r['Capo']) if r['Capo'] in opts_all else 0, key=f"sel_c_{key_prefix}_{giorno}")
+                                np = st.selectbox("Pass", opts_all, index=opts_all.index(r['Pass']) if r['Pass'] in opts_all else 0, key=f"sel_p_{key_prefix}_{giorno}")
+                            else:
+                                nc = st.text_input("Nome Capo", value=r['Capo'], key=f"txt_c_{key_prefix}_{giorno}")
+                                np = st.text_input("Nome Pass", value=r['Pass'], key=f"txt_p_{key_prefix}_{giorno}")
+                            
+                            if st.button("SALVA", key=f"s_{key_prefix}_{giorno}", use_container_width=True):
                                 for idx, m_item in enumerate(st.session_state['master_cal']):
                                     if m_item["Giorno"] == giorno:
                                         st.session_state['master_cal'][idx].update({"Capo": nc, "Pass": np})
@@ -214,14 +199,13 @@ with cb2:
     if st.button("🔍 VERIFICA", use_container_width=True):
         if 'master_cal' in st.session_state:
             err_g = [f"GG {r['Giorno']}" for r in st.session_state['master_cal'] if r['Giorno'] <= 11 and r['Capo'] not in leaders_list and r['Capo'] != "---"]
-            if err_g: st.error(f"Capo errato (1-11): {', '.join(err_g)}")
+            if err_g: st.warning(f"Nota: Capi non-R4 nei primi 11gg: {', '.join(err_g)}")
             else: st.success("Tutto perfetto!")
 
 with cb3:
     st.markdown('<div class="btn-assegna">', unsafe_allow_html=True)
     if st.button("🟩 ASSEGNA", use_container_width=True):
         if 'master_cal' in st.session_state:
-            # Salviamo mese e anno nel record della cronologia
             st.session_state['history'].append({
                 "data": f"{st.session_state['sel_mese']} {st.session_state['sel_anno']}",
                 "mese": st.session_state['sel_mese'],
@@ -238,12 +222,11 @@ with cb4:
         st.rerun()
 
 st.write("")
-view_mode = st.toggle("🎞️ VISTA COMPATTA (Tabellare)", value=False)
+view_mode = st.toggle("🎞️ VISTA COMPATTA (Senza modifiche)", value=False)
 st.markdown('</div>', unsafe_allow_html=True)
 
 # --- VISUALIZZAZIONE ---
 if 'master_cal' in st.session_state:
-    # Intestazione stilizzata con Treno e AOSR
     st.markdown(f"""
         <div class="cal-header-container">
             <span class="train-icon">🚂</span>
@@ -261,10 +244,8 @@ if st.session_state['history']:
         real_idx = len(st.session_state['history']) - 1 - idx
         with st.expander(f"📦 {item['data']} (Creato il {item['ts']})"):
             draw_grid(item['cal'], compact=True, is_history=True, key_prefix=f"hist_{real_idx}")
-            
             col_btn1, col_btn2 = st.columns(2)
             with col_btn1:
-                # FUNZIONE DI CARICAMENTO PER MODIFICA
                 if st.button("📝 MODIFICA QUESTO", key=f"edit_{real_idx}", use_container_width=True):
                     st.session_state['master_cal'] = [dict(d) for d in item['cal']]
                     st.session_state['sel_mese'] = item.get('mese', st.session_state['sel_mese'])
