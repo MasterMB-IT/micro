@@ -75,7 +75,7 @@ db = st.session_state['players_db']
 leaders_list = sorted(db[db['Grado'] == "R5/R4"]['Nome'].tolist())
 all_names_list = sorted(db['Nome'].tolist())
 
-# --- DATI STORICI 5 MESI ---
+# --- DATI STORICI INIZIALI (BASE 5 MESI) ---
 HISTORICAL_5_MONTHS = {
     "capo_counts": {
         "Hool": 2, "MASTER": 4, "SHINYPASTA": 4, "PEPPE": 3, "UNCLE G BROTHER": 2,
@@ -91,7 +91,7 @@ HISTORICAL_5_MONTHS = {
         "PITT9595": 2, "TOHIK": 2, "KINGGRUFFALO": 1, "BENDICO": 1, "27FRANCESCO": 1,
         "GHANDAL": 1, "MARKUS DEFENDED": 1, "GENNAROM": 1, "BANDOLERO26": 1,
         "JOSEPPONE": 3, "MIK I": 1, "BRNCOMMANDO": 1, "SQUIRTLE": 1, "PSYKOS": 1,
-        "UNCLE G BROTHER": 1, "MARIA": 1
+        "MARIA": 1
     },
     "pass_counts": {
         "MAメツ": 4, "SHINYPASTA": 2, "MASTER": 3, "09ALEX24": 2, "GOZ": 1,
@@ -100,27 +100,49 @@ HISTORICAL_5_MONTHS = {
         "WOLFOO6": 3, "ARYRON": 2, "BENDICO": 2, "MISSDRINKS": 1, "MX63": 1,
         "STEFANO00000": 2, "PAKII": 2, "BANDOLERO26": 1, "MARKUS DEFENDED": 1,
         "WALL 7": 3, "EDDWARD": 2, "KROMPIR": 3, "GHANDAL": 1, "ZOKRA": 2,
-        "CAMIIIII 08": 2, "JOSEPPONE": 3, "HULKSPAKKA": 2, "LE 12 SCIMMIE": 1,
-        "BADBIGBOSS": 2, "YEAH YEAH OOOO": 1, "NOVEMBERGENZ": 2, "SAGITTARIUS A1": 1,
-        "XFLOTCHY": 2, "BLOODYBLADE": 1, "ORAISHIO": 1, "PANDORE": 1, "MESHEL": 1,
-        "SIR LANCE OF N81": 1, "VINCENZOPOMA89": 1, "ZAAAAAAAYYYYY": 2, "JAXXTRONIC": 1,
-        "AGENT BASS": 1, "ARESARWEN": 1, "PSYKOS": 2, "SQUIRTLE ITA": 1, "STUNTMARK": 1,
-        "SIR VONSKI": 1, "MOUK57": 2, "LIMAXIMUS": 1, "F3NRYU": 1, "REKLAUS": 1,
-        "ELCHICOGYOT": 1, "LALLA 96": 1, "DARKGIOLLO": 1, "SPIO24": 2, "COMANDANTE MAV": 1,
-        "SKITETO": 1, "ECHOZERO": 1, "TOMENERGY": 1, "GERRY": 1, "TRICHECO": 2,
-        "PITT9595": 1, "CRUEL NEVE": 1, "GENNAROM": 1, "HOLDFAST": 1, "ANA BUNNY": 1,
-        "BRANCII": 2, "STRUNZTRUPPEN": 2, "27FRANCESCO": 1, "LEFADA13": 1, "MELO65": 1,
-        "PERSEUSXXX": 1, "BOGE": 1, "CASELLO": 1, "TCHIK": 1, "ZIO GIOTTO": 1,
-        "KING GRUFFALO": 1, "VENUS31": 1
+        "CAMIIIII 08": 2, "JOSEPPONE": 3, "HULKSPAKKA": 2, "BADBIGBOSS": 2, 
+        "YEAH YEAH OOOO": 1, "NOVEMBERGENZ": 2, "XFLOTCHY": 2, "BLOODYBLADE": 1, 
+        "ORAISHIO": 1, "PANDORE": 1, "MESHEL": 1, "SIR LANCE OF N81": 1, 
+        "VINCENZOPOMA89": 1, "ZAAAAAAAYYYYY": 2, "JAXXTRONIC": 1, "AGENT BASS": 1, 
+        "ARESARWEN": 1, "PSYKOS": 2, "SQUIRTLE ITA": 1, "STUNTMARK": 1, "SIR VONSKI": 1, 
+        "MOUK57": 2, "LIMAXIMUS": 1, "F3NRYU": 1, "REKLAUS": 1, "ELCHICOGYOT": 1, 
+        "LALLA 96": 1, "DARKGIOLLO": 1, "SPIO24": 2, "COMANDANTE MAV": 1, "SKITETO": 1, 
+        "ECHOZERO": 1, "TOMENERGY": 1, "GERRY": 1, "TRICHECO": 2, "PITT9595": 1, 
+        "CRUEL NEVE": 1, "GENNAROM": 1, "HOLDFAST": 1, "ANA BUNNY": 1, "BRANCII": 2, 
+        "STRUNZTRUPPEN": 2, "27FRANCESCO": 1, "LEFADA13": 1, "MELO65": 1, "PERSEUSXXX": 1, 
+        "BOGE": 1, "CASELLO": 1, "TCHIK": 1, "ZIO GIOTTO": 1, "KING GRUFFALO": 1, "VENUS31": 1
     }
 }
 
 def norm_name(name):
+    if not name:
+        return ""
     return name.split("(")[0].strip().upper()
 
+# --- ALGORITMO DI BILANCIAMENTO DINAMICO ---
+def get_dynamic_history():
+    """
+    Raccoglie i dati storici iniziali e li unisce a TUTTI i calendari 
+    salvati precedentemente nella sessione/JSON.
+    """
+    capo_counts = defaultdict(int, HISTORICAL_5_MONTHS["capo_counts"])
+    pass_counts = defaultdict(int, HISTORICAL_5_MONTHS["pass_counts"])
+    
+    saved_history = st.session_state.get('history', [])
+    
+    for month_data in saved_history:
+        for row in month_data.get('cal', []):
+            c_name = norm_name(row.get('Capo', ''))
+            p_name = norm_name(row.get('Pass', ''))
+            if c_name and c_name != "---":
+                capo_counts[c_name] += 1
+            if p_name and p_name != "---":
+                pass_counts[p_name] += 1
+                
+    return capo_counts, pass_counts
+
 def get_balanced_player(pool, role_type, current_assignments_this_month):
-    capo_hist = HISTORICAL_5_MONTHS["capo_counts"]
-    pass_hist = HISTORICAL_5_MONTHS["pass_counts"]
+    capo_hist, pass_hist = get_dynamic_history()
     
     candidates = []
     
@@ -149,18 +171,16 @@ def get_balanced_player(pool, role_type, current_assignments_this_month):
     candidates.sort(key=lambda x: (x["never_done"], x["current_total"], x["hist_total"], x["rand"]))
     return candidates[0]["player"]
 
-# --- STILE NEON / CYBERPUNK (TRENO DEL FUTURO) ---
+# --- STILE NEON / CYBERPUNK ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800;900&family=Rajdhani:wght@600;700&display=swap');
     
-    /* Background Cyberpunk Grid */
     .stApp { 
         background: radial-gradient(circle at 50% 10%, #150d2a 0%, #080811 100%);
         color: #e0e6ed;
     }
     
-    /* Header Futurist */
     .train-title { 
         font-family: 'Orbitron', sans-serif; 
         text-align: center; 
@@ -194,7 +214,6 @@ st.markdown("""
         filter: drop-shadow(0 0 10px #00f3ff);
     }
     
-    /* Panel Control Room */
     .sala-comando { 
         background: rgba(16, 12, 34, 0.75); 
         backdrop-filter: blur(12px); 
@@ -208,7 +227,6 @@ st.markdown("""
     [data-testid="column"] { padding: 0px !important; margin: 0px !important; }
     div[data-testid="stHorizontalBlock"] { gap: 0px !important; }
 
-    /* Futuristic Calendar Cell */
     .calendar-cell { 
         background: rgba(15, 15, 30, 0.85); 
         border: 1px solid rgba(0, 243, 255, 0.25);
@@ -241,7 +259,6 @@ st.markdown("""
     .h-comp { min-height: 175px !important; }
     .card-placeholder { background: rgba(5, 5, 12, 0.4); border: 1px dashed rgba(255,255,255,0.1); }
     
-    /* Badges & Labels */
     .day-badge { 
         background: linear-gradient(135deg, #7b2cbf, #ff007f); 
         color: #ffffff; 
@@ -280,7 +297,6 @@ st.markdown("""
         text-shadow: 0 0 5px rgba(255,255,255,0.3);
     }
     
-    /* Neon Buttons */
     .stButton>button { 
         border-radius: 6px !important; 
         font-family: 'Orbitron', sans-serif !important; 
@@ -463,7 +479,7 @@ with cb3:
                 "cal": [dict(d) for d in st.session_state['master_cal']]
             })
             save_history()
-            st.toast("Rotta Salvata nel Database!")
+            st.toast("AOSR Salvato nel Database!")
 
 with cb4:
     if st.button("🧹 SVUOTA", use_container_width=True):
@@ -488,10 +504,10 @@ if 'master_cal' in st.session_state:
 
 # --- ARCHIVIO STORICO ---
 if st.session_state['history']:
-    st.markdown("<br><br><h2 style='color:#00f3ff; font-family:Orbitron; text-align:center; text-shadow: 0 0 10px #00f3ff;'>📜 ARCHIVIO ROTTE SPAZIALI</h2>", unsafe_allow_html=True)
+    st.markdown("<br><br><h2 style='color:#00f3ff; font-family:Orbitron; text-align:center; text-shadow: 0 0 10px #00f3ff;'>📜 ARCHIVIO AOSR</h2>", unsafe_allow_html=True)
     for idx, item in enumerate(reversed(st.session_state['history'])):
         real_idx = len(st.session_state['history']) - 1 - idx
-        with st.expander(f"📦 ROTTA {item['data']} (Registrata il {item['ts']})"):
+        with st.expander(f"📦 AOSR {item['data']} (Registrato il {item['ts']})"):
             draw_grid(item['cal'], compact=True, is_history=True, key_prefix=f"hist_{real_idx}")
             col_btn1, col_btn2 = st.columns(2)
             with col_btn1:
