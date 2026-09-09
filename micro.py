@@ -36,14 +36,14 @@ if 'history' not in st.session_state:
 
 # --- DATABASE ---
 def init_db():
-    # Estratti dalla nuova lista e categorizzati per ruoli
     leaders = [
         "亗 Hool 亗 (R5)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", 
         "PΞPPΞ (R4)", "Ricky Around (R4)", "Uncle g brother (R4)", 
         "09ALEX24 (R4)", "ShinyPasta (R4)", "ΨWallΨ (R4)", "彡M A S T E Ʀ彡 (R4)"
     ]
     
-    r3 = [
+    # Elenco R2 e R3 accorpato in un unico gruppo
+    r3_r2 = [
         "Dragons slayer", "Morten1212", "J๏รєקקђoNe", "Zokra", "BadBigBoss", 
         "Sir Vonski", "Limaximus", "ARIO73", "Scolligo", "dome b", "Pitt9595", 
         "MartinSK", "Ｍａメツ", "xFlotchy", "ᶜᵃᵖᵒ ΘᴥΘ", "JaxxTronic", "NOVEMBERGENZ", 
@@ -52,10 +52,7 @@ def init_db():
         "Dark doom", "perseusxxx", "Reklaus", "SPio24", "F3nryU", "Strunztruppen", 
         "ᴮᵃⁿᵃⁿᵃ B", "Wolf006", "Sir Lance of N8Watch", "MissDrinks", "Aryron", 
         "Kɘrnel Panic", "Leechai", "Anubis 7", "GennaroM", "holdfast", "DarkGiollo", 
-        "PakII", "yeah yeah Coco Jambo", "GER176", "Giuseppec84", "mike92i", "krompir"
-    ]
-    
-    r2 = [
+        "PakII", "yeah yeah Coco Jambo", "GER176", "Giuseppec84", "mike92i", "krompir",
         "tchik", "Dark lalla", "zaaaaaaaayyyy", "controvento6", "torhil", "MeSHeL", 
         "Ꮭ ᏗᎶᏋᏁᏖ0", "G Σrry", "uncle g", "Pielaur", "Stefano00000", "VincenzoPoma89", 
         "Whale Panda", "Squirtle ITA", "Skiteto", "27Francesco", "BANDOLERO26", 
@@ -67,8 +64,7 @@ def init_db():
     
     data = [{"Nome": "---", "Grado": "Nessuno"}] + \
            [{"Nome": n, "Grado": "R5/R4"} for n in leaders] + \
-           [{"Nome": n, "Grado": "R3"} for n in r3] + \
-           [{"Nome": n, "Grado": "R2"} for n in r2]
+           [{"Nome": n, "Grado": "R3/R2"} for n in r3_r2]
     return pd.DataFrame(data)
 
 if 'players_db' not in st.session_state: 
@@ -186,13 +182,12 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
 st.markdown('<div class="train-title">🚂 AOSR EXPRESS Manager</div>', unsafe_allow_html=True)
 st.markdown('<div class="sala-comando">', unsafe_allow_html=True)
 
-c1, c2, c3, c4 = st.columns([1, 1.2, 1.2, 1.2])
+c1, c2, c3 = st.columns([1, 1.5, 2])
 with c1:
     st.session_state['sel_mese'] = st.selectbox("📅 MESE", MESI_ITA, index=datetime.now().month - 1)
     st.session_state['sel_anno'] = st.number_input("📆 ANNO", 2024, 2030, 2026)
 with c2: sel_leaders = st.multiselect("🤠 R5/R4", leaders_list)
-with c3: sel_r3 = st.multiselect("🌵 R3", db[db['Grado'] == "R3"]['Nome'].tolist())
-with c4: sel_r2 = st.multiselect("🐎 R2", db[db['Grado'] == "R2"]['Nome'].tolist())
+with c3: sel_r3_r2 = st.multiselect("🌵 R3/R2", db[db['Grado'] == "R3/R2"]['Nome'].tolist())
 
 st.markdown('<div style="margin-top:20px; padding-top:20px; border-top:1px solid rgba(255,204,102,0.2)">', unsafe_allow_html=True)
 cb1, cb1b, cb2, cb3, cb4 = st.columns(5)
@@ -201,7 +196,7 @@ with cb1:
     st.markdown('<div class="btn-genera">', unsafe_allow_html=True)
     if st.button("⚒️ GENERA AUTO", use_container_width=True):
         p_l = (sel_leaders if sel_leaders else leaders_list)
-        p_o = (sel_r3 if sel_r3 else db[db['Grado']=="R3"]['Nome'].tolist()) + (sel_r2 if sel_r2 else db[db['Grado']=="R2"]['Nome'].tolist())
+        p_o = (sel_r3_r2 if sel_r3_r2 else db[db['Grado']=="R3/R2"]['Nome'].tolist())
         random.shuffle(p_l); random.shuffle(p_o)
         num_gg = calendar.monthrange(st.session_state['sel_anno'], MESI_ITA.index(st.session_state['sel_mese'])+1)[1]
         st.session_state['master_cal'] = []
