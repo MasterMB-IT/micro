@@ -50,8 +50,8 @@ def init_db():
         "Sir Vonski", "Limaximus", "ARIO73", "Scolligo", "dome b", "Pitt9595", 
         "MartinSK", "Ｍａメツ", "xFlotchy", "ᶜᵃᵖᵒ ΘᴥΘ", "JaxxTronic", "NOVEMBERGENZ", 
         "Trivellatore", "TheDane001", "Purpix7", "Ξ Bugs Bunny Ξ", "Billy1906", 
-        "Mik I", "cruel neve", "Bendico", "Elchicogyot", "Comandante Maveric", 
-        "Dark doom", "perseusxxx", "Reklaus", "SPio24", "F3nryU", "Strunztruppen", 
+        "Mik I", "cruel neve", "Bendico", "Zio Giotto", "Comandante Maveric", 
+        "Markus Defender", "perseusxxx", "Reklaus", "SPio24", "F3nryU", "Strunztruppen", 
         "ᴮᵃⁿᵃⁿᵃ B", "Wolf006", "Sir Lance of N8Watch", "MissDrinks", "Aryron", 
         "Kɘrnel Panic", "Leechai", "Anubis 7", "GennaroM", "holdfast", "DarkGiollo", 
         "PakII", "yeah yeah Coco Jambo", "GER176", "Giuseppec84", "mike92i", "krompir",
@@ -83,15 +83,30 @@ def smart_normalize_name(name):
     if not name or name == "---":
         return ""
     
-    # 1. Rimuove indicazioni di grado e parentesi
-    clean = re.sub(r'\(.*?\)', '', str(name))
+    str_name = str(name).strip()
     
-    # 2. Normalizzazione caratteri Unicode (converte caratteri Fullwidth es. Ｍａ in Ma)
+    EXACT_MAP = {
+        "彡M A S T E Ʀ彡 (R4)": "MASTER",
+        "彡M A S T E Ʀ彡": "MASTER",
+        "MASTER": "MASTER",
+        "Ｍａメツ": "MA",
+        "MA": "MA",
+        "yeah yeah Coco Jambo": "GOZ",
+        "GOZ": "GOZ",
+        "Markus Defender": "DARKDOOM",
+        "DARK DOOM": "DARKDOOM",
+        "DARKDOOM": "DARKDOOM",
+        "Zio Giotto": "ELCHICOGYOT",
+        "ELCHICOGYOT": "ELCHICOGYOT"
+    }
+    if str_name in EXACT_MAP:
+        return EXACT_MAP[str_name]
+        
+    clean = re.sub(r'\(.*?\)', '', str_name)
     clean = unicodedata.normalize('NFKC', clean)
     clean = unicodedata.normalize('NFKD', clean).encode('ASCII', 'ignore').decode('utf-8')
     clean = clean.upper()
 
-    # 3. Mappature manuali ed eccezioni storiche esatte
     replacements = {
         'Ʀ': 'R', 'Ξ': 'E', '亗': '', 'Ψ': '', '๏': 'O', 'ร': 'S', 'ק': 'P', 
         'ђ': 'H', 'Σ': 'E', 'Δ': 'A', 'ℒ': 'L', 'ι': 'I', 'ℯ': 'E',
@@ -100,20 +115,21 @@ def smart_normalize_name(name):
     for char, repl in replacements.items():
         clean = clean.replace(char, repl)
         
-    # 4. Rimuove caratteri non alfanumerici (elimina simboli Katakana come メツ, 彡, ecc.)
     clean = re.sub(r'[^A-Z0-9]', '', clean)
     
-    # 5. Mappature per corrispondenze esatte dello storico
     if "YEAHYEAH" in clean:
         return "GOZ"
     if "MASTER" in clean:
         return "MASTER"
     if clean == "MA":
         return "MA"
+    if "MARKUS" in clean or "DARKDOOM" in clean:
+        return "DARKDOOM"
+    if "ZIOGIOTTO" in clean or "ELCHICO" in clean:
+        return "ELCHICOGYOT"
         
     return clean.strip()
 
-# Mappa unificata dei 100 giocatori attivi
 ACTIVE_PLAYERS_MAP = {smart_normalize_name(p): p for p in all_active_names}
 
 # --- DATI STORICI MAPPATI SUI NUOVI CODICI UNIFICATI ---
@@ -556,7 +572,7 @@ for norm_key, real_name in ACTIVE_PLAYERS_MAP.items():
 df_stats = pd.DataFrame(stats_data)
 df_stats = df_stats.sort_values(by=["Totale Presenze", "Giocatore"], ascending=[False, True]).reset_index(drop=True)
 
-tab_stat1, tab_stat2 = st.tabs(["📋 CONTEGGIO TOTALE MEMBRI ATTIVI", "🔍 RICERCA SINGOLO GIOCATORE"])
+tab_stat1, tab_stat2 = st.tabs(["📋 CONTEGGIO TOTALE MEMBRI ATTIVI", "🔍 VERIFICATORE NOME PER NOME"])
 
 with tab_stat1:
     m1, m2, m3 = st.columns(3)
@@ -578,13 +594,25 @@ with tab_stat1:
     )
 
 with tab_stat2:
-    search_player = st.selectbox("Seleziona Giocatore da verificare:", ["---"] + sorted(list(df_stats["Giocatore"])))
-    if search_player != "---":
-        row_p = df_stats[df_stats["Giocatore"] == search_player].iloc[0]
-        sp1, sp2, sp3 = st.columns(3)
-        sp1.metric("⚡ Ruoli Capo", int(row_p["Turni Capo"]))
-        sp2.metric("💺 Ruoli Passeggero", int(row_p["Turni Passeggero"]))
-        sp3.metric("🏆 Totale Generale", int(row_p["Totale Presenze"]))
+    st.markdown("### 🔎 Controllo di Corrispondenza e Normalizzazione")
+    st.caption("Seleziona o cerca un giocatore per verificare istantaneamente come viene letto dal sistema e quali dati storici aggancia.")
+    
+    selected_check_name = st.selectbox("Cerca Giocatore da Verificare:", all_active_names, key="checker_select")
+    
+    if selected_check_name:
+        norm_code = smart_normalize_name(selected_check_name)
+        c_val = capo_hist_total.get(norm_code, 0)
+        p_val = pass_hist_total.get(norm_code, 0)
+        
+        col_res1, col_res2, col_res3 = st.columns(3)
+        col_res1.metric("🔤 Chiave Interna", norm_code if norm_code else "❌ Non associabile")
+        col_res2.metric("⚡ Storico Capo Treno", c_val)
+        col_res3.metric("💺 Storico Passeggero", p_val)
+        
+        if c_val > 0 or p_val > 0:
+            st.success(f"✔ Il giocatore **{selected_check_name}** sta agganciando correttamente **{c_val + p_val} turni storici** tramite il codice `{norm_code}`.")
+        else:
+            st.warning(f"⚠ Il giocatore **{selected_check_name}** risulta a 0 turni storici. Se dovrebbe averne, controlla che la sua chiave (`{norm_code}`) corrisponda a quella salvata nei dati storici (`HISTORICAL_5_MONTHS`).")
 
 # --- ARCHIVIO STORICO CALENDARI ---
 if st.session_state['history']:
