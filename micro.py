@@ -42,7 +42,8 @@ def init_db():
     leaders = [
         "亗 Hool 亗 (R5)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", 
         "PΞPPΞ (R4)", "Ricky Around (R4)", "Uncle g brother (R4)", 
-        "09ALEX24 (R4)", "ShinyPasta (R4)", "ΨWallΨ (R4)", "彡M A S T E Ʀ彡 (R4)"
+        "09ALEX24 (R4)", "ShinyPasta (R4)", "ΨWallΨ (R4)", "彡M A S T E Ʀ彡 (R4)",
+        "GOZ (R4)"
     ]
     
     r3_r2 = [
@@ -54,7 +55,7 @@ def init_db():
         "Dark doom", "perseusxxx", "Reklaus", "SPio24", "F3nryU", "Strunztruppen", 
         "ᴮᵃⁿᵃⁿᵃ B", "Wolf006", "Sir Lance of N8Watch", "MissDrinks", "Aryron", 
         "Kɘrnel Panic", "Leechai", "Anubis 7", "GennaroM", "holdfast", "DarkGiollo", 
-        "PakII", "yeah yeah Coco Jambo", "GER176", "Giuseppec84", "mike92i", "krompir",
+        "PakII", "GER176", "Giuseppec84", "mike92i", "krompir",
         "tchik", "Dark lalla", "zaaaaaaaayyyy", "controvento6", "torhil", "MeSHeL", 
         "Ꮭ ᏗᎶᏋᏁᏖ0", "G Σrry", "uncle g", "Pielaur", "Stefano00000", "VincenzoPoma89", 
         "Whale Panda", "Squirtle ITA", "Skiteto", "27Francesco", "BANDOLERO26", 
@@ -94,6 +95,10 @@ def smart_normalize_name(name):
     # 4. Rimuove tutti i caratteri non alfanumerici (simboli, emoji, gilde)
     clean = re.sub(r'[^A-Z0-9]', '', clean)
     
+    # 5. ALIAS / MAPPATURA SPECIFICA (es. yeah yeah -> GOZ)
+    if "YEAHYEAH" in clean:
+        return "GOZ"
+        
     return clean.strip()
 
 # --- DATI STORICI INIZIALI (BASE 5 MESI) ---
@@ -122,7 +127,7 @@ HISTORICAL_5_MONTHS = {
         "STEFANO00000": 2, "PAKII": 2, "BANDOLERO26": 1, "MARKUS DEFENDED": 1,
         "WALL 7": 3, "EDDWARD": 2, "KROMPIR": 3, "GHANDAL": 1, "ZOKRA": 2,
         "CAMIIIII 08": 2, "JOSEPPONE": 3, "HULKSPAKKA": 2, "BADBIGBOSS": 2, 
-        "YEAH YEAH OOOO": 1, "NOVEMBERGENZ": 2, "XFLOTCHY": 2, "BLOODYBLADE": 1, 
+        "GOZ": 1, "NOVEMBERGENZ": 2, "XFLOTCHY": 2, "BLOODYBLADE": 1, 
         "ORAISHIO": 1, "PANDORE": 1, "MESHEL": 1, "SIR LANCE OF N81": 1, 
         "VINCENZOPOMA89": 1, "ZAAAAAAAYYYYY": 2, "JAXXTRONIC": 1, "AGENT BASS": 1, 
         "ARESARWEN": 1, "PSYKOS": 2, "SQUIRTLE ITA": 1, "STUNTMARK": 1, "SIR VONSKI": 1, 
