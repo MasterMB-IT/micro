@@ -4,7 +4,7 @@ import random
 import json
 import os
 import re
-import unicodeadata
+import unicodedata
 from datetime import datetime
 import calendar
 from collections import defaultdict
