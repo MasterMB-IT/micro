@@ -3,6 +3,8 @@ import pandas as pd
 import random
 import json
 import os
+import re
+import unicodeadata
 from datetime import datetime
 import calendar
 from collections import defaultdict
@@ -75,6 +77,25 @@ db = st.session_state['players_db']
 leaders_list = sorted(db[db['Grado'] == "R5/R4"]['Nome'].tolist())
 all_names_list = sorted(db['Nome'].tolist())
 
+# --- FUNZIONE AVANZATA DI PULIZIA E UNIFICAZIONE NOMI ---
+def smart_normalize_name(name):
+    if not name or name == "---":
+        return ""
+    
+    # 1. Rimuove eventuali note o gradi tra parentesi come (R4), (R5), ecc.
+    clean = re.sub(r'\(.*?\)', '', str(name))
+    
+    # 2. Conversione caratteri unicode / diacritici a caratteri standard A-Z
+    clean = unicodedata.normalize('NFKD', clean).encode('ASCII', 'ignore').decode('utf-8')
+    
+    # 3. Trasforma in maiuscolo
+    clean = clean.upper()
+    
+    # 4. Rimuove tutti i caratteri non alfanumerici (simboli, emoji, gilde)
+    clean = re.sub(r'[^A-Z0-9]', '', clean)
+    
+    return clean.strip()
+
 # --- DATI STORICI INIZIALI (BASE 5 MESI) ---
 HISTORICAL_5_MONTHS = {
     "capo_counts": {
@@ -114,36 +135,40 @@ HISTORICAL_5_MONTHS = {
     }
 }
 
-def norm_name(name):
-    if not name:
-        return ""
-    return name.split("(")[0].strip().upper()
-
 # --- ALGORITMO DI BILANCIAMENTO DINAMICO ---
 def get_dynamic_history():
     """
-    Raccoglie i dati storici iniziali e li unisce a TUTTI i calendari 
-    salvati precedentemente nella sessione/JSON.
+    Normalizza le chiavi e unifica il conteggio storico base con i mesi salvati.
     """
-    capo_counts = defaultdict(int, HISTORICAL_5_MONTHS["capo_counts"])
-    pass_counts = defaultdict(int, HISTORICAL_5_MONTHS["pass_counts"])
+    capo_counts = defaultdict(int)
+    pass_counts = defaultdict(int)
     
+    # 1. Carica storico 5 mesi con chiavi normalizzate
+    for k, v in HISTORICAL_5_MONTHS["capo_counts"].items():
+        norm_k = smart_normalize_name(k)
+        if norm_k:
+            capo_counts[norm_k] += v
+
+    for k, v in HISTORICAL_5_MONTHS["pass_counts"].items():
+        norm_k = smart_normalize_name(k)
+        if norm_k:
+            pass_counts[norm_k] += v
+    
+    # 2. Aggiungi i dati salvati in memoria/JSON
     saved_history = st.session_state.get('history', [])
-    
     for month_data in saved_history:
         for row in month_data.get('cal', []):
-            c_name = norm_name(row.get('Capo', ''))
-            p_name = norm_name(row.get('Pass', ''))
-            if c_name and c_name != "---":
-                capo_counts[c_name] += 1
-            if p_name and p_name != "---":
-                pass_counts[p_name] += 1
+            c_norm = smart_normalize_name(row.get('Capo', ''))
+            p_norm = smart_normalize_name(row.get('Pass', ''))
+            if c_norm:
+                capo_counts[c_norm] += 1
+            if p_norm:
+                pass_counts[p_norm] += 1
                 
     return capo_counts, pass_counts
 
 def get_balanced_player(pool, role_type, current_assignments_this_month):
     capo_hist, pass_hist = get_dynamic_history()
-    
     candidates = []
     
     for player in pool:
@@ -151,9 +176,9 @@ def get_balanced_player(pool, role_type, current_assignments_this_month):
         current_p = current_assignments_this_month["pass"][player]
         current_total = current_c + current_p
         
-        n_p = norm_name(player)
-        hist_c = sum(v for k, v in capo_hist.items() if k in n_p or n_p in k)
-        hist_p = sum(v for k, v in pass_hist.items() if k in n_p or n_p in k)
+        norm_p = smart_normalize_name(player)
+        hist_c = capo_hist.get(norm_p, 0)
+        hist_p = pass_hist.get(norm_p, 0)
             
         hist_role = hist_c if role_type == "capo" else hist_p
         hist_total = hist_c + hist_p
@@ -502,30 +527,34 @@ if 'master_cal' in st.session_state:
     
     draw_grid(st.session_state['master_cal'], compact=view_mode, key_prefix="master")
 
-# --- SEZIONE STORICO TESTUALE & STATISTICHE ---
+# --- SEZIONE STORICO TESTUALE & STATISTICHE (UNIFICATA E NORMALIZZATA) ---
 st.markdown("<br><hr style='border:1px solid rgba(0,243,255,0.2)'><br>", unsafe_allow_html=True)
 st.markdown("<h2 style='color:#00f3ff; font-family:Orbitron; text-align:center; text-shadow: 0 0 10px #00f3ff;'>📊 STATISTICHE & STORICO TESTUALE</h2>", unsafe_allow_html=True)
 
 capo_hist_total, pass_hist_total = get_dynamic_history()
 
-# Unisci solo i nomi con effettivo storico o presenti nel DB
-all_players_set = set(all_names_list)
-all_players_set.update(capo_hist_total.keys())
-all_players_set.update(pass_hist_total.keys())
+# Mappa per associare ad ogni chiave normalizzata il nome formattato preferito
+display_names = {}
+for p in all_names_list:
+    if p != "---":
+        norm_key = smart_normalize_name(p)
+        if norm_key and norm_key not in display_names:
+            display_names[norm_key] = p
+
+# Trova tutte le chiavi normalizzate univoche
+all_norm_keys = set(capo_hist_total.keys()).union(set(pass_hist_total.keys()))
 
 stats_data = []
-for p in sorted(all_players_set):
-    if p == "---":
-        continue
-    n_p = norm_name(p)
-    c_count = sum(v for k, v in capo_hist_total.items() if k in n_p or n_p in k)
-    p_count = sum(v for k, v in pass_hist_total.items() if k in n_p or n_p in k)
+for norm_key in sorted(all_norm_keys):
+    c_count = capo_hist_total.get(norm_key, 0)
+    p_count = pass_hist_total.get(norm_key, 0)
     tot = c_count + p_count
     
-    # MOSTRA SOLO CHI HA ALMENO 1 PRESENZA STORICA
     if tot > 0:
+        # Usa il nome formattato dal DB se esiste, altrimenti la chiave pulita
+        disp_name = display_names.get(norm_key, norm_key)
         stats_data.append({
-            "Giocatore": p,
+            "Giocatore": disp_name,
             "Turni Capo": c_count,
             "Turni Passeggero": p_count,
             "Totale Presenze": tot
@@ -535,14 +564,14 @@ df_stats = pd.DataFrame(stats_data)
 if not df_stats.empty:
     df_stats = df_stats.sort_values(by=["Totale Presenze", "Giocatore"], ascending=[False, True]).reset_index(drop=True)
 
-tab_stat1, tab_stat2 = st.tabs(["📋 CONTEGGIO TOTALE GIOCATORI EFFETTIVI", "🔍 RICERCA SINGOLO GIOCATORE"])
+tab_stat1, tab_stat2 = st.tabs(["📋 CONTEGGIO TOTALE GIOCATORI UNIFICATO", "🔍 RICERCA SINGOLO GIOCATORE"])
 
 with tab_stat1:
     if not df_stats.empty:
         m1, m2, m3 = st.columns(3)
         m1.metric("Totale Assegnazioni Capi", sum(df_stats["Turni Capo"]))
         m2.metric("Totale Assegnazioni Passeggeri", sum(df_stats["Turni Passeggero"]))
-        m3.metric("Membri Attivi con Presenze", len(df_stats))
+        m3.metric("Membri Unici Attivi", len(df_stats))
         
         st.write("")
         st.dataframe(
