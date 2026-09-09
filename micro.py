@@ -8,7 +8,7 @@ import calendar
 from collections import defaultdict
 
 # --- CONFIGURAZIONE PAGINA ---
-st.set_page_config(page_title="AOSR Train Manager - Deluxe Edition", layout="wide")
+st.set_page_config(page_title="AOSR Express 2099 - Hyperloop Manager", layout="wide")
 
 MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
             "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
@@ -35,7 +35,7 @@ def load_history():
 if 'history' not in st.session_state:
     st.session_state['history'] = load_history()
 
-# --- DATABASE MEMBRI AGGIORNATI ---
+# --- DATABASE MEMBRI ---
 def init_db():
     leaders = [
         "亗 Hool 亗 (R5)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", 
@@ -75,7 +75,7 @@ db = st.session_state['players_db']
 leaders_list = sorted(db[db['Grado'] == "R5/R4"]['Nome'].tolist())
 all_names_list = sorted(db['Nome'].tolist())
 
-# --- DATI STORICI ESTRATTI DAI 5 MESI (APRILE - AGOSTO 2026) ---
+# --- DATI STORICI 5 MESI ---
 HISTORICAL_5_MONTHS = {
     "capo_counts": {
         "Hool": 2, "MASTER": 4, "SHINYPASTA": 4, "PEPPE": 3, "UNCLE G BROTHER": 2,
@@ -115,43 +115,27 @@ HISTORICAL_5_MONTHS = {
     }
 }
 
-# Normalize historical keys for matching
 def norm_name(name):
-    clean = name.split("(")[0].strip().upper()
-    return clean
+    return name.split("(")[0].strip().upper()
 
-# --- ALGORITMO DI SELEZIONE BILANCIATO ---
 def get_balanced_player(pool, role_type, current_assignments_this_month):
-    """
-    Seleziona il giocatore migliore in base allo storico dei 5 mesi:
-    1. Chi non ha mai ricoperto il ruolo richiesto.
-    2. Chi ha il minor numero di incarichi totali (Capo + Passeggero).
-    3. Evita sovrapposizioni nello stesso mese corrente.
-    """
     capo_hist = HISTORICAL_5_MONTHS["capo_counts"]
     pass_hist = HISTORICAL_5_MONTHS["pass_counts"]
     
     candidates = []
     
     for player in pool:
-        # Conteggio nel mese che stiamo generando ora
         current_c = current_assignments_this_month["capo"][player]
         current_p = current_assignments_this_month["pass"][player]
         current_total = current_c + current_p
         
-        # Conteggio nei 5 mesi passati
         n_p = norm_name(player)
-        hist_c = 0
-        hist_p = 0
-        for k, v in capo_hist.items():
-            if k in n_p or n_p in k: hist_c += v
-        for k, v in pass_hist.items():
-            if k in n_p or n_p in k: hist_p += v
+        hist_c = sum(v for k, v in capo_hist.items() if k in n_p or n_p in k)
+        hist_p = sum(v for k, v in pass_hist.items() if k in n_p or n_p in k)
             
         hist_role = hist_c if role_type == "capo" else hist_p
         hist_total = hist_c + hist_p
         
-        # Priorità: (1) Mai fatto questo ruolo, (2) Meno presenze mese corrente, (3) Meno presenze storiche
         never_done_role = 1 if hist_role == 0 else 2
         
         candidates.append({
@@ -162,50 +146,192 @@ def get_balanced_player(pool, role_type, current_assignments_this_month):
             "rand": random.random()
         })
         
-    # Ordina i candidati per le priorità stabilite
     candidates.sort(key=lambda x: (x["never_done"], x["current_total"], x["hist_total"], x["rand"]))
     return candidates[0]["player"]
 
-# --- CSS ---
+# --- STILE NEON / CYBERPUNK (TRENO DEL FUTURO) ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Rye&family=Montserrat:wght@700;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800;900&family=Rajdhani:wght@600;700&display=swap');
     
-    .stApp { background: linear-gradient(rgba(30, 20, 10, 0.8), rgba(15, 10, 5, 0.95)), url('https://images.unsplash.com/photo-1510524527013-0393282436da?q=80&w=1920&auto=format&fit=crop'); background-size: cover; background-attachment: fixed; }
-    .train-title { font-family: 'Rye', cursive; text-align: center; color: #ffcc66; text-shadow: 5px 5px 0px #4b2e1b; font-size: 4rem; margin-bottom: 20px; }
-    .cal-header-container { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: -10px; }
-    .cal-header-text { font-family: 'Rye', cursive; color: #ffcc66; font-size: 2.5rem; margin: 0; }
-    .train-icon { font-size: 3rem; color: #ffcc66; }
-    .sala-comando { background: rgba(25, 15, 5, 0.85); backdrop-filter: blur(10px); border: 2px solid #ffcc66; border-radius: 20px; padding: 25px; margin-bottom: 30px; border-top: 5px solid #ffcc66; }
+    /* Background Cyberpunk Grid */
+    .stApp { 
+        background: radial-gradient(circle at 50% 10%, #150d2a 0%, #080811 100%);
+        color: #e0e6ed;
+    }
+    
+    /* Header Futurist */
+    .train-title { 
+        font-family: 'Orbitron', sans-serif; 
+        text-align: center; 
+        color: #00f3ff; 
+        text-shadow: 0 0 10px #00f3ff, 0 0 20px #00f3ff, 0 0 40px #9d4edd; 
+        font-size: 3.2rem; 
+        font-weight: 900;
+        letter-spacing: 3px;
+        margin-bottom: 25px; 
+    }
+    
+    .cal-header-container { 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        gap: 20px; 
+        margin-bottom: 15px; 
+    }
+    
+    .cal-header-text { 
+        font-family: 'Orbitron', sans-serif; 
+        color: #ff007f; 
+        text-shadow: 0 0 10px #ff007f, 0 0 20px #ff007f; 
+        font-size: 2.2rem; 
+        letter-spacing: 2px;
+        margin: 0; 
+    }
+    
+    .train-icon { 
+        font-size: 2.8rem; 
+        filter: drop-shadow(0 0 10px #00f3ff);
+    }
+    
+    /* Panel Control Room */
+    .sala-comando { 
+        background: rgba(16, 12, 34, 0.75); 
+        backdrop-filter: blur(12px); 
+        border: 1px solid #00f3ff; 
+        box-shadow: 0 0 15px rgba(0, 243, 255, 0.2), inset 0 0 15px rgba(157, 78, 221, 0.15);
+        border-radius: 12px; 
+        padding: 25px; 
+        margin-bottom: 30px; 
+    }
 
     [data-testid="column"] { padding: 0px !important; margin: 0px !important; }
     div[data-testid="stHorizontalBlock"] { gap: 0px !important; }
 
+    /* Futuristic Calendar Cell */
     .calendar-cell { 
-        background: #fdf5e6; 
-        border: 1px solid rgba(93, 64, 55, 0.4);
-        padding: 12px 8px; 
-        color: #2b1d0e; 
-        background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png'); 
+        background: rgba(15, 15, 30, 0.85); 
+        border: 1px solid rgba(0, 243, 255, 0.25);
+        padding: 12px 10px; 
+        color: #ffffff; 
         display: flex; 
         flex-direction: column; 
-        transition: 0.2s;
+        transition: all 0.3s ease;
         margin: -0.5px;
+        position: relative;
+        overflow: hidden;
     }
-    .calendar-cell:hover { background-color: #fff9f0; z-index: 10; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); }
+    
+    .calendar-cell::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 2px;
+        background: linear-gradient(90deg, #00f3ff, #ff007f);
+        opacity: 0.3;
+    }
+    
+    .calendar-cell:hover { 
+        border-color: #ff007f;
+        box-shadow: 0 0 15px rgba(255, 0, 127, 0.4), inset 0 0 10px rgba(0, 243, 255, 0.2); 
+        z-index: 10; 
+        transform: translateY(-2px);
+    }
+    
     .h-norm { min-height: 230px !important; }
     .h-comp { min-height: 175px !important; }
-    .card-placeholder { background: rgba(0,0,0,0.1); border: 1px solid rgba(93, 64, 55, 0.2); }
-    .day-badge { background: #8b0000; color: white; font-family: 'Montserrat', sans-serif; font-weight: 900; padding: 2px 8px; border-radius: 2px; font-size: 0.75rem; width: fit-content; margin-bottom: 6px; }
-    .role-label { color: #5d4037; font-size: 0.6rem; font-family: 'Montserrat', sans-serif; text-transform: uppercase; font-weight: 800; border-bottom: 1px solid rgba(93, 64, 55, 0.15); margin-top: 6px; }
-    .name-text { font-family: 'Special Elite', cursive; font-size: 0.88rem; font-weight: 900; text-transform: uppercase; border-left: 3px solid #d4a373; padding-left: 6px; overflow: hidden; white-space: nowrap; margin-top: 2px; color: #000000 !important; }
+    .card-placeholder { background: rgba(5, 5, 12, 0.4); border: 1px dashed rgba(255,255,255,0.1); }
     
-    .stButton>button { border-radius: 6px !important; font-family: 'Rye', cursive !important; border: 2px solid #2b1d0e !important; }
-    .btn-genera button { background: #d4a373 !important; color: #2b1d0e !important; }
-    .btn-vuoto button { background: #5a5a5a !important; color: white !important; }
-    .btn-assegna button { background: #1b4d3e !important; color: #2ecc71 !important; }
+    /* Badges & Labels */
+    .day-badge { 
+        background: linear-gradient(135deg, #7b2cbf, #ff007f); 
+        color: #ffffff; 
+        font-family: 'Orbitron', sans-serif; 
+        font-weight: 800; 
+        padding: 3px 8px; 
+        border-radius: 4px; 
+        font-size: 0.72rem; 
+        width: fit-content; 
+        margin-bottom: 8px; 
+        box-shadow: 0 0 8px rgba(255, 0, 127, 0.5);
+    }
     
-    div[data-testid="stPopover"] > button { height: 26px !important; width: 100% !important; margin-top: 8px !important; font-size: 0.75rem !important; border: 1px solid #d4a373 !important;}
+    .role-label { 
+        color: #00f3ff; 
+        font-size: 0.65rem; 
+        font-family: 'Rajdhani', sans-serif; 
+        text-transform: uppercase; 
+        font-weight: 700; 
+        letter-spacing: 1px;
+        border-bottom: 1px solid rgba(0, 243, 255, 0.2); 
+        margin-top: 6px; 
+    }
+    
+    .name-text { 
+        font-family: 'Rajdhani', sans-serif; 
+        font-size: 0.95rem; 
+        font-weight: 700; 
+        text-transform: uppercase; 
+        border-left: 3px solid #ff007f; 
+        padding-left: 6px; 
+        overflow: hidden; 
+        white-space: nowrap; 
+        margin-top: 3px; 
+        color: #ffffff !important; 
+        text-shadow: 0 0 5px rgba(255,255,255,0.3);
+    }
+    
+    /* Neon Buttons */
+    .stButton>button { 
+        border-radius: 6px !important; 
+        font-family: 'Orbitron', sans-serif !important; 
+        font-size: 0.8rem !important;
+        letter-spacing: 1px;
+        transition: all 0.3s ease !important;
+    }
+    
+    .btn-genera button { 
+        background: transparent !important; 
+        color: #00f3ff !important; 
+        border: 1px solid #00f3ff !important;
+        box-shadow: 0 0 10px rgba(0,243,255,0.2) !important;
+    }
+    .btn-genera button:hover {
+        background: #00f3ff !important;
+        color: #080811 !important;
+        box-shadow: 0 0 20px #00f3ff !important;
+    }
+
+    .btn-vuoto button { 
+        background: transparent !important; 
+        color: #a0aab2 !important; 
+        border: 1px solid #4a5568 !important;
+    }
+    .btn-vuoto button:hover {
+        background: #4a5568 !important;
+        color: #ffffff !important;
+    }
+
+    .btn-assegna button { 
+        background: transparent !important; 
+        color: #39ff14 !important; 
+        border: 1px solid #39ff14 !important;
+        box-shadow: 0 0 10px rgba(57, 255, 20, 0.2) !important;
+    }
+    .btn-assegna button:hover {
+        background: #39ff14 !important;
+        color: #080811 !important;
+        box-shadow: 0 0 20px #39ff14 !important;
+    }
+    
+    div[data-testid="stPopover"] > button { 
+        height: 26px !important; 
+        width: 100% !important; 
+        margin-top: 8px !important; 
+        font-size: 0.7rem !important; 
+        border: 1px solid #7b2cbf !important;
+        background: rgba(123, 44, 191, 0.2) !important;
+        color: #00f3ff !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -242,17 +368,17 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
                     
                     st.markdown(f"""
                     <div class="calendar-cell {h_cls}">
-                        <div class="day-badge">{wd_display} {giorno}</div>
-                        <div class="role-label">CAPO {"⭐" if giorno <= 11 else ""}</div>
+                        <div class="day-badge">⚡ {wd_display} {giorno}</div>
+                        <div class="role-label">⚡ CAPO TRENO {"🛰️" if giorno <= 11 else ""}</div>
                         <div class="name-text">{r['Capo']}</div>
-                        <div class="role-label">PASSEGGERO</div>
+                        <div class="role-label">💺 PASSEGGERO VIP</div>
                         <div class="name-text">{r['Pass']}</div>
                     </div>
                     """, unsafe_allow_html=True)
                     
                     if not is_history and not compact:
-                        with st.popover("✍️ SCRIVI"):
-                            st.caption(f"Modifica Giorno {giorno}")
+                        with st.popover("⚙️ MODIFICA"):
+                            st.caption(f"Configurazione Giorno {giorno}")
                             metodo = st.radio("Metodo", ["Lista", "Manuale"], key=f"met_{key_prefix}_{giorno}", horizontal=True)
                             
                             if metodo == "Lista":
@@ -269,23 +395,23 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
                                         break
                                 st.rerun()
 
-# --- INTERFACCIA ---
-st.markdown('<div class="train-title">🚂 AOSR EXPRESS Manager</div>', unsafe_allow_html=True)
+# --- INTERFACCIA UTENTE ---
+st.markdown('<div class="train-title">🚝 AOSR HYPERLOOP 2099</div>', unsafe_allow_html=True)
 st.markdown('<div class="sala-comando">', unsafe_allow_html=True)
 
 c1, c2, c3 = st.columns([1, 1.5, 2])
 with c1:
-    st.session_state['sel_mese'] = st.selectbox("📅 MESE", MESI_ITA, index=8) # Settembre
+    st.session_state['sel_mese'] = st.selectbox("📅 MESE", MESI_ITA, index=8)
     st.session_state['sel_anno'] = st.number_input("📆 ANNO", 2024, 2030, 2026)
-with c2: sel_leaders = st.multiselect("🤠 R5/R4", leaders_list)
-with c3: sel_r3_r2 = st.multiselect("🌵 R3/R2", db[db['Grado'] == "R3/R2"]['Nome'].tolist())
+with c2: sel_leaders = st.multiselect("🛸 PILOTI (R5/R4)", leaders_list)
+with c3: sel_r3_r2 = st.multiselect("🛰️ PASSEGGERI (R3/R2)", db[db['Grado'] == "R3/R2"]['Nome'].tolist())
 
-st.markdown('<div style="margin-top:20px; padding-top:20px; border-top:1px solid rgba(255,204,102,0.2)">', unsafe_allow_html=True)
+st.markdown('<div style="margin-top:20px; padding-top:20px; border-top:1px solid rgba(0,243,255,0.2)">', unsafe_allow_html=True)
 cb1, cb1b, cb2, cb3, cb4 = st.columns(5)
 
 with cb1:
     st.markdown('<div class="btn-genera">', unsafe_allow_html=True)
-    if st.button("⚒️ GENERA AUTO (BILANCIATO)", use_container_width=True):
+    if st.button("⚡ GENERA BILANCIATO", use_container_width=True):
         p_l = (sel_leaders if sel_leaders else leaders_list)
         p_o = (sel_r3_r2 if sel_r3_r2 else db[db['Grado']=="R3/R2"]['Nome'].tolist())
         
@@ -299,11 +425,9 @@ with cb1:
         
         for g in range(1, num_gg + 1):
             if g <= 11:
-                # Primi 11 giorni: Capo da R5/R4, Passeggero da R3/R2
                 c = get_balanced_player(p_l, "capo", current_assignments)
                 p = get_balanced_player([x for x in p_o if x != c], "pass", current_assignments)
             else:
-                # Dal 12 in poi: Entrambi da R3/R2
                 c = get_balanced_player(p_o, "capo", current_assignments)
                 p = get_balanced_player([x for x in p_o if x != c], "pass", current_assignments)
             
@@ -315,21 +439,21 @@ with cb1:
 
 with cb1b:
     st.markdown('<div class="btn-vuoto">', unsafe_allow_html=True)
-    if st.button("🆕 CREA VUOTO", use_container_width=True):
+    if st.button("🌐 RESET TABELLA", use_container_width=True):
         num_gg = calendar.monthrange(st.session_state['sel_anno'], MESI_ITA.index(st.session_state['sel_mese'])+1)[1]
         st.session_state['master_cal'] = [{"Giorno": g, "Capo": "---", "Pass": "---"} for g in range(1, num_gg + 1)]
     st.markdown('</div>', unsafe_allow_html=True)
 
 with cb2:
-    if st.button("🔍 VERIFICA", use_container_width=True):
+    if st.button("🔍 CHECK REGOLE", use_container_width=True):
         if 'master_cal' in st.session_state:
             err_g = [f"GG {r['Giorno']}" for r in st.session_state['master_cal'] if r['Giorno'] <= 11 and r['Capo'] not in leaders_list and r['Capo'] != "---"]
-            if err_g: st.warning(f"Nota: Capi non-R4 nei primi 11gg: {', '.join(err_g)}")
-            else: st.success("Tutto perfetto!")
+            if err_g: st.warning(f"Note: Capi non-R4 nei primi 11gg: {', '.join(err_g)}")
+            else: st.success("Pianificazione conforme!")
 
 with cb3:
     st.markdown('<div class="btn-assegna">', unsafe_allow_html=True)
-    if st.button("🟩 ASSEGNA", use_container_width=True):
+    if st.button("💾 SALVA IN MEMORIA", use_container_width=True):
         if 'master_cal' in st.session_state:
             st.session_state['history'].append({
                 "data": f"{st.session_state['sel_mese']} {st.session_state['sel_anno']}",
@@ -339,45 +463,45 @@ with cb3:
                 "cal": [dict(d) for d in st.session_state['master_cal']]
             })
             save_history()
-            st.toast("Calendario Salvato!")
+            st.toast("Rotta Salvata nel Database!")
 
 with cb4:
-    if st.button("🏜️ RESET", use_container_width=True):
+    if st.button("🧹 SVUOTA", use_container_width=True):
         if 'master_cal' in st.session_state: del st.session_state['master_cal']
         st.rerun()
 
 st.write("")
-view_mode = st.toggle("🎞️ VISTA COMPATTA (Senza modifiche)", value=False)
+view_mode = st.toggle("🎞️ VISTA COMPATTA MATRIX", value=False)
 st.markdown('</div>', unsafe_allow_html=True)
 
-# --- VISUALIZZAZIONE ---
+# --- VISUALIZZAZIONE PRINCIPALE ---
 if 'master_cal' in st.session_state:
     st.markdown(f"""
         <div class="cal-header-container">
-            <span class="train-icon">🚂</span>
-            <h2 class="cal-header-text">AOSR Express - {st.session_state['sel_mese'].upper()} {st.session_state['sel_anno']}</h2>
-            <span class="train-icon">🚂</span>
+            <span class="train-icon">🚅</span>
+            <h2 class="cal-header-text">ROTTA - {st.session_state['sel_mese'].upper()} {st.session_state['sel_anno']}</h2>
+            <span class="train-icon">🚅</span>
         </div>
     """, unsafe_allow_html=True)
     
     draw_grid(st.session_state['master_cal'], compact=view_mode, key_prefix="master")
 
-# --- ARCHIVIO ---
+# --- ARCHIVIO STORICO ---
 if st.session_state['history']:
-    st.markdown("<br><br><h2 style='color:#ffcc66; font-family:Rye; text-align:center;'>📜 CRONOLOGIA</h2>", unsafe_allow_html=True)
+    st.markdown("<br><br><h2 style='color:#00f3ff; font-family:Orbitron; text-align:center; text-shadow: 0 0 10px #00f3ff;'>📜 ARCHIVIO ROTTE SPAZIALI</h2>", unsafe_allow_html=True)
     for idx, item in enumerate(reversed(st.session_state['history'])):
         real_idx = len(st.session_state['history']) - 1 - idx
-        with st.expander(f"📦 {item['data']} (Creato il {item['ts']})"):
+        with st.expander(f"📦 ROTTA {item['data']} (Registrata il {item['ts']})"):
             draw_grid(item['cal'], compact=True, is_history=True, key_prefix=f"hist_{real_idx}")
             col_btn1, col_btn2 = st.columns(2)
             with col_btn1:
-                if st.button("📝 MODIFICA QUESTO", key=f"edit_{real_idx}", use_container_width=True):
+                if st.button("📝 CARICA & MODIFICA", key=f"edit_{real_idx}", use_container_width=True):
                     st.session_state['master_cal'] = [dict(d) for d in item['cal']]
                     st.session_state['sel_mese'] = item.get('mese', st.session_state['sel_mese'])
                     st.session_state['sel_anno'] = item.get('anno', st.session_state['sel_anno'])
                     st.rerun()
             with col_btn2:
-                if st.button("🗑️ ELIMINA", key=f"del_{real_idx}", use_container_width=True):
+                if st.button("🗑️ ELIMINA RECORD", key=f"del_{real_idx}", use_container_width=True):
                     st.session_state['history'].pop(real_idx)
                     save_history()
                     st.rerun()
