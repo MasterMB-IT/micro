@@ -5,6 +5,7 @@ import json
 import os
 from datetime import datetime
 import calendar
+from collections import defaultdict
 
 # --- CONFIGURAZIONE PAGINA ---
 st.set_page_config(page_title="AOSR Train Manager - Deluxe Edition", layout="wide")
@@ -34,7 +35,7 @@ def load_history():
 if 'history' not in st.session_state:
     st.session_state['history'] = load_history()
 
-# --- DATABASE ---
+# --- DATABASE MEMBRI AGGIORNATI ---
 def init_db():
     leaders = [
         "亗 Hool 亗 (R5)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", 
@@ -42,7 +43,6 @@ def init_db():
         "09ALEX24 (R4)", "ShinyPasta (R4)", "ΨWallΨ (R4)", "彡M A S T E Ʀ彡 (R4)"
     ]
     
-    # Elenco R2 e R3 accorpato in un unico gruppo
     r3_r2 = [
         "Dragons slayer", "Morten1212", "J๏รєקקђoNe", "Zokra", "BadBigBoss", 
         "Sir Vonski", "Limaximus", "ARIO73", "Scolligo", "dome b", "Pitt9595", 
@@ -74,6 +74,97 @@ db = st.session_state['players_db']
 
 leaders_list = sorted(db[db['Grado'] == "R5/R4"]['Nome'].tolist())
 all_names_list = sorted(db['Nome'].tolist())
+
+# --- DATI STORICI ESTRATTI DAI 5 MESI (APRILE - AGOSTO 2026) ---
+HISTORICAL_5_MONTHS = {
+    "capo_counts": {
+        "Hool": 2, "MASTER": 4, "SHINYPASTA": 4, "PEPPE": 3, "UNCLE G BROTHER": 2,
+        "RICKY AROUND": 3, "09ALEX24": 3, "BLOODYBLADE": 1, "LE 12 SCIMMIE": 2,
+        "STARBETTY": 1, "SAGITTARIUS A1": 3, "WHALE PANDA": 2, "JEPPE": 1, "GOZ": 3,
+        "STUNTMARK": 1, "WALL 7": 4, "CRUEL NEVE": 3, "ZOKRA": 3, "XFLOTCHY": 3,
+        "GIUSEPPEC84": 2, "BENITO MUSCHIONI": 2, "BADBIGBOSS": 3, "ANA BUNNY": 1,
+        "LALLA 96": 1, "MAメツ": 3, "NOVEMBERGENZ": 2, "GHOST": 2, "ECHOZERO": 1,
+        "SPIO24": 3, "TRICHECO": 1, "MOUK57": 2, "MORTEN1212": 3, "MELO65": 1,
+        "MARTINSK": 2, "CASELLO": 1, "SCOLLIGO": 2, "LIMAXIMUS": 2, "SIR VONSKI": 2,
+        "F3NRYU": 2, "DARKGIOLLO": 2, "STRAMM": 2, "REKLAUS": 2, "ANUBIS 7": 1,
+        "BRANCII": 1, "VENUS 31": 1, "JOS591": 1, "X THE LORD X": 2, "MIKE92I": 1,
+        "PITT9595": 2, "TOHIK": 2, "KINGGRUFFALO": 1, "BENDICO": 1, "27FRANCESCO": 1,
+        "GHANDAL": 1, "MARKUS DEFENDED": 1, "GENNAROM": 1, "BANDOLERO26": 1,
+        "JOSEPPONE": 3, "MIK I": 1, "BRNCOMMANDO": 1, "SQUIRTLE": 1, "PSYKOS": 1,
+        "UNCLE G BROTHER": 1, "MARIA": 1
+    },
+    "pass_counts": {
+        "MAメツ": 4, "SHINYPASTA": 2, "MASTER": 3, "09ALEX24": 2, "GOZ": 1,
+        "SAGITTARIUS A1": 2, "STARBETTY": 2, "RICKY AROUND": 2, "PEPPE": 2,
+        "UNCLE G BROTHER": 3, "LE 12 SCIMMIE": 2, "HOOL": 3, "G ERRY": 2,
+        "WOLFOO6": 3, "ARYRON": 2, "BENDICO": 2, "MISSDRINKS": 1, "MX63": 1,
+        "STEFANO00000": 2, "PAKII": 2, "BANDOLERO26": 1, "MARKUS DEFENDED": 1,
+        "WALL 7": 3, "EDDWARD": 2, "KROMPIR": 3, "GHANDAL": 1, "ZOKRA": 2,
+        "CAMIIIII 08": 2, "JOSEPPONE": 3, "HULKSPAKKA": 2, "LE 12 SCIMMIE": 1,
+        "BADBIGBOSS": 2, "YEAH YEAH OOOO": 1, "NOVEMBERGENZ": 2, "SAGITTARIUS A1": 1,
+        "XFLOTCHY": 2, "BLOODYBLADE": 1, "ORAISHIO": 1, "PANDORE": 1, "MESHEL": 1,
+        "SIR LANCE OF N81": 1, "VINCENZOPOMA89": 1, "ZAAAAAAAYYYYY": 2, "JAXXTRONIC": 1,
+        "AGENT BASS": 1, "ARESARWEN": 1, "PSYKOS": 2, "SQUIRTLE ITA": 1, "STUNTMARK": 1,
+        "SIR VONSKI": 1, "MOUK57": 2, "LIMAXIMUS": 1, "F3NRYU": 1, "REKLAUS": 1,
+        "ELCHICOGYOT": 1, "LALLA 96": 1, "DARKGIOLLO": 1, "SPIO24": 2, "COMANDANTE MAV": 1,
+        "SKITETO": 1, "ECHOZERO": 1, "TOMENERGY": 1, "GERRY": 1, "TRICHECO": 2,
+        "PITT9595": 1, "CRUEL NEVE": 1, "GENNAROM": 1, "HOLDFAST": 1, "ANA BUNNY": 1,
+        "BRANCII": 2, "STRUNZTRUPPEN": 2, "27FRANCESCO": 1, "LEFADA13": 1, "MELO65": 1,
+        "PERSEUSXXX": 1, "BOGE": 1, "CASELLO": 1, "TCHIK": 1, "ZIO GIOTTO": 1,
+        "KING GRUFFALO": 1, "VENUS31": 1
+    }
+}
+
+# Normalize historical keys for matching
+def norm_name(name):
+    clean = name.split("(")[0].strip().upper()
+    return clean
+
+# --- ALGORITMO DI SELEZIONE BILANCIATO ---
+def get_balanced_player(pool, role_type, current_assignments_this_month):
+    """
+    Seleziona il giocatore migliore in base allo storico dei 5 mesi:
+    1. Chi non ha mai ricoperto il ruolo richiesto.
+    2. Chi ha il minor numero di incarichi totali (Capo + Passeggero).
+    3. Evita sovrapposizioni nello stesso mese corrente.
+    """
+    capo_hist = HISTORICAL_5_MONTHS["capo_counts"]
+    pass_hist = HISTORICAL_5_MONTHS["pass_counts"]
+    
+    candidates = []
+    
+    for player in pool:
+        # Conteggio nel mese che stiamo generando ora
+        current_c = current_assignments_this_month["capo"][player]
+        current_p = current_assignments_this_month["pass"][player]
+        current_total = current_c + current_p
+        
+        # Conteggio nei 5 mesi passati
+        n_p = norm_name(player)
+        hist_c = 0
+        hist_p = 0
+        for k, v in capo_hist.items():
+            if k in n_p or n_p in k: hist_c += v
+        for k, v in pass_hist.items():
+            if k in n_p or n_p in k: hist_p += v
+            
+        hist_role = hist_c if role_type == "capo" else hist_p
+        hist_total = hist_c + hist_p
+        
+        # Priorità: (1) Mai fatto questo ruolo, (2) Meno presenze mese corrente, (3) Meno presenze storiche
+        never_done_role = 1 if hist_role == 0 else 2
+        
+        candidates.append({
+            "player": player,
+            "never_done": never_done_role,
+            "current_total": current_total,
+            "hist_total": hist_total,
+            "rand": random.random()
+        })
+        
+    # Ordina i candidati per le priorità stabilite
+    candidates.sort(key=lambda x: (x["never_done"], x["current_total"], x["hist_total"], x["rand"]))
+    return candidates[0]["player"]
 
 # --- CSS ---
 st.markdown("""
@@ -124,7 +215,7 @@ def get_weekday_idx(day, month_name, year):
 
 # --- RENDERING GRIGLIA ---
 def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
-    mese_nom = st.session_state.get('sel_mese', "Gennaio")
+    mese_nom = st.session_state.get('sel_mese', "Settembre")
     anno_val = st.session_state.get('sel_anno', 2026)
     
     first_day_wd = get_weekday_idx(1, mese_nom, anno_val)
@@ -184,7 +275,7 @@ st.markdown('<div class="sala-comando">', unsafe_allow_html=True)
 
 c1, c2, c3 = st.columns([1, 1.5, 2])
 with c1:
-    st.session_state['sel_mese'] = st.selectbox("📅 MESE", MESI_ITA, index=datetime.now().month - 1)
+    st.session_state['sel_mese'] = st.selectbox("📅 MESE", MESI_ITA, index=8) # Settembre
     st.session_state['sel_anno'] = st.number_input("📆 ANNO", 2024, 2030, 2026)
 with c2: sel_leaders = st.multiselect("🤠 R5/R4", leaders_list)
 with c3: sel_r3_r2 = st.multiselect("🌵 R3/R2", db[db['Grado'] == "R3/R2"]['Nome'].tolist())
@@ -194,19 +285,32 @@ cb1, cb1b, cb2, cb3, cb4 = st.columns(5)
 
 with cb1:
     st.markdown('<div class="btn-genera">', unsafe_allow_html=True)
-    if st.button("⚒️ GENERA AUTO", use_container_width=True):
+    if st.button("⚒️ GENERA AUTO (BILANCIATO)", use_container_width=True):
         p_l = (sel_leaders if sel_leaders else leaders_list)
         p_o = (sel_r3_r2 if sel_r3_r2 else db[db['Grado']=="R3/R2"]['Nome'].tolist())
-        random.shuffle(p_l); random.shuffle(p_o)
+        
         num_gg = calendar.monthrange(st.session_state['sel_anno'], MESI_ITA.index(st.session_state['sel_mese'])+1)[1]
         st.session_state['master_cal'] = []
-        p_idx = 0
+        
+        current_assignments = {
+            "capo": defaultdict(int),
+            "pass": defaultdict(int)
+        }
+        
         for g in range(1, num_gg + 1):
-            if g <= 11: 
-                c = p_l[(g-1)%len(p_l)]; p = p_o[g%len(p_o)]
-            else: 
-                c = p_o[p_idx % len(p_o)]; p = p_o[(p_idx+1) % len(p_o)]; p_idx += 2
+            if g <= 11:
+                # Primi 11 giorni: Capo da R5/R4, Passeggero da R3/R2
+                c = get_balanced_player(p_l, "capo", current_assignments)
+                p = get_balanced_player([x for x in p_o if x != c], "pass", current_assignments)
+            else:
+                # Dal 12 in poi: Entrambi da R3/R2
+                c = get_balanced_player(p_o, "capo", current_assignments)
+                p = get_balanced_player([x for x in p_o if x != c], "pass", current_assignments)
+            
+            current_assignments["capo"][c] += 1
+            current_assignments["pass"][p] += 1
             st.session_state['master_cal'].append({"Giorno": g, "Capo": c, "Pass": p})
+            
     st.markdown('</div>', unsafe_allow_html=True)
 
 with cb1b:
