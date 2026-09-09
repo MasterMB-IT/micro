@@ -37,7 +37,7 @@ def load_history():
 if 'history' not in st.session_state:
     st.session_state['history'] = load_history()
 
-# --- DATABASE MEMBRI AGGIORNATO (EXACTLY 100 PLAYERS) ---
+# --- DATABASE MEMBRI AGGIORNATO (100 GIOCATORI) ---
 def init_db():
     leaders = [
         "亗 Hool 亗 (R5)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", 
@@ -78,22 +78,43 @@ leaders_list = sorted(db[db['Grado'] == "R5/R4"]['Nome'].tolist())
 r3_r2_list = sorted(db[db['Grado'] == "R3/R2"]['Nome'].tolist())
 all_active_names = sorted(db[db['Nome'] != "---"]['Nome'].tolist())
 
-# --- NORMALIZZAZIONE STRINGHE ---
+# --- FUNZIONE AVANZATA DI PULIZIA E NORMALIZZAZIONE ---
 def smart_normalize_name(name):
     if not name or name == "---":
         return ""
+    
+    # 1. Rimuove indicazioni di grado e note
     clean = re.sub(r'\(.*?\)', '', str(name))
+    
+    # 2. Mappature manuali di caratteri decorativi non-ASCII frequenti
+    replacements = {
+        'Ʀ': 'R', 'Ξ': 'E', '亗': '', 'Ψ': '', '๏': 'O', 'ร': 'S', 'ק': 'P', 
+        'ђ': 'H', 'Σ': 'E', 'Δ': 'A', 'ℒ': 'L', 'ι': 'I', 'zz': 'ZZ', 'ℯ': 'E',
+        'Ｍ': 'M', 'ａ': 'A', 'メ': 'ME', 'ツ': 'TS', 'ღ': '', 'ᘻ': 'M', 'Ꮭ': 'L',
+        'Ꮧ': 'A', 'Ꮆ': 'G', 'Ꮛ': 'E', 'Ꮑ': 'N', 'Ꮦ': 'T', '0': 'O'
+    }
+    for char, repl in replacements.items():
+        clean = clean.replace(char, repl)
+        
+    # 3. Normalizzazione Unicode NFKD
     clean = unicodedata.normalize('NFKD', clean).encode('ASCII', 'ignore').decode('utf-8')
     clean = clean.upper()
+    
+    # 4. Rimuove caratteri non alfanumerici
     clean = re.sub(r'[^A-Z0-9]', '', clean)
+    
+    # 5. Casi speciali unificati
     if "YEAHYEAH" in clean:
         return "GOZ"
+    if "MASTER" in clean:
+        return "MASTER"
+        
     return clean.strip()
 
-# Mappa dei soli 100 giocatori attivi normalizzati
+# Mappa unificata dei soli 100 giocatori attivi
 ACTIVE_PLAYERS_MAP = {smart_normalize_name(p): p for p in all_active_names}
 
-# --- DATI STORICI GIA' FILTRATI SUI SOLI MEMBRI ATTUALI ---
+# --- DATI STORICI MAPPATI SUI NUOVI CODICI UNIFICATI ---
 HISTORICAL_5_MONTHS = {
     "capo_counts": {
         "HOOL": 2, "MASTER": 4, "SHINYPASTA": 4, "PEPPE": 3, "UNCLEG BROTHER": 2,
@@ -110,12 +131,12 @@ HISTORICAL_5_MONTHS = {
     "pass_counts": {
         "MA": 4, "SHINYPASTA": 2, "MASTER": 3, "09ALEX24": 2, "GOZ": 1,
         "SAGITTARIUS A1": 2, "RICKY AROUND": 2, "PEPPE": 2, "UNCLEG BROTHER": 3, 
-        "LE 12 SCIMMIE": 2, "HOOL": 3, "G ERRY": 2, "WOLF006": 3, "ARYRON": 2, 
+        "LE 12 SCIMMIE": 2, "HOOL": 3, "GERRY": 2, "WOLF006": 3, "ARYRON": 2, 
         "BENDICO": 2, "MISSDRINKS": 1, "STEFANO00000": 2, "PAKII": 2, 
         "BANDOLERO26": 1, "WALL": 3, "KROMPIR": 3, "GHANDAL": 1, "ZOKRA": 2,
         "CAMII": 2, "JOSEPPONE": 3, "BADBIGBOSS": 2, "NOVEMBERGENZ": 2, 
         "XFLOTCHY": 2, "MESHEL": 1, "SIR LANCE OF N8WATCH": 1, "VINCENZOPOMA89": 1, 
-        "ZAAAAAAAYYYYY": 2, "JAXXTRONIC": 1, "0": 1, "ARESARWEN": 1, "SQUIRTLE ITA": 1, 
+        "ZAAAAAAAYYYYY": 2, "JAXXTRONIC": 1, "ARESARWEN": 1, "SQUIRTLE ITA": 1, 
         "SIR VONSKI": 1, "LIMAXIMUS": 1, "F3NRYU": 1, "REKLAUS": 1, "ELCHICOGYOT": 1, 
         "DARKGIOLLO": 1, "SPIO24": 2, "COMANDANTE MAVERIC": 1, "SKITETO": 1, 
         "TRICHECO": 2, "PITT9595": 1, "CRUEL NEVE": 1, "GENNAROM": 1, "HOLDFAST": 1, 
@@ -124,12 +145,11 @@ HISTORICAL_5_MONTHS = {
     }
 }
 
-# --- ALGORITMO DI BILANCIAMENTO DINAMICO SOLO SU MEMBRI ATTIVI ---
+# --- ALGORITMO DI BILANCIAMENTO DINAMICO ---
 def get_dynamic_history():
     capo_counts = defaultdict(int)
     pass_counts = defaultdict(int)
     
-    # Pre-popola solo per i membri attivi
     for k, v in HISTORICAL_5_MONTHS["capo_counts"].items():
         norm_k = smart_normalize_name(k)
         if norm_k in ACTIVE_PLAYERS_MAP:
