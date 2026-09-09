@@ -479,7 +479,7 @@ if 'master_cal' in st.session_state:
     st.markdown(f"""
         <div class="cal-header-container">
             <span class="train-icon">🚅</span>
-            <h2 class="cal-header-text">ROTTA - {st.session_state['sel_mese'].upper()} {st.session_state['sel_anno']}</h2>
+            <h2 class="cal-header-text">AOSR - {st.session_state['sel_mese'].upper()} {st.session_state['sel_anno']}</h2>
             <span class="train-icon">🚅</span>
         </div>
     """, unsafe_allow_html=True)
