@@ -83,35 +83,37 @@ def smart_normalize_name(name):
     if not name or name == "---":
         return ""
     
-    # 1. Rimuove indicazioni di grado e note
+    # 1. Rimuove indicazioni di grado e parentesi
     clean = re.sub(r'\(.*?\)', '', str(name))
     
-    # 2. Mappature manuali di caratteri decorativi non-ASCII frequenti
+    # 2. Normalizzazione caratteri Unicode (converte caratteri Fullwidth es. Ｍａ in Ma)
+    clean = unicodedata.normalize('NFKC', clean)
+    clean = unicodedata.normalize('NFKD', clean).encode('ASCII', 'ignore').decode('utf-8')
+    clean = clean.upper()
+
+    # 3. Mappature manuali ed eccezioni storiche esatte
     replacements = {
         'Ʀ': 'R', 'Ξ': 'E', '亗': '', 'Ψ': '', '๏': 'O', 'ร': 'S', 'ק': 'P', 
-        'ђ': 'H', 'Σ': 'E', 'Δ': 'A', 'ℒ': 'L', 'ι': 'I', 'zz': 'ZZ', 'ℯ': 'E',
-        'Ｍ': 'M', 'ａ': 'A', 'メ': 'ME', 'ツ': 'TS', 'ღ': '', 'ᘻ': 'M', 'Ꮭ': 'L',
-        'Ꮧ': 'A', 'Ꮆ': 'G', 'Ꮛ': 'E', 'Ꮑ': 'N', 'Ꮦ': 'T', '0': 'O'
+        'ђ': 'H', 'Σ': 'E', 'Δ': 'A', 'ℒ': 'L', 'ι': 'I', 'ℯ': 'E',
+        'ღ': '', 'ᘻ': 'M', 'Ꮭ': 'L', 'Ꮧ': 'A', 'Ꮆ': 'G', 'Ꮛ': 'E', 'Ꮑ': 'N', 'Ꮦ': 'T'
     }
     for char, repl in replacements.items():
         clean = clean.replace(char, repl)
         
-    # 3. Normalizzazione Unicode NFKD
-    clean = unicodedata.normalize('NFKD', clean).encode('ASCII', 'ignore').decode('utf-8')
-    clean = clean.upper()
-    
-    # 4. Rimuove caratteri non alfanumerici
+    # 4. Rimuove caratteri non alfanumerici (elimina simboli Katakana come メツ, 彡, ecc.)
     clean = re.sub(r'[^A-Z0-9]', '', clean)
     
-    # 5. Casi speciali unificati
+    # 5. Mappature per corrispondenze esatte dello storico
     if "YEAHYEAH" in clean:
         return "GOZ"
     if "MASTER" in clean:
         return "MASTER"
+    if clean == "MA":
+        return "MA"
         
     return clean.strip()
 
-# Mappa unificata dei soli 100 giocatori attivi
+# Mappa unificata dei 100 giocatori attivi
 ACTIVE_PLAYERS_MAP = {smart_normalize_name(p): p for p in all_active_names}
 
 # --- DATI STORICI MAPPATI SUI NUOVI CODICI UNIFICATI ---
