@@ -508,7 +508,7 @@ st.markdown("<h2 style='color:#00f3ff; font-family:Orbitron; text-align:center; 
 
 capo_hist_total, pass_hist_total = get_dynamic_history()
 
-# Genera DataFrame unificato per tutti i giocatori censiti
+# Unisci solo i nomi con effettivo storico o presenti nel DB
 all_players_set = set(all_names_list)
 all_players_set.update(capo_hist_total.keys())
 all_players_set.update(pass_hist_total.keys())
@@ -520,45 +520,56 @@ for p in sorted(all_players_set):
     n_p = norm_name(p)
     c_count = sum(v for k, v in capo_hist_total.items() if k in n_p or n_p in k)
     p_count = sum(v for k, v in pass_hist_total.items() if k in n_p or n_p in k)
-    stats_data.append({
-        "Giocatore": p,
-        "Turni Capo": c_count,
-        "Turni Passeggero": p_count,
-        "Totale Presenze": c_count + p_count
-    })
+    tot = c_count + p_count
+    
+    # MOSTRA SOLO CHI HA ALMENO 1 PRESENZA STORICA
+    if tot > 0:
+        stats_data.append({
+            "Giocatore": p,
+            "Turni Capo": c_count,
+            "Turni Passeggero": p_count,
+            "Totale Presenze": tot
+        })
 
 df_stats = pd.DataFrame(stats_data)
-df_stats = df_stats.sort_values(by=["Totale Presenze", "Giocatore"], ascending=[False, True]).reset_index(drop=True)
+if not df_stats.empty:
+    df_stats = df_stats.sort_values(by=["Totale Presenze", "Giocatore"], ascending=[False, True]).reset_index(drop=True)
 
-tab_stat1, tab_stat2 = st.tabs(["📋 CONTEGGIO TOTALE GIOCATORI", "🔍 RICERCA SINGOLO GIOCATORE"])
+tab_stat1, tab_stat2 = st.tabs(["📋 CONTEGGIO TOTALE GIOCATORI EFFETTIVI", "🔍 RICERCA SINGOLO GIOCATORE"])
 
 with tab_stat1:
-    m1, m2, m3 = st.columns(3)
-    m1.metric("Totale Assegnazioni Capi", sum(df_stats["Turni Capo"]))
-    m2.metric("Totale Assegnazioni Passeggeri", sum(df_stats["Turni Passeggero"]))
-    m3.metric("Membri Attivi Registrati", len(df_stats[df_stats["Totale Presenze"] > 0]))
-    
-    st.write("")
-    st.dataframe(
-        df_stats, 
-        use_container_width=True, 
-        hide_index=True,
-        column_config={
-            "Giocatore": st.column_config.TextColumn("Nome Giocatore"),
-            "Turni Capo": st.column_config.NumberColumn("⚡ Capo Treno", format="%d"),
-            "Turni Passeggero": st.column_config.NumberColumn("💺 Passeggero VIP", format="%d"),
-            "Totale Presenze": st.column_config.NumberColumn("🏆 Totale Presenze", format="%d"),
-        }
-    )
+    if not df_stats.empty:
+        m1, m2, m3 = st.columns(3)
+        m1.metric("Totale Assegnazioni Capi", sum(df_stats["Turni Capo"]))
+        m2.metric("Totale Assegnazioni Passeggeri", sum(df_stats["Turni Passeggero"]))
+        m3.metric("Membri Attivi con Presenze", len(df_stats))
+        
+        st.write("")
+        st.dataframe(
+            df_stats, 
+            use_container_width=True, 
+            hide_index=True,
+            column_config={
+                "Giocatore": st.column_config.TextColumn("Nome Giocatore"),
+                "Turni Capo": st.column_config.NumberColumn("⚡ Capo Treno", format="%d"),
+                "Turni Passeggero": st.column_config.NumberColumn("💺 Passeggero VIP", format="%d"),
+                "Totale Presenze": st.column_config.NumberColumn("🏆 Totale Presenze", format="%d"),
+            }
+        )
+    else:
+        st.info("Nessuna presenza registrata nello storico.")
 
 with tab_stat2:
-    search_player = st.selectbox("Seleziona Giocatore da verificare:", ["---"] + sorted(list(df_stats["Giocatore"])))
-    if search_player != "---":
-        row_p = df_stats[df_stats["Giocatore"] == search_player].iloc[0]
-        sp1, sp2, sp3 = st.columns(3)
-        sp1.metric("⚡ Ruoli Capo", int(row_p["Turni Capo"]))
-        sp2.metric("💺 Ruoli Passeggero", int(row_p["Turni Passeggero"]))
-        sp3.metric("🏆 Totale Generale", int(row_p["Totale Presenze"]))
+    if not df_stats.empty:
+        search_player = st.selectbox("Seleziona Giocatore da verificare:", ["---"] + sorted(list(df_stats["Giocatore"])))
+        if search_player != "---":
+            row_p = df_stats[df_stats["Giocatore"] == search_player].iloc[0]
+            sp1, sp2, sp3 = st.columns(3)
+            sp1.metric("⚡ Ruoli Capo", int(row_p["Turni Capo"]))
+            sp2.metric("💺 Ruoli Passeggero", int(row_p["Turni Passeggero"]))
+            sp3.metric("🏆 Totale Generale", int(row_p["Totale Presenze"]))
+    else:
+        st.info("Nessun dato disponibile.")
 
 # --- ARCHIVIO STORICO CALENDARI ---
 if st.session_state['history']:
