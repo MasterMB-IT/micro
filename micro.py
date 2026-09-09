@@ -36,17 +36,44 @@ if 'history' not in st.session_state:
 
 # --- DATABASE ---
 def init_db():
-    leaders = ["Hool (R5)", "MASTER (R4)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", "Starbetty (R4)", "PEPPE (R4)", "Ricky Around (R4)", "Uncle g brother (R4)", "09ALEX24 (R4)", "ShinyPasta (R4)", "Wall 7 (R4)"]
-    r3 = ["Uncle g", "G Erry", "Goz", "Ghandal", "Aryron", "Tricheco", "Maメツ", "NOVEMBERGENZ", "Lalla 96", "Whale Panda", "GennaroM", "EchoZero", "EDDward", "AMY", "Resilienza", "Ana Bunny", "Giuseppec84", "Benito Muschiolini", "Pandino19", "xFlotchy", "MX63", "holdfast", "Ghost", "BadBigBoss", "Stefano00000", "PakII", "BANDOLERO26", "BlOOdyBlade", "Whale hunter Levve", "Aresxxx", "KingGruffalo", "Hulkspakka", "Joseppone", "ImAde", "Nysbie", "LeFada13", "Skiteto", "SPio24", "TomEnergy", "Markus Defender", "Sho0t3r", "Wolf006", "Zokra", "perseusxxx", "Bendico", "Obbyy", "ArLes", "Fatz87", "cruel neve", "Trivellatore", "Osgh00", "Slowfia ABOH", "Pontatinatore", "27Francesco", "MissDrinks", "krompir", "MaledettO"]
-    r2 = ["teomadh", "Bossnico", "Valecit", "FarmerHool", "camiiiii 08", "Doctor team", "Yass081", "Nuorifleming", "Vergabrio", "Frenk70", "Comandante Maveric", "Thor9000", "MrBolly", "BustaMaki", "S U C A", "StUnTmArK", "MONKEY D LUFFY 20", "CineSalentino", "Danylo98", "Ezechielefabianino", "BRNcommando", "LEONIDA", "elchicogyot", "erer1000", "Pupisnic", "Backfire1", "AnarchyBG", "Fabrizio1987", "JurdanS", "WiseR9", "Infinity8080"]
+    # Estratti dalla nuova lista e categorizzati per ruoli
+    leaders = [
+        "亗 Hool 亗 (R5)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", 
+        "PΞPPΞ (R4)", "Ricky Around (R4)", "Uncle g brother (R4)", 
+        "09ALEX24 (R4)", "ShinyPasta (R4)", "ΨWallΨ (R4)", "彡M A S T E Ʀ彡 (R4)"
+    ]
+    
+    r3 = [
+        "Dragons slayer", "Morten1212", "J๏รєקקђoNe", "Zokra", "BadBigBoss", 
+        "Sir Vonski", "Limaximus", "ARIO73", "Scolligo", "dome b", "Pitt9595", 
+        "MartinSK", "Ｍａメツ", "xFlotchy", "ᶜᵃᵖᵒ ΘᴥΘ", "JaxxTronic", "NOVEMBERGENZ", 
+        "Trivellatore", "TheDane001", "Purpix7", "Ξ Bugs Bunny Ξ", "Billy1906", 
+        "Mik I", "cruel neve", "Bendico", "Elchicogyot", "Comandante Maveric", 
+        "Dark doom", "perseusxxx", "Reklaus", "SPio24", "F3nryU", "Strunztruppen", 
+        "ᴮᵃⁿᵃⁿᵃ B", "Wolf006", "Sir Lance of N8Watch", "MissDrinks", "Aryron", 
+        "Kɘrnel Panic", "Leechai", "Anubis 7", "GennaroM", "holdfast", "DarkGiollo", 
+        "PakII", "yeah yeah Coco Jambo", "GER176", "Giuseppec84", "mike92i", "krompir"
+    ]
+    
+    r2 = [
+        "tchik", "Dark lalla", "zaaaaaaaayyyy", "controvento6", "torhil", "MeSHeL", 
+        "Ꮭ ᏗᎶᏋᏁᏖ0", "G Σrry", "uncle g", "Pielaur", "Stefano00000", "VincenzoPoma89", 
+        "Whale Panda", "Squirtle ITA", "Skiteto", "27Francesco", "BANDOLERO26", 
+        "ღNeyღ", "Ghandal", "MUSCHIOLINI", "Bunnyᘻ", "rnd66", "CaSeLLo", "Mmtyy", 
+        "bonnyand", "AresArwen", "MeIo65", "o GARGANTUA o", "x The Lord x", "Tricheco", 
+        "BRNcommando", "Brancii", "ImAde", "CΔMÍÍㆍᴥㆍ", "ℒιzzιℯ 82", "Peter Sveter", 
+        "LeFada13", "Riki Sajo", "Pembe komutan", "Pupisnic"
+    ]
     
     data = [{"Nome": "---", "Grado": "Nessuno"}] + \
-            [{"Nome": n, "Grado": "R5/R4"} for n in leaders] + \
-            [{"Nome": n, "Grado": "R3"} for n in r3] + \
-            [{"Nome": n, "Grado": "R2"} for n in r2]
+           [{"Nome": n, "Grado": "R5/R4"} for n in leaders] + \
+           [{"Nome": n, "Grado": "R3"} for n in r3] + \
+           [{"Nome": n, "Grado": "R2"} for n in r2]
     return pd.DataFrame(data)
 
-if 'players_db' not in st.session_state: st.session_state['players_db'] = init_db()
+if 'players_db' not in st.session_state: 
+    st.session_state['players_db'] = init_db()
+
 db = st.session_state['players_db']
 
 leaders_list = sorted(db[db['Grado'] == "R5/R4"]['Nome'].tolist())
@@ -139,7 +166,6 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
                     if not is_history and not compact:
                         with st.popover("✍️ SCRIVI"):
                             st.caption(f"Modifica Giorno {giorno}")
-                            # Scelta tra lista o manuale
                             metodo = st.radio("Metodo", ["Lista", "Manuale"], key=f"met_{key_prefix}_{giorno}", horizontal=True)
                             
                             if metodo == "Lista":
