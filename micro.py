@@ -37,7 +37,7 @@ def load_history():
 if 'history' not in st.session_state:
     st.session_state['history'] = load_history()
 
-# --- DATABASE MEMBRI AGGIORNATO (100 GIOCATORI) ---
+# --- DATABASE MEMBRI AGGIORNATO (EXACTLY 100 PLAYERS) ---
 def init_db():
     leaders = [
         "亗 Hool 亗 (R5)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", 
@@ -45,7 +45,6 @@ def init_db():
         "09ALEX24 (R4)", "ShinyPasta (R4)", "ΨWallΨ (R4)", "彡M A S T E Ʀ彡 (R4)"
     ]
     
-    # 90 Giocatori R3/R2 (incluso GOZ/yeah yeah Coco Jambo)
     r3_r2 = [
         "Dragons slayer", "Morten1212", "J๏รєקקђoNe", "Zokra", "BadBigBoss", 
         "Sir Vonski", "Limaximus", "ARIO73", "Scolligo", "dome b", "Pitt9595", 
@@ -76,83 +75,69 @@ if 'players_db' not in st.session_state:
 db = st.session_state['players_db']
 
 leaders_list = sorted(db[db['Grado'] == "R5/R4"]['Nome'].tolist())
-all_names_list = sorted(db['Nome'].tolist())
+r3_r2_list = sorted(db[db['Grado'] == "R3/R2"]['Nome'].tolist())
+all_active_names = sorted(db[db['Nome'] != "---"]['Nome'].tolist())
 
-# --- FUNZIONE AVANZATA DI PULIZIA E UNIFICAZIONE NOMI ---
+# --- NORMALIZZAZIONE STRINGHE ---
 def smart_normalize_name(name):
     if not name or name == "---":
         return ""
-    
-    # 1. Rimuove eventuali note o gradi tra parentesi
     clean = re.sub(r'\(.*?\)', '', str(name))
-    
-    # 2. Conversione caratteri unicode / diacritici a caratteri standard A-Z
     clean = unicodedata.normalize('NFKD', clean).encode('ASCII', 'ignore').decode('utf-8')
-    
-    # 3. Trasforma in maiuscolo
     clean = clean.upper()
-    
-    # 4. Rimuove tutti i caratteri non alfanumerici
     clean = re.sub(r'[^A-Z0-9]', '', clean)
-    
-    # 5. Mappatura GOZ / yeah yeah
     if "YEAHYEAH" in clean:
         return "GOZ"
-        
     return clean.strip()
 
-# --- DATI STORICI INIZIALI (BASE 5 MESI) ---
+# Mappa dei soli 100 giocatori attivi normalizzati
+ACTIVE_PLAYERS_MAP = {smart_normalize_name(p): p for p in all_active_names}
+
+# --- DATI STORICI GIA' FILTRATI SUI SOLI MEMBRI ATTUALI ---
 HISTORICAL_5_MONTHS = {
     "capo_counts": {
-        "Hool": 2, "MASTER": 4, "SHINYPASTA": 4, "PEPPE": 3, "UNCLE G BROTHER": 2,
-        "RICKY AROUND": 3, "09ALEX24": 3, "BLOODYBLADE": 1, "LE 12 SCIMMIE": 2,
-        "STARBETTY": 1, "SAGITTARIUS A1": 3, "WHALE PANDA": 2, "JEPPE": 1, "GOZ": 3,
-        "STUNTMARK": 1, "WALL 7": 4, "CRUEL NEVE": 3, "ZOKRA": 3, "XFLOTCHY": 3,
-        "GIUSEPPEC84": 2, "BENITO MUSCHIONI": 2, "BADBIGBOSS": 3, "ANA BUNNY": 1,
-        "LALLA 96": 1, "MAメツ": 3, "NOVEMBERGENZ": 2, "GHOST": 2, "ECHOZERO": 1,
-        "SPIO24": 3, "TRICHECO": 1, "MOUK57": 2, "MORTEN1212": 3, "MELO65": 1,
-        "MARTINSK": 2, "CASELLO": 1, "SCOLLIGO": 2, "LIMAXIMUS": 2, "SIR VONSKI": 2,
-        "F3NRYU": 2, "DARKGIOLLO": 2, "STRAMM": 2, "REKLAUS": 2, "ANUBIS 7": 1,
-        "BRANCII": 1, "VENUS 31": 1, "JOS591": 1, "X THE LORD X": 2, "MIKE92I": 1,
-        "PITT9595": 2, "TOHIK": 2, "KINGGRUFFALO": 1, "BENDICO": 1, "27FRANCESCO": 1,
-        "GHANDAL": 1, "MARKUS DEFENDED": 1, "GENNAROM": 1, "BANDOLERO26": 1,
-        "JOSEPPONE": 3, "MIK I": 1, "BRNCOMMANDO": 1, "SQUIRTLE": 1, "PSYKOS": 1,
-        "MARIA": 1
+        "HOOL": 2, "MASTER": 4, "SHINYPASTA": 4, "PEPPE": 3, "UNCLEG BROTHER": 2,
+        "RICKY AROUND": 3, "09ALEX24": 3, "LE 12 SCIMMIE": 2, "SAGITTARIUS A1": 3, 
+        "WHALE PANDA": 2, "GOZ": 3, "WALL": 4, "CRUEL NEVE": 3, "ZOKRA": 3, 
+        "XFLOTCHY": 3, "GIUSEPPEC84": 2, "MUSCHIOLINI": 2, "BADBIGBOSS": 3, 
+        "MA": 3, "NOVEMBERGENZ": 2, "SPIO24": 3, "TRICHECO": 1, "MORTEN1212": 3, 
+        "MEIO65": 1, "MARTINSK": 2, "CASELLO": 1, "SCOLLIGO": 2, "LIMAXIMUS": 2, 
+        "SIR VONSKI": 2, "F3NRYU": 2, "DARKGIOLLO": 2, "REKLAUS": 2, "ANUBIS 7": 1,
+        "BRANCII": 1, "X THE LORD X": 2, "MIKE92I": 1, "PITT9595": 2, "TORHIL": 2,
+        "BENDICO": 1, "27FRANCESCO": 1, "GHANDAL": 1, "GENNAROM": 1, "BANDOLERO26": 1,
+        "JOSEPPONE": 3, "MIK I": 1, "BRNCOMMANDO": 1, "SQUIRTLE ITA": 1
     },
     "pass_counts": {
-        "MAメツ": 4, "SHINYPASTA": 2, "MASTER": 3, "09ALEX24": 2, "GOZ": 1,
-        "SAGITTARIUS A1": 2, "STARBETTY": 2, "RICKY AROUND": 2, "PEPPE": 2,
-        "UNCLE G BROTHER": 3, "LE 12 SCIMMIE": 2, "HOOL": 3, "G ERRY": 2,
-        "WOLFOO6": 3, "ARYRON": 2, "BENDICO": 2, "MISSDRINKS": 1, "MX63": 1,
-        "STEFANO00000": 2, "PAKII": 2, "BANDOLERO26": 1, "MARKUS DEFENDED": 1,
-        "WALL 7": 3, "EDDWARD": 2, "KROMPIR": 3, "GHANDAL": 1, "ZOKRA": 2,
-        "CAMIIIII 08": 2, "JOSEPPONE": 3, "HULKSPAKKA": 2, "BADBIGBOSS": 2, 
-        "GOZ": 1, "NOVEMBERGENZ": 2, "XFLOTCHY": 2, "BLOODYBLADE": 1, 
-        "ORAISHIO": 1, "PANDORE": 1, "MESHEL": 1, "SIR LANCE OF N81": 1, 
-        "VINCENZOPOMA89": 1, "ZAAAAAAAYYYYY": 2, "JAXXTRONIC": 1, "AGENT BASS": 1, 
-        "ARESARWEN": 1, "PSYKOS": 2, "SQUIRTLE ITA": 1, "STUNTMARK": 1, "SIR VONSKI": 1, 
-        "MOUK57": 2, "LIMAXIMUS": 1, "F3NRYU": 1, "REKLAUS": 1, "ELCHICOGYOT": 1, 
-        "LALLA 96": 1, "DARKGIOLLO": 1, "SPIO24": 2, "COMANDANTE MAV": 1, "SKITETO": 1, 
-        "ECHOZERO": 1, "TOMENERGY": 1, "GERRY": 1, "TRICHECO": 2, "PITT9595": 1, 
-        "CRUEL NEVE": 1, "GENNAROM": 1, "HOLDFAST": 1, "ANA BUNNY": 1, "BRANCII": 2, 
-        "STRUNZTRUPPEN": 2, "27FRANCESCO": 1, "LEFADA13": 1, "MELO65": 1, "PERSEUSXXX": 1, 
-        "BOGE": 1, "CASELLO": 1, "TCHIK": 1, "ZIO GIOTTO": 1, "KING GRUFFALO": 1, "VENUS31": 1
+        "MA": 4, "SHINYPASTA": 2, "MASTER": 3, "09ALEX24": 2, "GOZ": 1,
+        "SAGITTARIUS A1": 2, "RICKY AROUND": 2, "PEPPE": 2, "UNCLEG BROTHER": 3, 
+        "LE 12 SCIMMIE": 2, "HOOL": 3, "G ERRY": 2, "WOLF006": 3, "ARYRON": 2, 
+        "BENDICO": 2, "MISSDRINKS": 1, "STEFANO00000": 2, "PAKII": 2, 
+        "BANDOLERO26": 1, "WALL": 3, "KROMPIR": 3, "GHANDAL": 1, "ZOKRA": 2,
+        "CAMII": 2, "JOSEPPONE": 3, "BADBIGBOSS": 2, "NOVEMBERGENZ": 2, 
+        "XFLOTCHY": 2, "MESHEL": 1, "SIR LANCE OF N8WATCH": 1, "VINCENZOPOMA89": 1, 
+        "ZAAAAAAAYYYYY": 2, "JAXXTRONIC": 1, "0": 1, "ARESARWEN": 1, "SQUIRTLE ITA": 1, 
+        "SIR VONSKI": 1, "LIMAXIMUS": 1, "F3NRYU": 1, "REKLAUS": 1, "ELCHICOGYOT": 1, 
+        "DARKGIOLLO": 1, "SPIO24": 2, "COMANDANTE MAVERIC": 1, "SKITETO": 1, 
+        "TRICHECO": 2, "PITT9595": 1, "CRUEL NEVE": 1, "GENNAROM": 1, "HOLDFAST": 1, 
+        "BRANCII": 2, "STRUNZTRUPPEN": 2, "27FRANCESCO": 1, "LEFADA13": 1, 
+        "MEIO65": 1, "PERSEUSXXX": 1, "CASELLO": 1, "TCHIK": 1
     }
 }
 
-# --- ALGORITMO DI BILANCIAMENTO DINAMICO ---
+# --- ALGORITMO DI BILANCIAMENTO DINAMICO SOLO SU MEMBRI ATTIVI ---
 def get_dynamic_history():
     capo_counts = defaultdict(int)
     pass_counts = defaultdict(int)
     
+    # Pre-popola solo per i membri attivi
     for k, v in HISTORICAL_5_MONTHS["capo_counts"].items():
         norm_k = smart_normalize_name(k)
-        if norm_k:
+        if norm_k in ACTIVE_PLAYERS_MAP:
             capo_counts[norm_k] += v
 
     for k, v in HISTORICAL_5_MONTHS["pass_counts"].items():
         norm_k = smart_normalize_name(k)
-        if norm_k:
+        if norm_k in ACTIVE_PLAYERS_MAP:
             pass_counts[norm_k] += v
     
     saved_history = st.session_state.get('history', [])
@@ -160,9 +145,9 @@ def get_dynamic_history():
         for row in month_data.get('cal', []):
             c_norm = smart_normalize_name(row.get('Capo', ''))
             p_norm = smart_normalize_name(row.get('Pass', ''))
-            if c_norm:
+            if c_norm in ACTIVE_PLAYERS_MAP:
                 capo_counts[c_norm] += 1
-            if p_norm:
+            if p_norm in ACTIVE_PLAYERS_MAP:
                 pass_counts[p_norm] += 1
                 
     return capo_counts, pass_counts
@@ -392,7 +377,7 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
     
     n_cols = 10 if compact else 7
     h_cls = "h-comp" if compact else "h-norm"
-    opts_all = ["---"] + all_names_list
+    opts_all = ["---"] + sorted(all_active_names)
 
     for i in range(0, len(full_display_list), n_cols):
         cols = st.columns(n_cols)
@@ -445,7 +430,7 @@ with c1:
     st.session_state['sel_mese'] = st.selectbox("📅 MESE", MESI_ITA, index=8)
     st.session_state['sel_anno'] = st.number_input("📆 ANNO", 2024, 2030, 2026)
 with c2: sel_leaders = st.multiselect("🛸 PILOTI (R5/R4)", leaders_list)
-with c3: sel_r3_r2 = st.multiselect("🛰️ PASSEGGERI (R3/R2)", db[db['Grado'] == "R3/R2"]['Nome'].tolist())
+with c3: sel_r3_r2 = st.multiselect("🛰️ PASSEGGERI (R3/R2)", r3_r2_list)
 
 st.markdown('<div style="margin-top:20px; padding-top:20px; border-top:1px solid rgba(0,243,255,0.2)">', unsafe_allow_html=True)
 cb1, cb1b, cb2, cb3, cb4 = st.columns(5)
@@ -454,7 +439,7 @@ with cb1:
     st.markdown('<div class="btn-genera">', unsafe_allow_html=True)
     if st.button("⚡ GENERA BILANCIATO", use_container_width=True):
         p_l = (sel_leaders if sel_leaders else leaders_list)
-        p_o = (sel_r3_r2 if sel_r3_r2 else db[db['Grado']=="R3/R2"]['Nome'].tolist())
+        p_o = (sel_r3_r2 if sel_r3_r2 else r3_r2_list)
         
         num_gg = calendar.monthrange(st.session_state['sel_anno'], MESI_ITA.index(st.session_state['sel_mese'])+1)[1]
         st.session_state['master_cal'] = []
@@ -527,75 +512,57 @@ if 'master_cal' in st.session_state:
     
     draw_grid(st.session_state['master_cal'], compact=view_mode, key_prefix="master")
 
-# --- SEZIONE STORICO TESTUALE & STATISTICHE ---
+# --- SEZIONE STATISTICHE ESCLUSIVA MEMBRI ATTIVI ---
 st.markdown("<br><hr style='border:1px solid rgba(0,243,255,0.2)'><br>", unsafe_allow_html=True)
-st.markdown("<h2 style='color:#00f3ff; font-family:Orbitron; text-align:center; text-shadow: 0 0 10px #00f3ff;'>📊 STATISTICHE & STORICO TESTUALE</h2>", unsafe_allow_html=True)
+st.markdown("<h2 style='color:#00f3ff; font-family:Orbitron; text-align:center; text-shadow: 0 0 10px #00f3ff;'>📊 STATISTICHE MEMBRI ATTIVI (100 GIOCATORI)</h2>", unsafe_allow_html=True)
 
 capo_hist_total, pass_hist_total = get_dynamic_history()
 
-display_names = {}
-for p in all_names_list:
-    if p != "---":
-        norm_key = smart_normalize_name(p)
-        if norm_key and norm_key not in display_names:
-            display_names[norm_key] = p
-
-all_norm_keys = set(capo_hist_total.keys()).union(set(pass_hist_total.keys()))
-
 stats_data = []
-for norm_key in sorted(all_norm_keys):
+for norm_key, real_name in ACTIVE_PLAYERS_MAP.items():
     c_count = capo_hist_total.get(norm_key, 0)
     p_count = pass_hist_total.get(norm_key, 0)
     tot = c_count + p_count
     
-    if tot > 0:
-        disp_name = display_names.get(norm_key, norm_key)
-        stats_data.append({
-            "Giocatore": disp_name,
-            "Turni Capo": c_count,
-            "Turni Passeggero": p_count,
-            "Totale Presenze": tot
-        })
+    stats_data.append({
+        "Giocatore": real_name,
+        "Turni Capo": c_count,
+        "Turni Passeggero": p_count,
+        "Totale Presenze": tot
+    })
 
 df_stats = pd.DataFrame(stats_data)
-if not df_stats.empty:
-    df_stats = df_stats.sort_values(by=["Totale Presenze", "Giocatore"], ascending=[False, True]).reset_index(drop=True)
+df_stats = df_stats.sort_values(by=["Totale Presenze", "Giocatore"], ascending=[False, True]).reset_index(drop=True)
 
-tab_stat1, tab_stat2 = st.tabs(["📋 CONTEGGIO TOTALE GIOCATORI UNIFICATO", "🔍 RICERCA SINGOLO GIOCATORE"])
+tab_stat1, tab_stat2 = st.tabs(["📋 CONTEGGIO TOTALE MEMBRI ATTIVI", "🔍 RICERCA SINGOLO GIOCATORE"])
 
 with tab_stat1:
-    if not df_stats.empty:
-        m1, m2, m3 = st.columns(3)
-        m1.metric("Totale Assegnazioni Capi", sum(df_stats["Turni Capo"]))
-        m2.metric("Totale Assegnazioni Passeggeri", sum(df_stats["Turni Passeggero"]))
-        m3.metric("Membri Unici Attivi", len(df_stats))
-        
-        st.write("")
-        st.dataframe(
-            df_stats, 
-            use_container_width=True, 
-            hide_index=True,
-            column_config={
-                "Giocatore": st.column_config.TextColumn("Nome Giocatore"),
-                "Turni Capo": st.column_config.NumberColumn("⚡ Capo Treno", format="%d"),
-                "Turni Passeggero": st.column_config.NumberColumn("💺 Passeggero VIP", format="%d"),
-                "Totale Presenze": st.column_config.NumberColumn("🏆 Totale Presenze", format="%d"),
-            }
-        )
-    else:
-        st.info("Nessuna presenza registrata nello storico.")
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Totale Assegnazioni Capi", sum(df_stats["Turni Capo"]))
+    m2.metric("Totale Assegnazioni Passeggeri", sum(df_stats["Turni Passeggero"]))
+    m3.metric("Giocatori Attivi In Lista", len(df_stats))
+    
+    st.write("")
+    st.dataframe(
+        df_stats, 
+        use_container_width=True, 
+        hide_index=True,
+        column_config={
+            "Giocatore": st.column_config.TextColumn("Nome Giocatore"),
+            "Turni Capo": st.column_config.NumberColumn("⚡ Capo Treno", format="%d"),
+            "Turni Passeggero": st.column_config.NumberColumn("💺 Passeggero VIP", format="%d"),
+            "Totale Presenze": st.column_config.NumberColumn("🏆 Totale Presenze", format="%d"),
+        }
+    )
 
 with tab_stat2:
-    if not df_stats.empty:
-        search_player = st.selectbox("Seleziona Giocatore da verificare:", ["---"] + sorted(list(df_stats["Giocatore"])))
-        if search_player != "---":
-            row_p = df_stats[df_stats["Giocatore"] == search_player].iloc[0]
-            sp1, sp2, sp3 = st.columns(3)
-            sp1.metric("⚡ Ruoli Capo", int(row_p["Turni Capo"]))
-            sp2.metric("💺 Ruoli Passeggero", int(row_p["Turni Passeggero"]))
-            sp3.metric("🏆 Totale Generale", int(row_p["Totale Presenze"]))
-    else:
-        st.info("Nessun dato disponibile.")
+    search_player = st.selectbox("Seleziona Giocatore da verificare:", ["---"] + sorted(list(df_stats["Giocatore"])))
+    if search_player != "---":
+        row_p = df_stats[df_stats["Giocatore"] == search_player].iloc[0]
+        sp1, sp2, sp3 = st.columns(3)
+        sp1.metric("⚡ Ruoli Capo", int(row_p["Turni Capo"]))
+        sp2.metric("💺 Ruoli Passeggero", int(row_p["Turni Passeggero"]))
+        sp3.metric("🏆 Totale Generale", int(row_p["Totale Presenze"]))
 
 # --- ARCHIVIO STORICO CALENDARI ---
 if st.session_state['history']:
