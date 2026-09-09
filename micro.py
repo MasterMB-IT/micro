@@ -37,15 +37,15 @@ def load_history():
 if 'history' not in st.session_state:
     st.session_state['history'] = load_history()
 
-# --- DATABASE MEMBRI ---
+# --- DATABASE MEMBRI AGGIORNATO (100 GIOCATORI) ---
 def init_db():
     leaders = [
         "亗 Hool 亗 (R5)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", 
         "PΞPPΞ (R4)", "Ricky Around (R4)", "Uncle g brother (R4)", 
-        "09ALEX24 (R4)", "ShinyPasta (R4)", "ΨWallΨ (R4)", "彡M A S T E Ʀ彡 (R4)",
-        "GOZ (R4)"
+        "09ALEX24 (R4)", "ShinyPasta (R4)", "ΨWallΨ (R4)", "彡M A S T E Ʀ彡 (R4)"
     ]
     
+    # 90 Giocatori R3/R2 (incluso GOZ/yeah yeah Coco Jambo)
     r3_r2 = [
         "Dragons slayer", "Morten1212", "J๏รєקקђoNe", "Zokra", "BadBigBoss", 
         "Sir Vonski", "Limaximus", "ARIO73", "Scolligo", "dome b", "Pitt9595", 
@@ -55,7 +55,7 @@ def init_db():
         "Dark doom", "perseusxxx", "Reklaus", "SPio24", "F3nryU", "Strunztruppen", 
         "ᴮᵃⁿᵃⁿᵃ B", "Wolf006", "Sir Lance of N8Watch", "MissDrinks", "Aryron", 
         "Kɘrnel Panic", "Leechai", "Anubis 7", "GennaroM", "holdfast", "DarkGiollo", 
-        "PakII", "GER176", "Giuseppec84", "mike92i", "krompir",
+        "PakII", "yeah yeah Coco Jambo", "GER176", "Giuseppec84", "mike92i", "krompir",
         "tchik", "Dark lalla", "zaaaaaaaayyyy", "controvento6", "torhil", "MeSHeL", 
         "Ꮭ ᏗᎶᏋᏁᏖ0", "G Σrry", "uncle g", "Pielaur", "Stefano00000", "VincenzoPoma89", 
         "Whale Panda", "Squirtle ITA", "Skiteto", "27Francesco", "BANDOLERO26", 
@@ -83,7 +83,7 @@ def smart_normalize_name(name):
     if not name or name == "---":
         return ""
     
-    # 1. Rimuove eventuali note o gradi tra parentesi come (R4), (R5), ecc.
+    # 1. Rimuove eventuali note o gradi tra parentesi
     clean = re.sub(r'\(.*?\)', '', str(name))
     
     # 2. Conversione caratteri unicode / diacritici a caratteri standard A-Z
@@ -92,10 +92,10 @@ def smart_normalize_name(name):
     # 3. Trasforma in maiuscolo
     clean = clean.upper()
     
-    # 4. Rimuove tutti i caratteri non alfanumerici (simboli, emoji, gilde)
+    # 4. Rimuove tutti i caratteri non alfanumerici
     clean = re.sub(r'[^A-Z0-9]', '', clean)
     
-    # 5. ALIAS / MAPPATURA SPECIFICA (es. yeah yeah -> GOZ)
+    # 5. Mappatura GOZ / yeah yeah
     if "YEAHYEAH" in clean:
         return "GOZ"
         
@@ -142,13 +142,9 @@ HISTORICAL_5_MONTHS = {
 
 # --- ALGORITMO DI BILANCIAMENTO DINAMICO ---
 def get_dynamic_history():
-    """
-    Normalizza le chiavi e unifica il conteggio storico base con i mesi salvati.
-    """
     capo_counts = defaultdict(int)
     pass_counts = defaultdict(int)
     
-    # 1. Carica storico 5 mesi con chiavi normalizzate
     for k, v in HISTORICAL_5_MONTHS["capo_counts"].items():
         norm_k = smart_normalize_name(k)
         if norm_k:
@@ -159,7 +155,6 @@ def get_dynamic_history():
         if norm_k:
             pass_counts[norm_k] += v
     
-    # 2. Aggiungi i dati salvati in memoria/JSON
     saved_history = st.session_state.get('history', [])
     for month_data in saved_history:
         for row in month_data.get('cal', []):
@@ -532,13 +527,12 @@ if 'master_cal' in st.session_state:
     
     draw_grid(st.session_state['master_cal'], compact=view_mode, key_prefix="master")
 
-# --- SEZIONE STORICO TESTUALE & STATISTICHE (UNIFICATA E NORMALIZZATA) ---
+# --- SEZIONE STORICO TESTUALE & STATISTICHE ---
 st.markdown("<br><hr style='border:1px solid rgba(0,243,255,0.2)'><br>", unsafe_allow_html=True)
 st.markdown("<h2 style='color:#00f3ff; font-family:Orbitron; text-align:center; text-shadow: 0 0 10px #00f3ff;'>📊 STATISTICHE & STORICO TESTUALE</h2>", unsafe_allow_html=True)
 
 capo_hist_total, pass_hist_total = get_dynamic_history()
 
-# Mappa per associare ad ogni chiave normalizzata il nome formattato preferito
 display_names = {}
 for p in all_names_list:
     if p != "---":
@@ -546,7 +540,6 @@ for p in all_names_list:
         if norm_key and norm_key not in display_names:
             display_names[norm_key] = p
 
-# Trova tutte le chiavi normalizzate univoche
 all_norm_keys = set(capo_hist_total.keys()).union(set(pass_hist_total.keys()))
 
 stats_data = []
@@ -556,7 +549,6 @@ for norm_key in sorted(all_norm_keys):
     tot = c_count + p_count
     
     if tot > 0:
-        # Usa il nome formattato dal DB se esiste, altrimenti la chiave pulita
         disp_name = display_names.get(norm_key, norm_key)
         stats_data.append({
             "Giocatore": disp_name,
