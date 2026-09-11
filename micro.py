@@ -97,6 +97,8 @@ def smart_normalize_name(name):
         "yeah yeah Coco Jambo": "GOZ",
         "yeah yeah": "GOZ",
         "GOZ": "GOZ",
+        "J๏รєקקђoNe": "JOSEPPONE",
+        "JOSEPPONE": "JOSEPPONE",
         "Markus Defender": "DARKDOOM",
         "DARK DOOM": "DARKDOOM",
         "DARKDOOM": "DARKDOOM",
@@ -124,10 +126,12 @@ def smart_normalize_name(name):
         
     clean = re.sub(r'[^A-Z0-9]', '', clean)
     
-    if "YEAHYEAH" in clean or "YEAH" in clean:
+    if "YEAHYEAH" in clean or "YEAH" in clean or "COCOJAMBO" in clean:
         return "GOZ"
     if "PEPPE" in clean:
         return "PEPPE"
+    if "JOSEPPONE" in clean or "J" in clean and "P" in clean:
+        return "JOSEPPONE"
     if "MASTER" in clean:
         return "MASTER"
     if clean == "MA":
