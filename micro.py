@@ -19,6 +19,7 @@ GIORNI_SETTIMANA = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì",
 GIORNI_ABBR = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"]
 
 DB_FILE = "cronologia_treni.json"
+OVERRIDES_FILE = "manual_overrides.json"
 
 # --- PERSISTENZA DATI ---
 def save_history():
@@ -34,8 +35,24 @@ def load_history():
             return []
     return []
 
+def save_overrides():
+    with open(OVERRIDES_FILE, "w", encoding="utf-8") as f:
+        json.dump(st.session_state['manual_overrides'], f, ensure_ascii=False, indent=4)
+
+def load_overrides():
+    if os.path.exists(OVERRIDES_FILE):
+        try:
+            with open(OVERRIDES_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except:
+            return {}
+    return {}
+
 if 'history' not in st.session_state:
     st.session_state['history'] = load_history()
+
+if 'manual_overrides' not in st.session_state:
+    st.session_state['manual_overrides'] = load_overrides()
 
 # --- DATABASE MEMBRI ATTIVI ---
 def init_db():
@@ -141,7 +158,7 @@ def smart_normalize_name(name):
 
 ACTIVE_PLAYERS_MAP = {smart_normalize_name(p): p for p in all_active_names}
 
-# --- DATI STORICI VERIFICATI SU 5 MESI ---
+# --- DATI STORICI BASE ---
 HISTORICAL_5_MONTHS = {
     "capo_counts": {
         "09ALEX24": 5, "LE 12 SCIMMIE": 5, "RICKY AROUND": 5, "SAGITTARIUS A1": 5, 
@@ -174,7 +191,7 @@ HISTORICAL_5_MONTHS = {
     }
 }
 
-# --- ALGORITMO DI BILANCIAMENTO DINAMICO ---
+# --- ALGORITMO DI BILANCIAMENTO CON INTEGRATIONE MODIFICHE MANUALLI ---
 def get_dynamic_history():
     capo_counts = defaultdict(int)
     pass_counts = defaultdict(int)
@@ -197,6 +214,11 @@ def get_dynamic_history():
             if c_norm in ACTIVE_PLAYERS_MAP: capo_counts[c_norm] += 1
             if p_norm in ACTIVE_PLAYERS_MAP: pass_counts[p_norm] += 1
                 
+    overrides = st.session_state.get('manual_overrides', {})
+    for norm_k, vals in overrides.items():
+        if "capo" in vals: capo_counts[norm_k] = vals["capo"]
+        if "pass" in vals: pass_counts[norm_k] = vals["pass"]
+
     return capo_counts, pass_counts
 
 def get_balanced_player(pool, role_type, current_assignments_this_month):
@@ -559,7 +581,7 @@ if 'master_cal' in st.session_state:
     
     draw_grid(st.session_state['master_cal'], compact=view_mode, key_prefix="master")
 
-# --- PANNELLO STATISTICHE COMPLETO ---
+# --- PANNELLO STATISTICHE COMPLETO ED EDITABILE ---
 st.markdown("<br><hr style='border:1px solid rgba(0,243,255,0.2)'><br>", unsafe_allow_html=True)
 st.markdown("<h2 style='color:#00f3ff; font-family:Orbitron; text-align:center; text-shadow: 0 0 10px #00f3ff;'>📊 STATISTICHE MEMBRI ATTIVI</h2>", unsafe_allow_html=True)
 
@@ -581,7 +603,7 @@ for norm_key, real_name in ACTIVE_PLAYERS_MAP.items():
 df_stats = pd.DataFrame(stats_data)
 df_stats = df_stats.sort_values(by=["Totale Presenze", "Giocatore"], ascending=[False, True]).reset_index(drop=True)
 
-tab_stat1, tab_stat2 = st.tabs(["📋 CONTEGGIO TOTALE MEMBRI ATTIVI", "🔍 VERIFICATORE NOME PER NOME"])
+tab_stat1, tab_stat2, tab_stat3 = st.tabs(["📋 CONTEGGIO TOTALE MEMBRI ATTIVI", "✏️ MODIFICA MANUALMENTE LO STORICO", "🔍 VERIFICATORE NOME PER NOME"])
 
 with tab_stat1:
     m1, m2, m3 = st.columns(3)
@@ -603,6 +625,39 @@ with tab_stat1:
     )
 
 with tab_stat2:
+    st.markdown("### ✏️ Gestione Manuale dei Conteggi Storici")
+    st.caption("Usa questo pannello se desideri modificare direttamente le presenze storiche accumulate da un membro. I nuovi valori sovrascriveranno i dati storici e verranno impiegati immediatamente dall'algoritmo di bilanciamento.")
+    
+    target_player = st.selectbox("Seleziona Giocatore da Modificare:", all_active_names, key="override_player_select")
+    
+    if target_player:
+        norm_target = smart_normalize_name(target_player)
+        curr_c = capo_hist_total.get(norm_target, 0)
+        curr_p = pass_hist_total.get(norm_target, 0)
+        
+        col_m1, col_m2 = st.columns(2)
+        with col_m1:
+            new_c = st.number_input(f"⚡ Modifica Turni CAPO per {target_player}:", min_value=0, max_value=100, value=curr_c, key="input_mod_capo")
+        with col_m2:
+            new_p = st.number_input(f"💺 Modifica Turni PASSEGGERO per {target_player}:", min_value=0, max_value=100, value=curr_p, key="input_mod_pass")
+            
+        col_btn_sav, col_btn_res = st.columns(2)
+        with col_btn_sav:
+            if st.button("💾 APPLICA E SALVA MODIFICA", use_container_width=True):
+                st.session_state['manual_overrides'][norm_target] = {"capo": new_c, "pass": new_p}
+                save_overrides()
+                st.toast(f"Modifiche applicate per {target_player}!")
+                st.rerun()
+                
+        with col_btn_res:
+            if norm_target in st.session_state['manual_overrides']:
+                if st.button("🔄 RIPRISTINA DATO ORIGINALE", use_container_width=True):
+                    del st.session_state['manual_overrides'][norm_target]
+                    save_overrides()
+                    st.toast(f"Ripristinato dato calcolato per {target_player}!")
+                    st.rerun()
+
+with tab_stat3:
     st.markdown("### 🔎 Controllo di Corrispondenza e Normalizzazione")
     st.caption("Seleziona o cerca un giocatore per verificare istantaneamente come viene letto dal sistema e quali dati storici aggancia.")
     
@@ -618,7 +673,9 @@ with tab_stat2:
         col_res2.metric("⚡ Storico Capo Treno", c_val)
         col_res3.metric("💺 Storico Passeggero", p_val)
         
-        if c_val > 0 or p_val > 0:
+        if norm_code in st.session_state.get('manual_overrides', {}):
+            st.info(f"✏️ I valori attuali di **{selected_check_name}** sono stati modificati manualmente tramite l'apposito pannello.")
+        elif c_val > 0 or p_val > 0:
             st.success(f"✔ Il giocatore **{selected_check_name}** sta agganciando correttamente **{c_val + p_val} turni storici** (`{c_val}` Capi + `{p_val}` Pass) tramite il codice `{norm_code}`.")
         else:
             st.warning(f"⚠ Il giocatore **{selected_check_name}** risulta a 0 turni storici. Se dovrebbe averne, controlla la chiave (`{norm_code}`).")
