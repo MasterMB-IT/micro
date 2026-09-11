@@ -37,7 +37,7 @@ def load_history():
 if 'history' not in st.session_state:
     st.session_state['history'] = load_history()
 
-# --- DATABASE MEMBRI AGGIORNATO (100 GIOCATORI) ---
+# --- DATABASE MEMBRI AGGIORNATO (SOLO MEMBRI IN ALLEANZA) ---
 def init_db():
     leaders = [
         "亗 Hool 亗 (R5)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", 
@@ -45,22 +45,23 @@ def init_db():
         "09ALEX24 (R4)", "ShinyPasta (R4)", "ΨWallΨ (R4)", "彡M A S T E Ʀ彡 (R4)"
     ]
     
+    # R3/R2 aggiornati con Bugs Bunny e Bunnyᘻ
     r3_r2 = [
         "Dragons slayer", "Morten1212", "J๏รєקקђoNe", "Zokra", "BadBigBoss", 
         "Sir Vonski", "Limaximus", "ARIO73", "Scolligo", "dome b", "Pitt9595", 
         "MartinSK", "Ｍａメツ", "xFlotchy", "ᶜᵃᵖᵒ ΘᴥΘ", "JaxxTronic", "NOVEMBERGENZ", 
-        "Trivellatore", "TheDane001", "Purpix7", "Ξ Bugs Bunny Ξ", "Billy1906", 
-        "Mik I", "cruel neve", "Bendico", "Zio Giotto", "Comandante Maveric", 
-        "Markus Defender", "perseusxxx", "Reklaus", "SPio24", "F3nryU", "Strunztruppen", 
+        "Trivellatore", "TheDane001", "Purpix7", "Bugs Bunny", "Billy1906", 
+        "Mik I", "cruel neve", "Bendico", "Elchicojyot", "Comandante Maveric", 
+        "Dark Doom", "perseusxxx", "Reklaus", "SPio24", "F3nryU", "Struntruppen", 
         "ᴮᵃⁿᵃⁿᵃ B", "Wolf006", "Sir Lance of N8Watch", "MissDrinks", "Aryron", 
         "Kɘrnel Panic", "Leechai", "Anubis 7", "GennaroM", "holdfast", "DarkGiollo", 
         "PakII", "yeah yeah Coco Jambo", "GER176", "Giuseppec84", "mike92i", "krompir",
         "tchik", "Dark lalla", "zaaaaaaaayyyy", "controvento6", "torhil", "MeSHeL", 
         "Ꮭ ᏗᎶᏋᏁᏖ0", "G Σrry", "uncle g", "Pielaur", "Stefano00000", "VincenzoPoma89", 
         "Whale Panda", "Squirtle ITA", "Skiteto", "27Francesco", "BANDOLERO26", 
-        "ღNeyღ", "Ghandal", "MUSCHIOLINI", "Bunnyᘻ", "rnd66", "CaSeLLo", "Mmtyy", 
+        "ღNeyღ", "Ghandal", "MUSCOLEENI", "Bunnyᘻ", "rnd66", "CaSeLLo", "Mmtyy", 
         "bonnyand", "AresArwen", "MeIo65", "o GARGANTUA o", "x The Lord x", "Tricheco", 
-        "BRNcommando", "Brancii", "ImAde", "CΔMÍÍㆍᴥㆍ", "ℒιzzιℯ 82", "Peter Sveter", 
+        "BRNcommando", "Brancii", "ImAde", "CAMìì", "ℒιzzιℯ 82", "Peter Sveter", 
         "LeFada13", "Riki Sajo", "Pembe komutan", "Pupisnic"
     ]
     
@@ -85,6 +86,7 @@ def smart_normalize_name(name):
     
     str_name = str(name).strip()
     
+    # Mappature dirette aggiornate
     EXACT_MAP = {
         "彡M A S T E Ʀ彡 (R4)": "MASTER",
         "彡M A S T E Ʀ彡": "MASTER",
@@ -99,14 +101,35 @@ def smart_normalize_name(name):
         "GOZ": "GOZ",
         "J๏รєקקђoNe": "JOSEPPONE",
         "JOSEPPONE": "JOSEPPONE",
+        "Dark Doom": "DARKDOOM",
         "Markus Defender": "DARKDOOM",
         "DARK DOOM": "DARKDOOM",
         "DARKDOOM": "DARKDOOM",
-        "Zio Giotto": "ELCHICOGYOT",
-        "ELCHICOGYOT": "ELCHICOGYOT",
+        "Elchicojyot": "ELCHICOJYOT",
+        "Zio Giotto": "ELCHICOJYOT",
+        "ELCHICOJYOT": "ELCHICOJYOT",
+        "ELCHICOGYOT": "ELCHICOJYOT",
         "ΨWallΨ (R4)": "WALL",
         "ΨWallΨ": "WALL",
-        "WALL": "WALL"
+        "WALL": "WALL",
+        "Struntruppen": "STRUNZTRUPPEN",
+        "Strunztruppen": "STRUNZTRUPPEN",
+        "MX63": "STRUNZTRUPPEN",
+        "MUSCOLEENI": "MUSCHIOLINI",
+        "BENITO MUSCHIO": "MUSCHIOLINI",
+        "MUSCHIOLINI": "MUSCHIOLINI",
+        "Bugs Bunny": "BUGSBUNNY",
+        "Bug Bunny": "BUGSBUNNY",
+        "GHOST": "BUGSBUNNY",
+        "Ξ Bugs Bunny Ξ": "BUGSBUNNY",
+        "CAMìì": "CAMII",
+        "CAMIIIII 08": "CAMII",
+        "CΔMÍÍㆍᴥㆍ": "CAMII",
+        "Ꮭ ᏗᎶᏋᏁᏖ0": "AGENT0",
+        "AGENT BASS": "AGENT0",
+        "Bunnyᘻ": "BUNNYM",
+        "ANA BUNNY": "BUNNYM",
+        "Stefano00000": "STEFANO00000"
     }
     if str_name in EXACT_MAP:
         return EXACT_MAP[str_name]
@@ -119,67 +142,79 @@ def smart_normalize_name(name):
     replacements = {
         'Ʀ': 'R', 'Ξ': 'E', '亗': '', 'Ψ': '', '๏': 'O', 'ร': 'S', 'ק': 'P', 
         'ђ': 'H', 'Σ': 'E', 'Δ': 'A', 'ℒ': 'L', 'ι': 'I', 'ℯ': 'E',
-        'ღ': '', 'ᘻ': 'M', 'Ꮭ': 'L', 'Ꮧ': 'A', 'Ꮆ': 'G', 'Ꮛ': 'E', 'Ꮑ': 'N', 'Ꮦ': 'T'
+        'ღ': '', 'ᘻ': 'M', 'Ꮭ': 'L', 'Ꮧ': 'A', 'Ꮆ': 'G', 'Ꮛ': 'E', 'Ꮑ': 'N', 'Ꮦ': 'T', 'ì': 'I'
     }
     for char, repl in replacements.items():
         clean = clean.replace(char, repl)
         
     clean = re.sub(r'[^A-Z0-9]', '', clean)
     
-    if "YEAHYEAH" in clean or "YEAH" in clean or "COCOJAMBO" in clean:
+    if "YEAH" in clean or "COCO" in clean or "JAMBO" in clean or "GOZ" in clean:
         return "GOZ"
+    if "JOSEPPONE" in clean or ("J" in clean and "PEP" in clean):
+        return "JOSEPPONE"
     if "PEPPE" in clean:
         return "PEPPE"
-    if "JOSEPPONE" in clean or "J" in clean and "P" in clean:
-        return "JOSEPPONE"
     if "MASTER" in clean:
         return "MASTER"
     if clean == "MA":
         return "MA"
     if "MARKUS" in clean or "DARKDOOM" in clean:
         return "DARKDOOM"
-    if "ZIOGIOTTO" in clean or "ELCHICO" in clean:
-        return "ELCHICOGYOT"
+    if "ELCHICO" in clean or "ZIOGIOTTO" in clean:
+        return "ELCHICOJYOT"
     if "WALL" in clean:
         return "WALL"
+    if "MUSCOL" in clean or "MUSCH" in clean:
+        return "MUSCHIOLINI"
+    if "STRUN" in clean or "STRUNT" in clean:
+        return "STRUNZTRUPPEN"
+    if "BUG" in clean and "BUNNY" in clean:
+        return "BUGSBUNNY"
+    if "CAMII" in clean:
+        return "CAMII"
+    if "AGENT" in clean or "LAGENTO" in clean:
+        return "AGENT0"
+    if "BUNNY" in clean or "ANA" in clean:
+        return "BUNNYM"
         
     return clean.strip()
 
 ACTIVE_PLAYERS_MAP = {smart_normalize_name(p): p for p in all_active_names}
 
-# --- DATI STORICI RICALIBRATI (MAX 5 TURNI CAPOTRENO SU 5 MESI) ---
+# --- DATI STORICI MAPPATI SULLE CHIAVI UNIVOCHE ---
 HISTORICAL_5_MONTHS = {
     "capo_counts": {
         "HOOL": 5, "MASTER": 5, "SHINYPASTA": 5, "PEPPE": 5, "UNCLEG BROTHER": 3,
         "RICKY AROUND": 5, "09ALEX24": 5, "LE 12 SCIMMIE": 5, "SAGITTARIUS A1": 5, 
-        "WHALE PANDA": 3, "GOZ": 0, "WALL": 4, "CRUEL NEVE": 4, "ZOKRA": 5, 
-        "XFLOTCHY": 5, "GIUSEPPEC84": 3, "MUSCHIOLINI": 2, "BADBIGBOSS": 4, 
+        "WHALE PANDA": 3, "GOZ": 4, "yeah yeah Coco Jambo": 4, "WALL": 4, "CRUEL NEVE": 4, "ZOKRA": 5, 
+        "XFLOTCHY": 5, "GIUSEPPEC84": 3, "MUSCHIOLINI": 2, "MUSCOLEENI": 2, "BADBIGBOSS": 4, 
         "MA": 3, "NOVEMBERGENZ": 3, "SPIO24": 4, "TRICHECO": 1, "MORTEN1212": 3, 
         "MEIO65": 1, "MARTINSK": 3, "CASELLO": 1, "SCOLLIGO": 4, "LIMAXIMUS": 4, 
         "SIR VONSKI": 3, "F3NRYU": 4, "DARKGIOLLO": 4, "REKLAUS": 4, "ANUBIS 7": 1,
         "BRANCII": 2, "X THE LORD X": 3, "MIKE92I": 1, "PITT9595": 4, "TORHIL": 2,
         "BENDICO": 2, "27FRANCESCO": 2, "GHANDAL": 3, "GENNAROM": 2, "BANDOLERO26": 2,
-        "JOSEPPONE": 5, "MIK I": 2, "BRNCOMMANDO": 2, "SQUIRTLE ITA": 3,
-        "ZAAAAAAAYYYYY": 1, "ELCHICOGYOT": 1, "DARKDOOM": 2, "SIR LANCE OF N8Watch": 0,
+        "JOSEPPONE": 5, "J๏รєקקђoNe": 5, "MIK I": 2, "BRNCOMMANDO": 2, "SQUIRTLE ITA": 3,
+        "ZAAAAAAAYYYYY": 1, "ELCHICOJYOT": 1, "ELCHICOGYOT": 1, "DARKDOOM": 2, "SIR LANCE OF N8Watch": 0,
         "MISSDRINKS": 0, "STEFANO00000": 0, "PAKII": 0, "KROMPIR": 0, "CAMII": 0,
         "MESHEL": 0, "VINCENZOPOMA89": 0, "JAXXTRONIC": 0, "ARESARWEN": 0,
-        "COMANDANTE MAVERIC": 0, "SKITETO": 0, "HOLDFAST": 0, "STRUNZTRUPPEN": 2,
+        "COMANDANTE MAVERIC": 0, "SKITETO": 0, "HOLDFAST": 0, "STRUNZTRUPPEN": 2, "STRUNTRUPPEN": 2,
         "LEFADA13": 0, "PERSEUSXXX": 1, "TCHIK": 0, "GERRY": 0, "WOLF006": 0, "ARYRON": 0
     },
     "pass_counts": {
-        "MA": 5, "SHINYPASTA": 5, "MASTER": 4, "09ALEX24": 6, "GOZ": 1,
+        "MA": 5, "SHINYPASTA": 5, "MASTER": 4, "09ALEX24": 6, "GOZ": 3, "yeah yeah Coco Jambo": 3,
         "SAGITTARIUS A1": 5, "RICKY AROUND": 4, "PEPPE": 4, "UNCLEG BROTHER": 2, 
         "LE 12 SCIMMIE": 3, "HOOL": 4, "GERRY": 3, "WOLF006": 4, "ARYRON": 3, 
         "BENDICO": 4, "MISSDRINKS": 1, "STEFANO00000": 3, "PAKII": 3, 
         "BANDOLERO26": 1, "WALL": 3, "KROMPIR": 3, "GHANDAL": 0, "ZOKRA": 3,
-        "CAMII": 2, "JOSEPPONE": 4, "BADBIGBOSS": 4, "NOVEMBERGENZ": 5, 
+        "CAMII": 2, "JOSEPPONE": 4, "J๏รєקקђoNe": 4, "BADBIGBOSS": 4, "NOVEMBERGENZ": 5, 
         "XFLOTCHY": 3, "MESHEL": 1, "SIR LANCE OF N8Watch": 1, "VINCENZOPOMA89": 1, 
         "ZAAAAAAAYYYYY": 3, "JAXXTRONIC": 2, "ARESARWEN": 2, "SQUIRTLE ITA": 2, 
-        "SIR VONSKI": 2, "LIMAXIMUS": 2, "F3NRYU": 1, "REKLAUS": 3, "ELCHICOGYOT": 2, 
+        "SIR VONSKI": 2, "LIMAXIMUS": 2, "F3NRYU": 1, "REKLAUS": 3, "ELCHICOJYOT": 2, "ELCHICOGYOT": 2,
         "DARKGIOLLO": 1, "SPIO24": 3, "COMANDANTE MAVERIC": 2, "SKITETO": 2, 
         "TRICHECO": 4, "PITT9595": 1, "CRUEL NEVE": 2, "GENNAROM": 2, "HOLDFAST": 1, 
-        "BRANCII": 4, "STRUNZTRUPPEN": 4, "27FRANCESCO": 2, "LEFADA13": 2, 
-        "MEIO65": 2, "PERSEUSXXX": 2, "CASELLO": 2, "TCHIK": 2
+        "BRANCII": 4, "STRUNZTRUPPEN": 4, "STRUNTRUPPEN": 4, "27FRANCESCO": 2, "LEFADA13": 2, 
+        "MEIO65": 2, "PERSEUSXXX": 2, "CASELLO": 2, "TCHIK": 2, "MUSCHIOLINI": 1, "MUSCOLEENI": 1
     }
 }
 
@@ -191,12 +226,12 @@ def get_dynamic_history():
     for k, v in HISTORICAL_5_MONTHS["capo_counts"].items():
         norm_k = smart_normalize_name(k)
         if norm_k in ACTIVE_PLAYERS_MAP:
-            capo_counts[norm_k] += v
+            capo_counts[norm_k] = max(capo_counts[norm_k], v)
 
     for k, v in HISTORICAL_5_MONTHS["pass_counts"].items():
         norm_k = smart_normalize_name(k)
         if norm_k in ACTIVE_PLAYERS_MAP:
-            pass_counts[norm_k] += v
+            pass_counts[norm_k] = max(pass_counts[norm_k], v)
     
     saved_history = st.session_state.get('history', [])
     for month_data in saved_history:
@@ -572,7 +607,7 @@ if 'master_cal' in st.session_state:
 
 # --- SEZIONE STATISTICHE ESCLUSIVA MEMBRI ATTIVI ---
 st.markdown("<br><hr style='border:1px solid rgba(0,243,255,0.2)'><br>", unsafe_allow_html=True)
-st.markdown("<h2 style='color:#00f3ff; font-family:Orbitron; text-align:center; text-shadow: 0 0 10px #00f3ff;'>📊 STATISTICHE MEMBRI ATTIVI (100 GIOCATORI)</h2>", unsafe_allow_html=True)
+st.markdown("<h2 style='color:#00f3ff; font-family:Orbitron; text-align:center; text-shadow: 0 0 10px #00f3ff;'>📊 STATISTICHE MEMBRI ATTIVI</h2>", unsafe_allow_html=True)
 
 capo_hist_total, pass_hist_total = get_dynamic_history()
 
@@ -630,9 +665,9 @@ with tab_stat2:
         col_res3.metric("💺 Storico Passeggero", p_val)
         
         if c_val > 0 or p_val > 0:
-            st.success(f"✔ Il giocatore **{selected_check_name}** sta agganciando correttamente **{c_val + p_val} turni storici** tramite il codice `{norm_code}`.")
+            st.success(f"✔ Il giocatore **{selected_check_name}** sta agganciando correttamente **{c_val + p_val} turni storici** (`{c_val}` Capi + `{p_val}` Pass) tramite il codice `{norm_code}`.")
         else:
-            st.warning(f"⚠ Il giocatore **{selected_check_name}** risulta a 0 turni storici. Se dovrebbe averne, controlla che la sua chiave (`{norm_code}`) corrisponda a quella salvata nei dati storici (`HISTORICAL_5_MONTHS`).")
+            st.warning(f"⚠ Il giocatore **{selected_check_name}** risulta a 0 turni storici. Se dovrebbe averne, controlla la chiave (`{norm_code}`).")
 
 # --- ARCHIVIO STORICO CALENDARI ---
 if st.session_state['history']:
