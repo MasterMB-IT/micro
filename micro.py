@@ -215,7 +215,7 @@ def get_dynamic_history():
 
     return capo_counts, pass_counts
 
-# --- NUOVO ALGORITMO DI BILANCIAMENTO AMMORTIZZATO ---
+# --- ALGORITMO DI BILANCIAMENTO ---
 def get_advanced_balanced_player(pool, role_type, current_assignments, phase="Fase 1 (Primi 2 Mesi)"):
     capo_hist, pass_hist = get_dynamic_history()
     
@@ -338,7 +338,7 @@ with c3: sel_phase = st.selectbox("⚖️ FASE BILANCIAMENTO", ["Fase 1 (Primi 2
 with c4: merito_days_input = st.multiselect("🎖️ 5 GIORNI MERITO (R4)", list(range(12, 32)), default=[12, 15, 18, 22, 28])
 
 st.markdown('<div style="margin-top:15px; padding-top:15px; border-top:1px solid rgba(0,243,255,0.2)">', unsafe_allow_html=True)
-cb1, cb2, cb3, cb4 = st.columns(4)
+cb1, cb2, cb3, cb4, cb5 = st.columns([1.5, 1.2, 1.4, 1, 1])
 
 with cb1:
     st.markdown('<div class="btn-genera">', unsafe_allow_html=True)
@@ -381,13 +381,25 @@ with cb2:
             })
             save_history()
             st.toast("Salvato con successo!")
+            st.rerun()
 
 with cb3:
+    # PULSANTE ANNULLA ULTIMO SALVATAGGIO
+    if st.button("🔙 ANNULLA ULTIMO SALVATAGGIO", use_container_width=True):
+        if st.session_state['history']:
+            last_saved = st.session_state['history'].pop()
+            save_history()
+            st.toast(f"Rimesso indietro lo storico! Eliminato: {last_saved['data']}")
+            st.rerun()
+        else:
+            st.toast("Nessun salvataggio presente nello storico!")
+
+with cb4:
     if st.button("🌐 RESET", use_container_width=True):
         num_gg = calendar.monthrange(st.session_state['sel_anno'], MESI_ITA.index(st.session_state['sel_mese'])+1)[1]
         st.session_state['master_cal'] = [{"Giorno": g, "Capo": "---", "Pass": "---"} for g in range(1, num_gg + 1)]
 
-with cb4:
+with cb5:
     view_mode = st.toggle("🎞️ VISTA COMPATTA", value=False)
 
 st.markdown('</div>', unsafe_allow_html=True)
@@ -400,6 +412,31 @@ if 'master_cal' in st.session_state:
         </div>
     """, unsafe_allow_html=True)
     draw_grid(st.session_state['master_cal'], compact=view_mode, key_prefix="master")
+
+# --- PANNELLO ARCHIVIO E CRONOLOGIA ---
+st.markdown("<br><hr style='border:1px solid rgba(0,243,255,0.2)'><br>", unsafe_allow_html=True)
+st.markdown("<h2 style='color:#ff007f; font-family:Orbitron; text-align:center;'>📜 ARCHIVIO MESI E GESTIONE SALVATAGGI</h2>", unsafe_allow_html=True)
+
+if st.session_state['history']:
+    st.caption("Qui puoi visualizzare o cancellare qualsiasi mese salvato in precedenza. Eliminando un mese, lo storico dei giocatori tornerà indietro automaticamente.")
+    
+    for idx, item in enumerate(reversed(st.session_state['history'])):
+        real_idx = len(st.session_state['history']) - 1 - idx
+        with st.expander(f"📌 {item['data']} (Salvato il {item['ts']})"):
+            c_del1, c_del2 = st.columns([4, 1])
+            with c_del2:
+                if st.button("🗑️ ELIMINA QUESTO MESE", key=f"del_hist_{real_idx}", use_container_width=True):
+                    st.session_state['history'].pop(real_idx)
+                    save_history()
+                    st.toast("Mese eliminato dallo storico!")
+                    st.rerun()
+            
+            with c_del1:
+                st.caption("Anteprima Turni Salvati:")
+                df_hist_preview = pd.DataFrame(item['cal'])
+                st.dataframe(df_hist_preview, use_container_width=True, hide_index=True)
+else:
+    st.info("Nessun mese salvato in memoria.")
 
 # --- PANNELLO STATISTICHE COMPLETO ---
 st.markdown("<br><hr style='border:1px solid rgba(0,243,255,0.2)'><br>", unsafe_allow_html=True)
