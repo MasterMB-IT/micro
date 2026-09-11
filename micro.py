@@ -10,7 +10,7 @@ import calendar
 from collections import defaultdict
 
 # --- CONFIGURAZIONE PAGINA ---
-st.set_page_config(page_title="AOSR EXPRESS - Windows 95 Edition", layout="wide")
+st.set_page_config(page_title="AOSR EXPRESS - Retro 90s Neon", layout="wide")
 
 MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
             "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
@@ -248,131 +248,127 @@ def get_advanced_balanced_player(pool, role_type, current_assignments, phase="Fa
     candidates.sort(key=lambda x: x["score"])
     return candidates[0]["player"]
 
-# --- CSS ANNI '90 / WINDOWS 95 ---
+# --- CSS STILE RETRO ANNI '90 (ARCADE / NEON / SYNTHWAVE) ---
 st.markdown("""
     <style>
-    /* STILE GENERALE DESKTOP ANNI 90 */
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@600;700&display=swap');
+
+    /* FONDO PRINCIPALE ANNI 90 RETRO-FUTURISTICO */
     .stApp { 
-        background-color: #008080 !important; /* Teal classico di Win95 */
-        font-family: 'Courier New', 'MS Sans Serif', monospace !important;
-        color: #000000 !important;
-    }
-    
-    /* WINDOW CONTAINER 95 */
-    .win95-container {
-        background-color: #c0c0c0;
-        border-top: 3px solid #ffffff;
-        border-left: 3px solid #ffffff;
-        border-right: 3px solid #000000;
-        border-bottom: 3px solid #000000;
-        padding: 4px;
-        box-shadow: 2px 2px 0px #000000;
-        margin-bottom: 20px;
+        background-color: #0d0614 !important;
+        background-image: 
+            linear-gradient(rgba(255, 0, 127, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 240, 255, 0.05) 1px, transparent 1px) !important;
+        background-size: 30px 30px !important;
+        color: #e0e0e0 !important;
+        font-family: 'Rajdhani', sans-serif !important;
     }
 
-    .win95-titlebar {
-        background: linear-gradient(90deg, #000080, #1084d0);
-        color: #ffffff;
-        font-weight: bold;
-        padding: 3px 6px;
-        font-size: 14px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-        font-family: Arial, sans-serif;
+    /* TITOLO LOGO SYNTHWAVE */
+    .retro-header {
+        text-align: center;
+        font-family: 'Press Start 2P', monospace;
+        color: #ff007f;
+        text-shadow: 3px 3px 0px #00f0ff;
+        font-size: 26px;
+        margin-bottom: 25px;
+        letter-spacing: -1px;
     }
 
-    /* ALLINEAMENTO UNIFORME ELEMENTI */
+    /* ALLINEAMENTO RIGIDO DELLE COLONNE */
     div[data-testid="stHorizontalBlock"] {
         align-items: flex-end !important;
-        gap: 8px !important;
+        gap: 10px !important;
     }
 
-    /* INPUTS & SELECTBOXES 95 INSET */
+    /* INPUT E SELECTBOX ANNI 90 */
     div[data-baseweb="select"] > div, div[data-baseweb="input"] > div {
-        background-color: #ffffff !important;
-        border-top: 2px solid #000000 !important;
-        border-left: 2px solid #000000 !important;
-        border-right: 2px solid #dfdfdf !important;
-        border-bottom: 2px solid #dfdfdf !important;
-        border-radius: 0px !important;
-        color: #000000 !important;
-        min-height: 38px !important;
+        background-color: #1a0f2e !important;
+        border: 2px solid #00f0ff !important;
+        border-radius: 4px !important;
+        color: #ffffff !important;
+        min-height: 42px !important;
+        box-shadow: 0 0 5px rgba(0, 240, 255, 0.3);
+    }
+    
+    div[data-baseweb="select"] span {
+        color: #ffffff !important;
+        font-weight: bold;
     }
 
-    /* PULSANTI RETRO 95 OUTSET */
+    /* PULSANTI RETRO NEON */
     .stButton > button {
-        height: 38px !important;
-        background-color: #c0c0c0 !important;
-        border-top: 2px solid #ffffff !important;
-        border-left: 2px solid #ffffff !important;
-        border-right: 2px solid #000000 !important;
-        border-bottom: 2px solid #000000 !important;
-        border-radius: 0px !important;
-        color: #000000 !important;
+        height: 42px !important;
+        background: linear-gradient(180deg, #ff007f 0%, #b30059 100%) !important;
+        border: 2px solid #ffcc00 !important;
+        border-radius: 4px !important;
+        color: #ffffff !important;
         font-weight: bold !important;
-        font-family: 'Courier New', monospace !important;
-        box-shadow: none !important;
-    }
-    
-    .stButton > button:active {
-        border-top: 2px solid #000000 !important;
-        border-left: 2px solid #000000 !important;
-        border-right: 2px solid #ffffff !important;
-        border-bottom: 2px solid #ffffff !important;
-        padding: 2px 0px 0px 2px !important;
+        font-size: 14px !important;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        box-shadow: 0 0 8px rgba(255, 0, 127, 0.5) !important;
+        transition: all 0.2s ease;
     }
 
-    /* CALENDARIO E SCHEDE */
-    .calendar-cell {
-        background-color: #c0c0c0;
-        border-top: 2px solid #ffffff;
-        border-left: 2px solid #ffffff;
-        border-right: 2px solid #000000;
-        border-bottom: 2px solid #000000;
-        padding: 6px;
-        margin: -1px;
+    .stButton > button:hover {
+        background: linear-gradient(180deg, #00f0ff 0%, #0080ff 100%) !important;
+        border-color: #ffffff !important;
+        color: #000000 !important;
+        box-shadow: 0 0 12px rgba(0, 240, 255, 0.8) !important;
     }
-    
-    .h-norm { min-height: 200px !important; }
-    .h-comp { min-height: 150px !important; }
+
+    /* SCHEDE DEL CALENDARIO RETRO */
+    .calendar-cell {
+        background: #150a21;
+        border: 2px solid #3d1e6d;
+        border-radius: 6px;
+        padding: 8px;
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+    }
+
+    .h-norm { min-height: 190px !important; }
+    .h-comp { min-height: 140px !important; }
 
     .day-badge {
-        background-color: #000080;
+        background-color: #ff007f;
         color: #ffffff;
-        font-weight: bold;
-        padding: 2px 4px;
-        font-size: 12px;
-        margin-bottom: 6px;
+        font-family: 'Press Start 2P', monospace;
+        font-size: 10px;
+        padding: 4px;
+        text-align: center;
+        border-radius: 2px;
+        margin-bottom: 8px;
     }
 
     .role-label {
         font-size: 11px;
         font-weight: bold;
-        color: #000000;
+        color: #00f0ff;
+        text-transform: uppercase;
         margin-top: 4px;
-        border-bottom: 1px solid #808080;
     }
 
     .name-text {
         font-size: 13px;
-        background-color: #ffffff;
-        border-top: 1px solid #000000;
-        border-left: 1px solid #000000;
-        border-right: 1px solid #dfdfdf;
-        border-bottom: 1px solid #dfdfdf;
-        padding: 2px 4px;
-        margin-top: 2px;
-        color: #000000 !important;
+        background-color: #090310;
+        border: 1px solid #ff007f;
+        color: #ffcc00 !important;
+        padding: 3px 6px;
+        border-radius: 3px;
         font-weight: bold;
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
-    
+
     /* LABELS */
     label {
-        color: #000000 !important;
+        color: #00f0ff !important;
         font-weight: bold !important;
         font-size: 12px !important;
+        letter-spacing: 0.5px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -400,7 +396,7 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
         for j, item in enumerate(chunk):
             with cols[j]:
                 if item["type"] == "empty":
-                    st.markdown(f'<div class="calendar-cell {h_cls}" style="background-color:#a0a0a0;"></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="calendar-cell {h_cls}" style="opacity: 0.15; border-style: dashed;"></div>', unsafe_allow_html=True)
                 else:
                     r = item["content"]
                     giorno = r['Giorno']
@@ -418,37 +414,31 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
                     """, unsafe_allow_html=True)
                     
                     if not is_history and not compact:
-                        with st.popover("EDIT"):
+                        with st.popover("MODIFICA"):
                             st.caption(f"Giorno {giorno}")
                             nc = st.selectbox("Capo", opts_all, index=opts_all.index(r['Capo']) if r['Capo'] in opts_all else 0, key=f"sel_c_{key_prefix}_{giorno}")
                             np = st.selectbox("Pass", opts_all, index=opts_all.index(r['Pass']) if r['Pass'] in opts_all else 0, key=f"sel_p_{key_prefix}_{giorno}")
                             
-                            if st.button("OK", key=f"s_{key_prefix}_{giorno}", use_container_width=True):
+                            if st.button("SALVA", key=f"s_{key_prefix}_{giorno}", use_container_width=True):
                                 for idx, m_item in enumerate(st.session_state['master_cal']):
                                     if m_item["Giorno"] == giorno:
                                         st.session_state['master_cal'][idx].update({"Capo": nc, "Pass": np})
                                         break
                                 st.rerun()
 
-# --- FINESTRA PRINCIPALE WINDOWS 95 ---
-st.markdown("""
-<div class="win95-container">
-    <div class="win95-titlebar">
-        <span>C:\\AOSR_EXPRESS\\SYSTEM\\SCHEDULER.EXE</span>
-        <span>[X]</span>
-    </div>
-""", unsafe_allow_html=True)
+# --- INTESTAZIONE RETRO ---
+st.markdown('<div class="retro-header">⚡ AOSR EXPRESS 90S ⚡</div>', unsafe_allow_html=True)
 
-# CONTROLLI / DASHBOARD
+# CONTROLLI / DASHBOARD PERFETTAMENTE ALLINEATI
 c1, c2, c3, c4 = st.columns([1, 1, 1.5, 1.5])
 with c1: st.session_state['sel_mese'] = st.selectbox("MESE:", MESI_ITA, index=8)
 with c2: st.session_state['sel_anno'] = st.number_input("ANNO:", 2024, 2030, 2026)
 with c3: sel_phase = st.selectbox("BILANCIAMENTO:", ["Fase 1 (Primi 2 Mesi)", "Fase 2 (Transizione Mese 3)", "Fase 3 (A Regime)"])
 with c4: merito_days_input = st.multiselect("GIORNI MERITO (R4):", list(range(12, 32)), default=[12, 15, 18, 22, 28])
 
-st.markdown('<div style="margin-top:10px;"></div>', unsafe_allow_html=True)
+st.markdown('<div style="margin-top:12px;"></div>', unsafe_allow_html=True)
 
-# PULSANTI ALLINEATI RIGIDI
+# PULSANTI D'AZIONE ALLINEATI
 cb1, cb2, cb3, cb4, cb5 = st.columns([1.5, 1.3, 1.5, 1, 1])
 
 with cb1:
@@ -488,7 +478,7 @@ with cb2:
                 "cal": [dict(d) for d in st.session_state['master_cal']]
             })
             save_history()
-            st.toast("Salvato!")
+            st.toast("Salvato nell'Archivio!")
             st.rerun()
 
 with cb3:
@@ -496,7 +486,7 @@ with cb3:
         if st.session_state['history']:
             st.session_state['history'].pop()
             save_history()
-            st.toast("Annullato!")
+            st.toast("Ultima azione annullata!")
             st.rerun()
 
 with cb4:
@@ -507,21 +497,21 @@ with cb4:
 with cb5:
     view_mode = st.toggle("COMPATTA", value=False)
 
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("<br>", unsafe_allow_html=True)
 
 # --- RENDERING GRIGLIA ---
 if 'master_cal' in st.session_state:
-    st.markdown(f"### PROGRAMMAZIONE: {st.session_state['sel_mese'].upper()} {st.session_state['sel_anno']}")
+    st.markdown(f"### CALENDARIO: {st.session_state['sel_mese'].upper()} {st.session_state['sel_anno']}")
     draw_grid(st.session_state['master_cal'], compact=view_mode, key_prefix="master")
 
 # --- ARCHIVIO MESI ---
 st.markdown("<br>", unsafe_allow_html=True)
-st.markdown("### ARCHIVIO DATI HISTORICAL")
+st.markdown("### ARCHIVIO STORICO")
 
 if st.session_state['history']:
     for idx, item in enumerate(reversed(st.session_state['history'])):
         real_idx = len(st.session_state['history']) - 1 - idx
-        with st.expander(f"FILE: {item['data']}.DAT ({item['ts']})"):
+        with st.expander(f"Mese: {item['data']} (Salvato il {item['ts']})"):
             c_del1, c_del2 = st.columns([4, 1])
             with c_del2:
                 if st.button("ELIMINA", key=f"del_hist_{real_idx}", use_container_width=True):
@@ -533,7 +523,7 @@ if st.session_state['history']:
 
 # --- STATISTICHE ---
 st.markdown("<br>", unsafe_allow_html=True)
-st.markdown("### STATISTICHE E DATABASE")
+st.markdown("### STATISTICHE E OVERRIDE")
 
 capo_hist_total, pass_hist_total = get_dynamic_history()
 
@@ -550,7 +540,7 @@ for norm_key, real_name in ACTIVE_PLAYERS_MAP.items():
 
 df_stats = pd.DataFrame(stats_data).sort_values(by=["Totale Presenze", "Giocatore"], ascending=[False, True]).reset_index(drop=True)
 
-tab_stat1, tab_stat2 = st.tabs(["TABELLA GENERALE", "OVERRIDE MANUALE"])
+tab_stat1, tab_stat2 = st.tabs(["STATISTICHE COMPLETI", "OVERRIDE MANUALE"])
 
 with tab_stat1:
     st.dataframe(df_stats, use_container_width=True, hide_index=True)
