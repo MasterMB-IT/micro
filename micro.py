@@ -37,7 +37,7 @@ def load_history():
 if 'history' not in st.session_state:
     st.session_state['history'] = load_history()
 
-# --- DATABASE MEMBRI AGGIORNATO (SOLO MEMBRI IN ALLEANZA) ---
+# --- DATABASE MEMBRI AGGIORNATO ---
 def init_db():
     leaders = [
         "亗 Hool 亗 (R5)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", 
@@ -45,7 +45,6 @@ def init_db():
         "09ALEX24 (R4)", "ShinyPasta (R4)", "ΨWallΨ (R4)", "彡M A S T E Ʀ彡 (R4)"
     ]
     
-    # R3/R2 aggiornati con Bugs Bunny e Bunnyᘻ
     r3_r2 = [
         "Dragons slayer", "Morten1212", "J๏รєקקђoNe", "Zokra", "BadBigBoss", 
         "Sir Vonski", "Limaximus", "ARIO73", "Scolligo", "dome b", "Pitt9595", 
@@ -86,13 +85,14 @@ def smart_normalize_name(name):
     
     str_name = str(name).strip()
     
-    # Mappature dirette aggiornate
+    # Mappature dirette complete
     EXACT_MAP = {
         "彡M A S T E Ʀ彡 (R4)": "MASTER",
         "彡M A S T E Ʀ彡": "MASTER",
         "MASTER": "MASTER",
         "Ｍａメツ": "MA",
         "MA": "MA",
+        "MAX": "MA",
         "PΞPPΞ (R4)": "PEPPE",
         "PΞPPΞ": "PEPPE",
         "PEPPE": "PEPPE",
@@ -112,6 +112,7 @@ def smart_normalize_name(name):
         "ΨWallΨ (R4)": "WALL",
         "ΨWallΨ": "WALL",
         "WALL": "WALL",
+        "WALL7": "WALL",
         "Struntruppen": "STRUNZTRUPPEN",
         "Strunztruppen": "STRUNZTRUPPEN",
         "MX63": "STRUNZTRUPPEN",
@@ -129,7 +130,9 @@ def smart_normalize_name(name):
         "AGENT BASS": "AGENT0",
         "Bunnyᘻ": "BUNNYM",
         "ANA BUNNY": "BUNNYM",
-        "Stefano00000": "STEFANO00000"
+        "Stefano00000": "STEFANO00000",
+        "Reklaus": "REKLAUS",
+        "REKLAUS": "REKLAUS"
     }
     if str_name in EXACT_MAP:
         return EXACT_MAP[str_name]
@@ -157,7 +160,7 @@ def smart_normalize_name(name):
         return "PEPPE"
     if "MASTER" in clean:
         return "MASTER"
-    if clean == "MA":
+    if clean in ["MA", "MAX"]:
         return "MA"
     if "MARKUS" in clean or "DARKDOOM" in clean:
         return "DARKDOOM"
@@ -177,6 +180,8 @@ def smart_normalize_name(name):
         return "AGENT0"
     if "BUNNY" in clean or "ANA" in clean:
         return "BUNNYM"
+    if "REKLAUS" in clean:
+        return "REKLAUS"
         
     return clean.strip()
 
