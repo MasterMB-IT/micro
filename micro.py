@@ -137,11 +137,11 @@ def smart_normalize_name(name):
 
 ACTIVE_PLAYERS_MAP = {smart_normalize_name(p): p for p in all_active_names}
 
-# --- DATI STORICI AGGIORNATI APRILE - AGOSTO 2026 ---
+# --- DATI STORICI RICALIBRATI (MAX 5 TURNI CAPOTRENO SU 5 MESI) ---
 HISTORICAL_5_MONTHS = {
     "capo_counts": {
-        "HOOL": 6, "MASTER": 6, "SHINYPASTA": 6, "PEPPE": 6, "UNCLEG BROTHER": 3,
-        "RICKY AROUND": 6, "09ALEX24": 5, "LE 12 SCIMMIE": 5, "SAGITTARIUS A1": 5, 
+        "HOOL": 5, "MASTER": 5, "SHINYPASTA": 5, "PEPPE": 5, "UNCLEG BROTHER": 3,
+        "RICKY AROUND": 5, "09ALEX24": 5, "LE 12 SCIMMIE": 5, "SAGITTARIUS A1": 5, 
         "WHALE PANDA": 3, "GOZ": 0, "WALL": 4, "CRUEL NEVE": 4, "ZOKRA": 5, 
         "XFLOTCHY": 5, "GIUSEPPEC84": 3, "MUSCHIOLINI": 2, "BADBIGBOSS": 4, 
         "MA": 3, "NOVEMBERGENZ": 3, "SPIO24": 4, "TRICHECO": 1, "MORTEN1212": 3, 
