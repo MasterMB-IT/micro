@@ -10,7 +10,7 @@ import calendar
 from collections import defaultdict
 
 # --- CONFIGURAZIONE PAGINA ---
-st.set_page_config(page_title="AOSR Express", layout="wide")
+st.set_page_config(page_title="AOSR Express 2099 - Hyperloop Manager", layout="wide")
 
 MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
             "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
