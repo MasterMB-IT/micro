@@ -272,10 +272,19 @@ st.markdown("""
         text-shadow: 0 0 10px #00f3ff, 0 0 20px #00f3ff, 0 0 40px #7b2cbf;
     }
     
-    /* ALLINEAMENTO VERTICALE E COMPATTEZZA */
+    /* ALLINEAMENTO VERTICALE PERFECT FIT */
     div[data-testid="stHorizontalBlock"] {
         align-items: flex-end !important;
         gap: 8px !important;
+    }
+    
+    div[data-testid="stColumn"] {
+        display: flex;
+        align-items: flex-end;
+    }
+
+    div[data-testid="stColumn"] > div {
+        width: 100%;
     }
     
     /* NORMALIZZAZIONE INPUT E SELECTBOX */
@@ -283,7 +292,7 @@ st.markdown("""
         border-radius: 6px !important;
     }
 
-    /* STILIZZAZIONE BOTTONI */
+    /* STILIZZAZIONE BOTTONI STANDARD */
     .stButton > button {
         height: 42px !important;
         border-radius: 6px !important;
@@ -296,6 +305,7 @@ st.markdown("""
         color: #00f3ff !important;
         transition: all 0.25s ease-in-out !important;
         padding: 0px 8px !important;
+        margin: 0 !important;
     }
     
     .stButton > button:hover {
@@ -305,30 +315,32 @@ st.markdown("""
         background: rgba(255, 0, 127, 0.2) !important;
     }
     
-    .btn-genera button {
+    /* STILE SPECIALE PER PRIMO BOTTONE (GENERA) SUL PRIMO ELEMENTO COLONNA */
+    div[data-testid="stHorizontalBlock"]:nth-of-type(2) div[data-testid="stColumn"]:first-child button {
         border: 2px solid #00f3ff !important;
         background: linear-gradient(135deg, rgba(0, 243, 255, 0.25), rgba(123, 44, 191, 0.4)) !important;
         color: #ffffff !important;
         text-shadow: 0 0 5px #00f3ff !important;
     }
     
-    .btn-genera button:hover {
+    div[data-testid="stHorizontalBlock"]:nth-of-type(2) div[data-testid="stColumn"]:first-child button:hover {
         border-color: #00f3ff !important;
         background: #00f3ff !important;
         color: #05050a !important;
         box-shadow: 0 0 20px #00f3ff !important;
     }
 
-    /* TOGGLE STILIZZATO COMPATTO */
+    /* TOGGLE STILIZZATO PERFETTAMENTE PARI AI BOTTONI */
     div[data-testid="stToggleButton"] {
-        height: 42px;
+        height: 42px !important;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(15, 15, 30, 0.9);
-        border: 1px solid rgba(0, 243, 255, 0.4);
-        border-radius: 6px;
-        padding: 0px 10px;
+        background: rgba(15, 15, 30, 0.9) !important;
+        border: 1px solid rgba(0, 243, 255, 0.4) !important;
+        border-radius: 6px !important;
+        padding: 0px 10px !important;
+        margin: 0 !important;
     }
 
     /* CALENDARIO GRIGLIA */
@@ -414,7 +426,6 @@ st.markdown('<div style="margin-top: 10px;"></div>', unsafe_allow_html=True)
 cb1, cb2, cb3, cb4, cb5 = st.columns([1.5, 1.2, 1.4, 1, 1])
 
 with cb1:
-    st.markdown('<div class="btn-genera">', unsafe_allow_html=True)
     if st.button("⚡ GENERA CALENDARIO", use_container_width=True):
         p_l = leaders_list
         p_o = r3_r2_list
@@ -439,8 +450,6 @@ with cb1:
             if c in all_players: current_assignments["capo"][c] += 1
             if p in all_players: current_assignments["pass"][p] += 1
             st.session_state['master_cal'].append({"Giorno": g, "Capo": c, "Pass": p})
-            
-    st.markdown('</div>', unsafe_allow_html=True)
 
 with cb2:
     if st.button("💾 SALVA IN MEMORIA", use_container_width=True):
