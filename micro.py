@@ -91,7 +91,11 @@ def smart_normalize_name(name):
         "MASTER": "MASTER",
         "Ｍａメツ": "MA",
         "MA": "MA",
+        "PΞPPΞ (R4)": "PEPPE",
+        "PΞPPΞ": "PEPPE",
+        "PEPPE": "PEPPE",
         "yeah yeah Coco Jambo": "GOZ",
+        "yeah yeah": "GOZ",
         "GOZ": "GOZ",
         "Markus Defender": "DARKDOOM",
         "DARK DOOM": "DARKDOOM",
@@ -120,8 +124,10 @@ def smart_normalize_name(name):
         
     clean = re.sub(r'[^A-Z0-9]', '', clean)
     
-    if "YEAHYEAH" in clean:
+    if "YEAHYEAH" in clean or "YEAH" in clean:
         return "GOZ"
+    if "PEPPE" in clean:
+        return "PEPPE"
     if "MASTER" in clean:
         return "MASTER"
     if clean == "MA":
