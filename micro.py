@@ -258,48 +258,44 @@ st.markdown("""
         color: #e0e6ed; 
     }
     
-    /* TITOLO PRINCIPALE CAZZUTO */
+    /* TITOLO PRINCIPALE */
     .express-title {
         font-family: 'Orbitron', sans-serif;
         text-align: center;
         color: #00f3ff;
-        font-size: 3.5rem;
+        font-size: 3rem;
         font-weight: 900;
         letter-spacing: 4px;
         text-transform: uppercase;
         margin-top: -10px;
-        margin-bottom: 25px;
+        margin-bottom: 20px;
         text-shadow: 0 0 10px #00f3ff, 0 0 20px #00f3ff, 0 0 40px #7b2cbf;
     }
     
-    /* DASHBOARD SALA COMANDO BORDATA */
-    .sala-comando-cyber {
-        background: rgba(10, 8, 22, 0.85);
-        border: 2px solid #00f3ff;
-        box-shadow: 0 0 15px rgba(0, 243, 255, 0.3), inset 0 0 15px rgba(0, 243, 255, 0.1);
-        border-radius: 12px;
-        padding: 20px 25px;
-        margin-bottom: 30px;
-    }
-    
-    /* ALLINEAMENTO VERTICALE PULSANTI */
+    /* ALLINEAMENTO VERTICALE E COMPATTEZZA */
     div[data-testid="stHorizontalBlock"] {
         align-items: flex-end !important;
-        gap: 12px !important;
+        gap: 8px !important;
     }
     
+    /* NORMALIZZAZIONE INPUT E SELECTBOX */
+    div[data-baseweb="select"], div[data-baseweb="input"] {
+        border-radius: 6px !important;
+    }
+
     /* STILIZZAZIONE BOTTONI */
     .stButton > button {
         height: 42px !important;
         border-radius: 6px !important;
         font-family: 'Orbitron', sans-serif !important;
-        font-size: 0.75rem !important;
+        font-size: 0.72rem !important;
         font-weight: 700 !important;
         letter-spacing: 0.5px !important;
         border: 1px solid rgba(0, 243, 255, 0.4) !important;
         background: rgba(15, 15, 30, 0.9) !important;
         color: #00f3ff !important;
         transition: all 0.25s ease-in-out !important;
+        padding: 0px 8px !important;
     }
     
     .stButton > button:hover {
@@ -311,7 +307,7 @@ st.markdown("""
     
     .btn-genera button {
         border: 2px solid #00f3ff !important;
-        background: linear-gradient(135deg, rgba(0, 243, 255, 0.2), rgba(123, 44, 191, 0.3)) !important;
+        background: linear-gradient(135deg, rgba(0, 243, 255, 0.25), rgba(123, 44, 191, 0.4)) !important;
         color: #ffffff !important;
         text-shadow: 0 0 5px #00f3ff !important;
     }
@@ -323,8 +319,20 @@ st.markdown("""
         box-shadow: 0 0 20px #00f3ff !important;
     }
 
+    /* TOGGLE STILIZZATO COMPATTO */
+    div[data-testid="stToggleButton"] {
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 15, 30, 0.9);
+        border: 1px solid rgba(0, 243, 255, 0.4);
+        border-radius: 6px;
+        padding: 0px 10px;
+    }
+
     /* CALENDARIO GRIGLIA */
-    .cal-header-container { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 15px; }
+    .cal-header-container { display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 15px; margin-bottom: 15px; }
     .cal-header-text { font-family: 'Orbitron', sans-serif; color: #ff007f; text-shadow: 0 0 10px #ff007f; font-size: 2rem; margin: 0; }
     .calendar-cell { background: rgba(15, 15, 30, 0.85); border: 1px solid rgba(0, 243, 255, 0.25); padding: 12px 10px; color: #ffffff; display: flex; flex-direction: column; transition: all 0.3s ease; margin: -0.5px; position: relative; }
     .calendar-cell:hover { border-color: #ff007f; box-shadow: 0 0 15px rgba(255, 0, 127, 0.4); z-index: 10; transform: translateY(-2px); }
@@ -393,19 +401,17 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
 # --- TITOLO E INTERFACCIA ALTA ---
 st.markdown('<div class="express-title">🚄 AOSR EXPRESS</div>', unsafe_allow_html=True)
 
-st.markdown('<div class="sala-comando-cyber">', unsafe_allow_html=True)
-
-# RIGA 1: CONFIGURAZIONE
-c1, c2, c3, c4 = st.columns([1, 1, 1.5, 1.5])
+# RIGA 1: CONFIGURAZIONE PARAMETRI
+c1, c2, c3, c4 = st.columns([1, 1, 1.3, 2.2])
 with c1: st.session_state['sel_mese'] = st.selectbox("📅 MESE", MESI_ITA, index=8)
 with c2: st.session_state['sel_anno'] = st.number_input("📆 ANNO", 2024, 2030, 2026)
 with c3: sel_phase = st.selectbox("⚖️ FASE BILANCIAMENTO", ["Fase 1 (Primi 2 Mesi)", "Fase 2 (Transizione Mese 3)", "Fase 3 (A Regime)"])
 with c4: merito_days_input = st.multiselect("🎖️ 5 GIORNI MERITO (R4)", list(range(12, 32)), default=[12, 15, 18, 22, 28])
 
-st.markdown('<div style="margin-top:15px;"></div>', unsafe_allow_html=True)
+st.markdown('<div style="margin-top: 10px;"></div>', unsafe_allow_html=True)
 
-# RIGA 2: PULSANTI COMANDO ALLINEATI
-cb1, cb2, cb3, cb4, cb5 = st.columns([1.6, 1.3, 1.5, 1, 1])
+# RIGA 2: BARRA AZIONI E CONTROLLO
+cb1, cb2, cb3, cb4, cb5 = st.columns([1.5, 1.2, 1.4, 1, 1])
 
 with cb1:
     st.markdown('<div class="btn-genera">', unsafe_allow_html=True)
@@ -467,8 +473,6 @@ with cb4:
 
 with cb5:
     view_mode = st.toggle("🎞️ COMPATTA", value=False)
-
-st.markdown('</div>', unsafe_allow_html=True)
 
 # --- RENDERING GRIGLIA ---
 if 'master_cal' in st.session_state:
