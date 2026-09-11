@@ -97,7 +97,10 @@ def smart_normalize_name(name):
         "DARK DOOM": "DARKDOOM",
         "DARKDOOM": "DARKDOOM",
         "Zio Giotto": "ELCHICOGYOT",
-        "ELCHICOGYOT": "ELCHICOGYOT"
+        "ELCHICOGYOT": "ELCHICOGYOT",
+        "ΨWallΨ (R4)": "WALL",
+        "ΨWallΨ": "WALL",
+        "WALL": "WALL"
     }
     if str_name in EXACT_MAP:
         return EXACT_MAP[str_name]
@@ -127,39 +130,46 @@ def smart_normalize_name(name):
         return "DARKDOOM"
     if "ZIOGIOTTO" in clean or "ELCHICO" in clean:
         return "ELCHICOGYOT"
+    if "WALL" in clean:
+        return "WALL"
         
     return clean.strip()
 
 ACTIVE_PLAYERS_MAP = {smart_normalize_name(p): p for p in all_active_names}
 
-# --- DATI STORICI MAPPATI SUI NUOVI CODICI UNIFICATI ---
+# --- DATI STORICI AGGIORNATI APRILE - AGOSTO 2026 ---
 HISTORICAL_5_MONTHS = {
     "capo_counts": {
-        "HOOL": 2, "MASTER": 4, "SHINYPASTA": 4, "PEPPE": 3, "UNCLEG BROTHER": 2,
-        "RICKY AROUND": 3, "09ALEX24": 3, "LE 12 SCIMMIE": 2, "SAGITTARIUS A1": 3, 
-        "WHALE PANDA": 2, "GOZ": 3, "WALL": 4, "CRUEL NEVE": 3, "ZOKRA": 3, 
-        "XFLOTCHY": 3, "GIUSEPPEC84": 2, "MUSCHIOLINI": 2, "BADBIGBOSS": 3, 
-        "MA": 3, "NOVEMBERGENZ": 2, "SPIO24": 3, "TRICHECO": 1, "MORTEN1212": 3, 
-        "MEIO65": 1, "MARTINSK": 2, "CASELLO": 1, "SCOLLIGO": 2, "LIMAXIMUS": 2, 
-        "SIR VONSKI": 2, "F3NRYU": 2, "DARKGIOLLO": 2, "REKLAUS": 2, "ANUBIS 7": 1,
-        "BRANCII": 1, "X THE LORD X": 2, "MIKE92I": 1, "PITT9595": 2, "TORHIL": 2,
-        "BENDICO": 1, "27FRANCESCO": 1, "GHANDAL": 1, "GENNAROM": 1, "BANDOLERO26": 1,
-        "JOSEPPONE": 3, "MIK I": 1, "BRNCOMMANDO": 1, "SQUIRTLE ITA": 1
+        "HOOL": 6, "MASTER": 6, "SHINYPASTA": 6, "PEPPE": 6, "UNCLEG BROTHER": 3,
+        "RICKY AROUND": 6, "09ALEX24": 5, "LE 12 SCIMMIE": 5, "SAGITTARIUS A1": 5, 
+        "WHALE PANDA": 3, "GOZ": 0, "WALL": 4, "CRUEL NEVE": 4, "ZOKRA": 5, 
+        "XFLOTCHY": 5, "GIUSEPPEC84": 3, "MUSCHIOLINI": 2, "BADBIGBOSS": 4, 
+        "MA": 3, "NOVEMBERGENZ": 3, "SPIO24": 4, "TRICHECO": 1, "MORTEN1212": 3, 
+        "MEIO65": 1, "MARTINSK": 3, "CASELLO": 1, "SCOLLIGO": 4, "LIMAXIMUS": 4, 
+        "SIR VONSKI": 3, "F3NRYU": 4, "DARKGIOLLO": 4, "REKLAUS": 4, "ANUBIS 7": 1,
+        "BRANCII": 2, "X THE LORD X": 3, "MIKE92I": 1, "PITT9595": 4, "TORHIL": 2,
+        "BENDICO": 2, "27FRANCESCO": 2, "GHANDAL": 3, "GENNAROM": 2, "BANDOLERO26": 2,
+        "JOSEPPONE": 5, "MIK I": 2, "BRNCOMMANDO": 2, "SQUIRTLE ITA": 3,
+        "ZAAAAAAAYYYYY": 1, "ELCHICOGYOT": 1, "DARKDOOM": 2, "SIR LANCE OF N8Watch": 0,
+        "MISSDRINKS": 0, "STEFANO00000": 0, "PAKII": 0, "KROMPIR": 0, "CAMII": 0,
+        "MESHEL": 0, "VINCENZOPOMA89": 0, "JAXXTRONIC": 0, "ARESARWEN": 0,
+        "COMANDANTE MAVERIC": 0, "SKITETO": 0, "HOLDFAST": 0, "STRUNZTRUPPEN": 2,
+        "LEFADA13": 0, "PERSEUSXXX": 1, "TCHIK": 0, "GERRY": 0, "WOLF006": 0, "ARYRON": 0
     },
     "pass_counts": {
-        "MA": 4, "SHINYPASTA": 2, "MASTER": 3, "09ALEX24": 2, "GOZ": 1,
-        "SAGITTARIUS A1": 2, "RICKY AROUND": 2, "PEPPE": 2, "UNCLEG BROTHER": 3, 
-        "LE 12 SCIMMIE": 2, "HOOL": 3, "GERRY": 2, "WOLF006": 3, "ARYRON": 2, 
-        "BENDICO": 2, "MISSDRINKS": 1, "STEFANO00000": 2, "PAKII": 2, 
-        "BANDOLERO26": 1, "WALL": 3, "KROMPIR": 3, "GHANDAL": 1, "ZOKRA": 2,
-        "CAMII": 2, "JOSEPPONE": 3, "BADBIGBOSS": 2, "NOVEMBERGENZ": 2, 
-        "XFLOTCHY": 2, "MESHEL": 1, "SIR LANCE OF N8WATCH": 1, "VINCENZOPOMA89": 1, 
-        "ZAAAAAAAYYYYY": 2, "JAXXTRONIC": 1, "ARESARWEN": 1, "SQUIRTLE ITA": 1, 
-        "SIR VONSKI": 1, "LIMAXIMUS": 1, "F3NRYU": 1, "REKLAUS": 1, "ELCHICOGYOT": 1, 
-        "DARKGIOLLO": 1, "SPIO24": 2, "COMANDANTE MAVERIC": 1, "SKITETO": 1, 
-        "TRICHECO": 2, "PITT9595": 1, "CRUEL NEVE": 1, "GENNAROM": 1, "HOLDFAST": 1, 
-        "BRANCII": 2, "STRUNZTRUPPEN": 2, "27FRANCESCO": 1, "LEFADA13": 1, 
-        "MEIO65": 1, "PERSEUSXXX": 1, "CASELLO": 1, "TCHIK": 1
+        "MA": 5, "SHINYPASTA": 5, "MASTER": 4, "09ALEX24": 6, "GOZ": 1,
+        "SAGITTARIUS A1": 5, "RICKY AROUND": 4, "PEPPE": 4, "UNCLEG BROTHER": 2, 
+        "LE 12 SCIMMIE": 3, "HOOL": 4, "GERRY": 3, "WOLF006": 4, "ARYRON": 3, 
+        "BENDICO": 4, "MISSDRINKS": 1, "STEFANO00000": 3, "PAKII": 3, 
+        "BANDOLERO26": 1, "WALL": 3, "KROMPIR": 3, "GHANDAL": 0, "ZOKRA": 3,
+        "CAMII": 2, "JOSEPPONE": 4, "BADBIGBOSS": 4, "NOVEMBERGENZ": 5, 
+        "XFLOTCHY": 3, "MESHEL": 1, "SIR LANCE OF N8Watch": 1, "VINCENZOPOMA89": 1, 
+        "ZAAAAAAAYYYYY": 3, "JAXXTRONIC": 2, "ARESARWEN": 2, "SQUIRTLE ITA": 2, 
+        "SIR VONSKI": 2, "LIMAXIMUS": 2, "F3NRYU": 1, "REKLAUS": 3, "ELCHICOGYOT": 2, 
+        "DARKGIOLLO": 1, "SPIO24": 3, "COMANDANTE MAVERIC": 2, "SKITETO": 2, 
+        "TRICHECO": 4, "PITT9595": 1, "CRUEL NEVE": 2, "GENNAROM": 2, "HOLDFAST": 1, 
+        "BRANCII": 4, "STRUNZTRUPPEN": 4, "27FRANCESCO": 2, "LEFADA13": 2, 
+        "MEIO65": 2, "PERSEUSXXX": 2, "CASELLO": 2, "TCHIK": 2
     }
 }
 
