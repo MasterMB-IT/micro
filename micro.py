@@ -10,7 +10,7 @@ import calendar
 from collections import defaultdict
 
 # --- CONFIGURAZIONE PAGINA ---
-st.set_page_config(page_title="AOSR Express 2099 - Hyperloop Manager", layout="wide")
+st.set_page_config(page_title="AOSR EXPRESS", layout="wide")
 
 MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
             "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
@@ -248,17 +248,84 @@ def get_advanced_balanced_player(pool, role_type, current_assignments, phase="Fa
     candidates.sort(key=lambda x: x["score"])
     return candidates[0]["player"]
 
-# --- STILE CSS ---
+# --- CSS CAZZUTO E ALLINEAMENTO PERFETTO ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800;900&family=Rajdhani:wght@600;700&display=swap');
-    .stApp { background: radial-gradient(circle at 50% 10%, #150d2a 0%, #080811 100%); color: #e0e6ed; }
-    .train-title { font-family: 'Orbitron', sans-serif; text-align: center; color: #00f3ff; text-shadow: 0 0 10px #00f3ff, 0 0 20px #00f3ff; font-size: 3rem; font-weight: 900; margin-bottom: 20px; }
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@600;700&display=swap');
+    
+    .stApp { 
+        background: radial-gradient(circle at 50% 5%, #0f0a1e 0%, #05050a 100%); 
+        color: #e0e6ed; 
+    }
+    
+    /* TITOLO PRINCIPALE CAZZUTO */
+    .express-title {
+        font-family: 'Orbitron', sans-serif;
+        text-align: center;
+        color: #00f3ff;
+        font-size: 3.5rem;
+        font-weight: 900;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        margin-top: -10px;
+        margin-bottom: 25px;
+        text-shadow: 0 0 10px #00f3ff, 0 0 20px #00f3ff, 0 0 40px #7b2cbf;
+    }
+    
+    /* DASHBOARD SALA COMANDO BORDATA */
+    .sala-comando-cyber {
+        background: rgba(10, 8, 22, 0.85);
+        border: 2px solid #00f3ff;
+        box-shadow: 0 0 15px rgba(0, 243, 255, 0.3), inset 0 0 15px rgba(0, 243, 255, 0.1);
+        border-radius: 12px;
+        padding: 20px 25px;
+        margin-bottom: 30px;
+    }
+    
+    /* ALLINEAMENTO VERTICALE PULSANTI */
+    div[data-testid="stHorizontalBlock"] {
+        align-items: flex-end !important;
+        gap: 12px !important;
+    }
+    
+    /* STILIZZAZIONE BOTTONI */
+    .stButton > button {
+        height: 42px !important;
+        border-radius: 6px !important;
+        font-family: 'Orbitron', sans-serif !important;
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.5px !important;
+        border: 1px solid rgba(0, 243, 255, 0.4) !important;
+        background: rgba(15, 15, 30, 0.9) !important;
+        color: #00f3ff !important;
+        transition: all 0.25s ease-in-out !important;
+    }
+    
+    .stButton > button:hover {
+        border-color: #ff007f !important;
+        color: #ffffff !important;
+        box-shadow: 0 0 12px rgba(255, 0, 127, 0.5) !important;
+        background: rgba(255, 0, 127, 0.2) !important;
+    }
+    
+    .btn-genera button {
+        border: 2px solid #00f3ff !important;
+        background: linear-gradient(135deg, rgba(0, 243, 255, 0.2), rgba(123, 44, 191, 0.3)) !important;
+        color: #ffffff !important;
+        text-shadow: 0 0 5px #00f3ff !important;
+    }
+    
+    .btn-genera button:hover {
+        border-color: #00f3ff !important;
+        background: #00f3ff !important;
+        color: #05050a !important;
+        box-shadow: 0 0 20px #00f3ff !important;
+    }
+
+    /* CALENDARIO GRIGLIA */
     .cal-header-container { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 15px; }
     .cal-header-text { font-family: 'Orbitron', sans-serif; color: #ff007f; text-shadow: 0 0 10px #ff007f; font-size: 2rem; margin: 0; }
-    .sala-comando { background: rgba(16, 12, 34, 0.75); backdrop-filter: blur(12px); border: 1px solid #00f3ff; border-radius: 12px; padding: 25px; margin-bottom: 30px; }
-    [data-testid="column"] { padding: 0px !important; margin: 0px !important; }
-    div[data-testid="stHorizontalBlock"] { gap: 0px !important; }
     .calendar-cell { background: rgba(15, 15, 30, 0.85); border: 1px solid rgba(0, 243, 255, 0.25); padding: 12px 10px; color: #ffffff; display: flex; flex-direction: column; transition: all 0.3s ease; margin: -0.5px; position: relative; }
     .calendar-cell:hover { border-color: #ff007f; box-shadow: 0 0 15px rgba(255, 0, 127, 0.4); z-index: 10; transform: translateY(-2px); }
     .h-norm { min-height: 230px !important; }
@@ -267,10 +334,6 @@ st.markdown("""
     .day-badge { background: linear-gradient(135deg, #7b2cbf, #ff007f); color: #ffffff; font-family: 'Orbitron', sans-serif; font-weight: 800; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; width: fit-content; margin-bottom: 8px; }
     .role-label { color: #00f3ff; font-size: 0.65rem; font-family: 'Rajdhani', sans-serif; text-transform: uppercase; font-weight: 700; border-bottom: 1px solid rgba(0, 243, 255, 0.2); margin-top: 6px; }
     .name-text { font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; font-weight: 700; text-transform: uppercase; border-left: 3px solid #ff007f; padding-left: 6px; overflow: hidden; white-space: nowrap; margin-top: 3px; color: #ffffff !important; }
-    .stButton>button { border-radius: 6px !important; font-family: 'Orbitron', sans-serif !important; font-size: 0.8rem !important; }
-    .btn-genera button { background: transparent !important; color: #00f3ff !important; border: 1px solid #00f3ff !important; }
-    .btn-genera button:hover { background: #00f3ff !important; color: #080811 !important; }
-    div[data-testid="stPopover"] > button { height: 26px !important; width: 100% !important; margin-top: 8px !important; font-size: 0.7rem !important; border: 1px solid #7b2cbf !important; background: rgba(123, 44, 191, 0.2) !important; color: #00f3ff !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -327,22 +390,26 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
                                         break
                                 st.rerun()
 
-# --- DASHBOARD PRINCIPALE ---
-st.markdown('<div class="train-title">🚝 AOSR HYPERLOOP 2099</div>', unsafe_allow_html=True)
-st.markdown('<div class="sala-comando">', unsafe_allow_html=True)
+# --- TITOLO E INTERFACCIA ALTA ---
+st.markdown('<div class="express-title">🚄 AOSR EXPRESS</div>', unsafe_allow_html=True)
 
+st.markdown('<div class="sala-comando-cyber">', unsafe_allow_html=True)
+
+# RIGA 1: CONFIGURAZIONE
 c1, c2, c3, c4 = st.columns([1, 1, 1.5, 1.5])
 with c1: st.session_state['sel_mese'] = st.selectbox("📅 MESE", MESI_ITA, index=8)
 with c2: st.session_state['sel_anno'] = st.number_input("📆 ANNO", 2024, 2030, 2026)
 with c3: sel_phase = st.selectbox("⚖️ FASE BILANCIAMENTO", ["Fase 1 (Primi 2 Mesi)", "Fase 2 (Transizione Mese 3)", "Fase 3 (A Regime)"])
 with c4: merito_days_input = st.multiselect("🎖️ 5 GIORNI MERITO (R4)", list(range(12, 32)), default=[12, 15, 18, 22, 28])
 
-st.markdown('<div style="margin-top:15px; padding-top:15px; border-top:1px solid rgba(0,243,255,0.2)">', unsafe_allow_html=True)
-cb1, cb2, cb3, cb4, cb5 = st.columns([1.5, 1.2, 1.4, 1, 1])
+st.markdown('<div style="margin-top:15px;"></div>', unsafe_allow_html=True)
+
+# RIGA 2: PULSANTI COMANDO ALLINEATI
+cb1, cb2, cb3, cb4, cb5 = st.columns([1.6, 1.3, 1.5, 1, 1])
 
 with cb1:
     st.markdown('<div class="btn-genera">', unsafe_allow_html=True)
-    if st.button("⚡ GENERA CALENDARIO ALLEANZA", use_container_width=True):
+    if st.button("⚡ GENERA CALENDARIO", use_container_width=True):
         p_l = leaders_list
         p_o = r3_r2_list
         all_players = sorted(list(set(p_l + p_o)))
@@ -384,15 +451,14 @@ with cb2:
             st.rerun()
 
 with cb3:
-    # PULSANTE ANNULLA ULTIMO SALVATAGGIO
-    if st.button("🔙 ANNULLA ULTIMO SALVATAGGIO", use_container_width=True):
+    if st.button("🔙 ANNULLA SALVATAGGIO", use_container_width=True):
         if st.session_state['history']:
             last_saved = st.session_state['history'].pop()
             save_history()
             st.toast(f"Rimesso indietro lo storico! Eliminato: {last_saved['data']}")
             st.rerun()
         else:
-            st.toast("Nessun salvataggio presente nello storico!")
+            st.toast("Nessun salvataggio presente!")
 
 with cb4:
     if st.button("🌐 RESET", use_container_width=True):
@@ -400,7 +466,7 @@ with cb4:
         st.session_state['master_cal'] = [{"Giorno": g, "Capo": "---", "Pass": "---"} for g in range(1, num_gg + 1)]
 
 with cb5:
-    view_mode = st.toggle("🎞️ VISTA COMPATTA", value=False)
+    view_mode = st.toggle("🎞️ COMPATTA", value=False)
 
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -413,32 +479,26 @@ if 'master_cal' in st.session_state:
     """, unsafe_allow_html=True)
     draw_grid(st.session_state['master_cal'], compact=view_mode, key_prefix="master")
 
-# --- PANNELLO ARCHIVIO E CRONOLOGIA ---
+# --- ARCHIVIO MESI ---
 st.markdown("<br><hr style='border:1px solid rgba(0,243,255,0.2)'><br>", unsafe_allow_html=True)
 st.markdown("<h2 style='color:#ff007f; font-family:Orbitron; text-align:center;'>📜 ARCHIVIO MESI E GESTIONE SALVATAGGI</h2>", unsafe_allow_html=True)
 
 if st.session_state['history']:
-    st.caption("Qui puoi visualizzare o cancellare qualsiasi mese salvato in precedenza. Eliminando un mese, lo storico dei giocatori tornerà indietro automaticamente.")
-    
     for idx, item in enumerate(reversed(st.session_state['history'])):
         real_idx = len(st.session_state['history']) - 1 - idx
         with st.expander(f"📌 {item['data']} (Salvato il {item['ts']})"):
             c_del1, c_del2 = st.columns([4, 1])
             with c_del2:
-                if st.button("🗑️ ELIMINA QUESTO MESE", key=f"del_hist_{real_idx}", use_container_width=True):
+                if st.button("🗑️ ELIMINA", key=f"del_hist_{real_idx}", use_container_width=True):
                     st.session_state['history'].pop(real_idx)
                     save_history()
-                    st.toast("Mese eliminato dallo storico!")
+                    st.toast("Mese eliminato!")
                     st.rerun()
-            
             with c_del1:
-                st.caption("Anteprima Turni Salvati:")
                 df_hist_preview = pd.DataFrame(item['cal'])
                 st.dataframe(df_hist_preview, use_container_width=True, hide_index=True)
-else:
-    st.info("Nessun mese salvato in memoria.")
 
-# --- PANNELLO STATISTICHE COMPLETO ---
+# --- STATISTICHE ---
 st.markdown("<br><hr style='border:1px solid rgba(0,243,255,0.2)'><br>", unsafe_allow_html=True)
 st.markdown("<h2 style='color:#00f3ff; font-family:Orbitron; text-align:center;'>📊 STATISTICHE E MODIFICA STORICO</h2>", unsafe_allow_html=True)
 
@@ -463,9 +523,7 @@ with tab_stat1:
     st.dataframe(df_stats, use_container_width=True, hide_index=True)
 
 with tab_stat2:
-    st.caption("Sovrascrivi qui le presenze di qualsiasi membro. L'algoritmo userà immediatamente questi valori.")
     target_player = st.selectbox("Seleziona Giocatore:", all_active_names, key="override_player_select")
-    
     if target_player:
         norm_target = smart_normalize_name(target_player)
         curr_c = capo_hist_total.get(norm_target, 0)
