@@ -54,33 +54,38 @@ if 'history' not in st.session_state:
 if 'manual_overrides' not in st.session_state:
     st.session_state['manual_overrides'] = load_overrides()
 
-# --- DATABASE MEMBRI ATTIVI ---
+# --- DATABASE MEMBRI ATTIVI (ESTRATTI DAL CSV: 1 R5 + 10 R4 = 11 LEADERS) ---
 def init_db():
-    # Rimosso "Uncle g brother (R4)" dai leaders
     leaders = [
-        "亗 Hool 亗 (R5)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", 
-        "PΞPPΞ (R4)", "Ricky Around (R4)", "09ALEX24 (R4)", 
-        "ShinyPasta (R4)", "ΨWallΨ (R4)", "彡M A S T E Ʀ彡 (R4)"
+        "亗 Hool 亗 (R5)",          # R5
+        "ΨWallΨ (R4)",              # R4
+        "09ALEX24 (R4)",            # R4
+        "Ricky Around (R4)",        # R4
+        "Sagittarius A1 (R4)",      # R4
+        "彡M A S T E Ʀ彡 (R4)",      # R4
+        "Ｍａメツ (R4)",             # R4
+        "PΞPPΞ (R4)",               # R4
+        "Le 12 Scimmie (R4)",       # R4
+        "ShinyPasta (R4)",          # R4
+        "xFlotchy (R4)"             # R4
     ]
     
-    # Inserito uncle g / Uncle g brother in R3/R2
     r3_r2 = [
-        "Dragons slayer", "Morten1212", "J๏รєקקђoNe", "Zokra", "BadBigBoss", 
-        "Sir Vonski", "Limaximus", "ARIO73", "Scolligo", "dome b", "Pitt9595", 
-        "MartinSK", "Ｍａメツ", "xFlotchy", "ᶜᵃᵖᵒ ΘᴥΘ", "JaxxTronic", "NOVEMBERGENZ", 
-        "Trivellatore", "TheDane001", "Purpix7", "Bugs Bunny", "Billy1906", 
-        "Mik I", "cruel neve", "Bendico", "Elchicojyot", "Comandante Maveric", 
-        "Dark Doom", "perseusxxx", "Reklaus", "SPio24", "F3nryU", "Struntruppen", 
-        "ᴮᵃⁿᵃⁿᵃ B", "Wolf006", "Sir Lance of N8Watch", "MissDrinks", "Aryron", 
-        "Kɘrnel Panic", "Leechai", "Anubis 7", "GennaroM", "holdfast", "DarkGiollo", 
-        "PakII", "yeah yeah Coco Jambo", "GER176", "Giuseppec84", "mike92i", "krompir",
-        "tchik", "Dark lalla", "zaaaaaaaayyyy", "controvento6", "torhil", "MeSHeL", 
-        "Ꮭ ᏗᎶᏋᏁᏖ0", "G Σrry", "Uncle g brother", "Pielaur", "Stefano00000", "VincenzoPoma89", 
-        "Whale Panda", "Squirtle ITA", "Skiteto", "27Francesco", "BANDOLERO26", 
-        "ღNeyღ", "Ghandal", "MUSCOLEENI", "Bunnyᘻ", "rnd66", "CaSeLLo", "Mmtyy", 
-        "bonnyand", "AresArwen", "MeIo65", "o GARGANTUA o", "x The Lord x", "Tricheco", 
-        "BRNcommando", "Brancii", "ImAde", "CAMìì", "ℒιzzιℯ 82", "Peter Sveter", 
-        "LeFada13", "Riki Sajo", "Pembe komutan", "Pupisnic"
+        "Morten1212", "Ξ Ghost Ξ", "F3nryU", "Zokra", "DarkGiollo", "Dragons slayer", 
+        "BadBigBoss", "TheDane001", "J๏รєקקђoNe", "Scolligo", "JaxxTronic", "ARIO73", 
+        "Pitt9595", "GER176", "Ghandal", "Uncle g brother", "Limaximus", "Purpix7", 
+        "PØNTΔTINΔTØRΞ", "dome b", "perseusxxx", "MeSHeeL", "Elchicogyot", "tchik", 
+        "Leechai", "ᴮᵃⁿᵃⁿᵃ B", "cruel neve", "GennaroM", "Wolf006", "Ꮭ ᏗᎶᏋᏁᏖ0", 
+        "Aryron", "mike92i", "Mik I", "Sir Lance of N8Watch", "AMYᵃᵒˢʳ", "ImAde", 
+        "MartinSK", "PakII", "Dark doom", "controvento6", "MeIo65", "Bendico", 
+        "Rikki Sajo", "yeah yeah Coco Jambo", "27Francesco", "ᶜᵃᵖᵒ ΘᴥΘ", "uncle g", 
+        "holdfast", "BANDOLERO26", "VincenzoPoma89", "EDDward", "krompir", "zaaaaaaaayyyy", 
+        "ღNeyღ", "Comandante Maveric", "Giuseppec84", "Squirtle ITA", "AresArwen", 
+        "NOVEMBERGENZ", "rnd66", "Whale Panda", "SPio24", "torhil", "Pembe komutan", 
+        "Bunnyᘻ", "Trivellatore", "Billy1906", "Iniuria", "BRNcommando", "MUSCOLEENI", 
+        "Dark lalla", "G Σrry", "ℒιzzιℯ 82", "Strunztruppen", "Brancii", "o GARGANTUA o", 
+        "CΔMÍÍㆍᴥㆍ", "Skiteto", "Pielaur", "Anubis  7", "MissDrinks", "Mmtyy", 
+        "さGhandyる", "Peter Sveter", "x The Lord x", "LeFada13", "Tricheco", "bonnyand", "Pupisnic"
     ]
     
     data = [{"Nome": "---", "Grado": "Nessuno"}] + \
@@ -106,22 +111,23 @@ def smart_normalize_name(name):
     
     EXACT_MAP = {
         "彡M A S T E Ʀ彡 (R4)": "MASTER", "彡M A S T E Ʀ彡": "MASTER", "MASTER": "MASTER", "MASTER (R4)": "MASTER",
-        "Ｍａメツ": "MA", "MA": "MA", "MAX": "MA", "MAメツ": "MA", "MAメツ (R4)": "MA",
+        "Ｍａメツ": "MA", "MA": "MA", "MAX": "MA", "MAメツ": "MA", "Ｍａメツ (R4)": "MA",
         "PΞPPΞ (R4)": "PEPPE", "PΞPPΞ": "PEPPE", "PEPPE": "PEPPE", "PEPPE (R5)": "PEPPE", "PEPPE (R4)": "PEPPE",
         "yeah yeah Coco Jambo": "GOZ", "yeah yeah": "GOZ", "GOZ": "GOZ",
-        "J๏รєקקђoNe": "JOSEPPONE", "JOSEPPONE": "JOSEPPONE", "JOSEPPONE (R4)": "JOSEPPONE",
-        "Dark Doom": "DARKDOOM", "Markus Defender": "DARKDOOM", "MARKUS DEFENDE": "DARKDOOM", "DARK DOOM": "DARKDOOM", "DARKDOOM": "DARKDOOM",
-        "Elchicojyot": "ELCHICOJYOT", "Zio Giotto": "ELCHICOJYOT", "ZIO GIOTTO": "ELCHICOJYOT", "ELCHICOJYOT": "ELCHICOJYOT", "ELCHICOGYOT": "ELCHICOJYOT",
+        "J๏รєקקђoNe": "JOSEPPONE", "J๏รєקקђoNe (R4)": "JOSEPPONE", "JOSEPPONE": "JOSEPPONE", "JOSEPPONE (R4)": "JOSEPPONE",
+        "Dark doom": "DARKDOOM", "Dark Doom": "DARKDOOM", "Markus Defender": "DARKDOOM", "MARKUS DEFENDE": "DARKDOOM", "DARK DOOM": "DARKDOOM", "DARKDOOM": "DARKDOOM",
+        "Elchicogyot": "ELCHICOJYOT", "Elchicojyot": "ELCHICOJYOT", "Zio Giotto": "ELCHICOJYOT", "ZIO GIOTTO": "ELCHICOJYOT", "ELCHICOJYOT": "ELCHICOJYOT",
         "ΨWallΨ (R4)": "WALL", "ΨWallΨ": "WALL", "WALL (R4)": "WALL", "WALL": "WALL", "WALL7": "WALL", "WALL 7": "WALL", "WALL 7 (R4)": "WALL",
-        "Struntruppen": "STRUNZTRUPPEN", "Strunztruppen": "STRUNZTRUPPEN", "MX63": "STRUNZTRUPPEN",
+        "Strunztruppen": "STRUNZTRUPPEN", "Struntruppen": "STRUNZTRUPPEN", "MX63": "STRUNZTRUPPEN",
         "MUSCOLEENI": "MUSCHIOLINI", "BENITO MUSCHIO": "MUSCHIOLINI", "BENITO MUSCHIOI": "MUSCHIOLINI", "MUSCHIOLINI": "MUSCHIOLINI",
-        "Bugs Bunny": "BUGSBUNNY", "Bug Bunny": "BUGSBUNNY", "GHOST": "BUGSBUNNY", "Ξ Bugs Bunny Ξ": "BUGSBUNNY",
-        "CAMìì": "CAMII", "CAMIIIII 08": "CAMII", "CΔMÍÍㆍᴥㆍ": "CAMII",
+        "Bugs Bunny": "BUGSBUNNY", "Bug Bunny": "BUGSBUNNY", "GHOST": "BUGSBUNNY", "Ξ Ghost Ξ": "BUGSBUNNY",
+        "CΔMÍÍㆍᴥㆍ": "CAMII", "CAMìì": "CAMII", "CAMIIIII 08": "CAMII",
         "Ꮭ ᏗᎶᏋᏁᏖ0": "AGENT0", "AGENT BASS": "AGENT0",
         "Bunnyᘻ": "BUNNYM", "ANA BUNNY": "BUNNYM",
         "Stefano00000": "STEFANO00000",
         "Reklaus": "REKLAUS", "REKLAUS": "REKLAUS",
-        "Uncle g brother": "UNCLEG", "uncle g": "UNCLEG", "UNCLEG BROTHER": "UNCLEG"
+        "Uncle g brother": "UNCLEG", "uncle g": "UNCLEG", "Uncle g brother (R4)": "UNCLEG", "UNCLEG BROTHER": "UNCLEG",
+        "xFlotchy": "XFLOTCHY", "xFlotchy (R4)": "XFLOTCHY"
     }
     if str_name in EXACT_MAP:
         return EXACT_MAP[str_name]
@@ -152,11 +158,11 @@ def smart_normalize_name(name):
     if "WALL" in clean: return "WALL"
     if "MUSCOL" in clean or "MUSCH" in clean: return "MUSCHIOLINI"
     if "STRUN" in clean or "STRUNT" in clean: return "STRUNZTRUPPEN"
-    if "BUG" in clean and "BUNNY" in clean: return "BUGSBUNNY"
+    if "GHOST" in clean: return "BUGSBUNNY"
     if "CAMII" in clean: return "CAMII"
     if "AGENT" in clean or "LAGENTO" in clean: return "AGENT0"
     if "BUNNY" in clean or "ANA" in clean: return "BUNNYM"
-    if "REKLAUS" in clean: return "REKLAUS"
+    if "FLOTCHY" in clean: return "XFLOTCHY"
         
     return clean.strip()
 
@@ -219,8 +225,8 @@ def get_dynamic_history():
 
     return capo_hist, pass_hist
 
-# --- ALGORITMO DI BILANCIAMENTO CORRETTO ---
-def get_advanced_balanced_player(pool, role_type, current_assignments, exclude_list=None, phase="Fase 1 (Primi 2 Mesi)"):
+# --- ALGORITMO DI BILANCIAMENTO ---
+def get_advanced_balanced_player(pool, role_type, current_assignments, month_assigned_capos, exclude_list=None, phase="Fase 1 (Primi 2 Mesi)"):
     if exclude_list is None:
         exclude_list = []
         
@@ -228,18 +234,26 @@ def get_advanced_balanced_player(pool, role_type, current_assignments, exclude_l
     
     if phase == "Fase 1 (Primi 2 Mesi)":
         w_hist = 0.25
-        sigma = 1.5
+        sigma = 0.5
     elif phase == "Fase 2 (Transizione Mese 3)":
         w_hist = 0.50
-        sigma = 1.0
+        sigma = 0.5
     else:
         w_hist = 1.00
-        sigma = 0.5
+        sigma = 0.2
 
     candidates = []
     norm_excludes = [smart_normalize_name(x) for x in exclude_list]
 
-    for player in pool:
+    available_pool = [
+        p for p in pool 
+        if role_type != "capo" or smart_normalize_name(p) not in month_assigned_capos
+    ]
+    
+    if not available_pool:
+        available_pool = pool
+
+    for player in available_pool:
         norm_p = smart_normalize_name(player)
         if norm_p in norm_excludes:
             continue
@@ -252,8 +266,7 @@ def get_advanced_balanced_player(pool, role_type, current_assignments, exclude_l
         hist_p = pass_hist.get(norm_p, 0)
         hist_role = hist_c if role_type == "capo" else hist_p
         
-        # Penallizzazione fortissima per chi ha già un turno nello stesso mese
-        score = (hist_role * w_hist) + (curr_c * 10 if role_type == "capo" else curr_p * 10) + (curr_total * 3) + random.uniform(0, sigma)
+        score = (hist_role * w_hist) + (curr_c * 50 if role_type == "capo" else curr_p * 10) + (curr_total * 5) + random.uniform(0, sigma)
         
         candidates.append({"player": player, "score": score})
     
@@ -431,7 +444,7 @@ st.markdown('<div style="margin-top: 10px;"></div>', unsafe_allow_html=True)
 
 cb1, cb2, cb3, cb4, cb5 = st.columns([1.5, 1.2, 1.4, 1, 1])
 
-# --- GENERAZIONE CON PREVENZIONE DUPLICATI ---
+# --- GENERAZIONE ---
 with cb1:
     if st.button("⚡ GENERA CALENDARIO", use_container_width=True):
         p_l = leaders_list
@@ -442,25 +455,29 @@ with cb1:
         st.session_state['master_cal'] = []
         
         current_assignments = {"capo": defaultdict(int), "pass": defaultdict(int)}
+        month_assigned_capos = set()
         
         for g in range(1, num_gg + 1):
             if g in merito_days_input:
                 c = "--- (DA ASSEGNARE)"
                 p = "--- (DA ASSEGNARE)"
             elif g <= 11:
-                # Primi 11 giorni: Capo Treno SOLO R4/R5
-                c = get_advanced_balanced_player(p_l, "capo", current_assignments, exclude_list=[], phase=sel_phase)
-                p = get_advanced_balanced_player(all_players, "pass", current_assignments, exclude_list=[c], phase=sel_phase)
+                # Primi 11 giorni: Capo Treno SOLO i 11 Leaders (R5 + R4)
+                c = get_advanced_balanced_player(p_l, "capo", current_assignments, month_assigned_capos, exclude_list=[], phase=sel_phase)
+                p = get_advanced_balanced_player(all_players, "pass", current_assignments, month_assigned_capos, exclude_list=[c], phase=sel_phase)
             else:
                 # Giorni normali: Capo Treno Tutti
-                c = get_advanced_balanced_player(all_players, "capo", current_assignments, exclude_list=[], phase=sel_phase)
-                p = get_advanced_balanced_player(all_players, "pass", current_assignments, exclude_list=[c], phase=sel_phase)
+                c = get_advanced_balanced_player(all_players, "capo", current_assignments, month_assigned_capos, exclude_list=[], phase=sel_phase)
+                p = get_advanced_balanced_player(all_players, "pass", current_assignments, month_assigned_capos, exclude_list=[c], phase=sel_phase)
             
             norm_c = smart_normalize_name(c)
             norm_p = smart_normalize_name(p)
             
-            if norm_c: current_assignments["capo"][norm_c] += 1
-            if norm_p: current_assignments["pass"][norm_p] += 1
+            if norm_c: 
+                current_assignments["capo"][norm_c] += 1
+                month_assigned_capos.add(norm_c)
+            if norm_p: 
+                current_assignments["pass"][norm_p] += 1
             
             st.session_state['master_cal'].append({"Giorno": g, "Capo": c, "Pass": p})
 
