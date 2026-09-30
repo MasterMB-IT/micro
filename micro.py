@@ -56,12 +56,14 @@ if 'manual_overrides' not in st.session_state:
 
 # --- DATABASE MEMBRI ATTIVI ---
 def init_db():
+    # Rimosso "Uncle g brother (R4)" dai leaders
     leaders = [
         "亗 Hool 亗 (R5)", "Le 12 Scimmie (R4)", "Sagittarius A1 (R4)", 
-        "PΞPPΞ (R4)", "Ricky Around (R4)", "Uncle g brother (R4)", 
-        "09ALEX24 (R4)", "ShinyPasta (R4)", "ΨWallΨ (R4)", "彡M A S T E Ʀ彡 (R4)"
+        "PΞPPΞ (R4)", "Ricky Around (R4)", "09ALEX24 (R4)", 
+        "ShinyPasta (R4)", "ΨWallΨ (R4)", "彡M A S T E Ʀ彡 (R4)"
     ]
     
+    # Inserito uncle g / Uncle g brother in R3/R2
     r3_r2 = [
         "Dragons slayer", "Morten1212", "J๏รєקקђoNe", "Zokra", "BadBigBoss", 
         "Sir Vonski", "Limaximus", "ARIO73", "Scolligo", "dome b", "Pitt9595", 
@@ -73,7 +75,7 @@ def init_db():
         "Kɘrnel Panic", "Leechai", "Anubis 7", "GennaroM", "holdfast", "DarkGiollo", 
         "PakII", "yeah yeah Coco Jambo", "GER176", "Giuseppec84", "mike92i", "krompir",
         "tchik", "Dark lalla", "zaaaaaaaayyyy", "controvento6", "torhil", "MeSHeL", 
-        "Ꮭ ᏗᎶᏋᏁᏖ0", "G Σrry", "uncle g", "Pielaur", "Stefano00000", "VincenzoPoma89", 
+        "Ꮭ ᏗᎶᏋᏁᏖ0", "G Σrry", "Uncle g brother", "Pielaur", "Stefano00000", "VincenzoPoma89", 
         "Whale Panda", "Squirtle ITA", "Skiteto", "27Francesco", "BANDOLERO26", 
         "ღNeyღ", "Ghandal", "MUSCOLEENI", "Bunnyᘻ", "rnd66", "CaSeLLo", "Mmtyy", 
         "bonnyand", "AresArwen", "MeIo65", "o GARGANTUA o", "x The Lord x", "Tricheco", 
@@ -118,7 +120,8 @@ def smart_normalize_name(name):
         "Ꮭ ᏗᎶᏋᏁᏖ0": "AGENT0", "AGENT BASS": "AGENT0",
         "Bunnyᘻ": "BUNNYM", "ANA BUNNY": "BUNNYM",
         "Stefano00000": "STEFANO00000",
-        "Reklaus": "REKLAUS", "REKLAUS": "REKLAUS"
+        "Reklaus": "REKLAUS", "REKLAUS": "REKLAUS",
+        "Uncle g brother": "UNCLEG", "uncle g": "UNCLEG", "UNCLEG BROTHER": "UNCLEG"
     }
     if str_name in EXACT_MAP:
         return EXACT_MAP[str_name]
@@ -138,6 +141,7 @@ def smart_normalize_name(name):
         
     clean = re.sub(r'[^A-Z0-9]', '', clean)
     
+    if "UNCLE" in clean: return "UNCLEG"
     if "YEAH" in clean or "COCO" in clean or "JAMBO" in clean or "GOZ" in clean: return "GOZ"
     if "JOSEPPONE" in clean or ("J" in clean and "PEP" in clean): return "JOSEPPONE"
     if "PEPPE" in clean: return "PEPPE"
@@ -164,7 +168,7 @@ HISTORICAL_5_MONTHS = {
         "SHINYPASTA": 5, "WALL": 5, "MASTER": 5, "HOOL": 5, "PEPPE": 5, "JOSEPPONE": 5, 
         "XFLOTCHY": 5, "ZOKRA": 5, "MA": 4, "GOZ": 4, "BADBIGBOSS": 4, "SPIO24": 4, 
         "CRUEL NEVE": 4, "DARKGIOLLO": 4, "F3NRYU": 4, "LIMAXIMUS": 4, "PITT9595": 4, 
-        "SCOLLIGO": 4, "NOVEMBERGENZ": 3, "SIR VONSKI": 3, "UNCLEG BROTHER": 3, 
+        "SCOLLIGO": 4, "NOVEMBERGENZ": 3, "SIR VONSKI": 3, "UNCLEG": 3, 
         "WHALE PANDA": 3, "MORTEN1212": 3, "MARTINSK": 3, "SQUIRTLE ITA": 3, 
         "X THE LORD X": 3, "GHANDAL": 3, "GIUSEPPEC84": 3, "BENDICO": 2, 
         "DARKDOOM": 2, "27FRANCESCO": 2, "BRANCII": 2, "GENNAROM": 2, "MUSCHIOLINI": 2, 
@@ -179,7 +183,7 @@ HISTORICAL_5_MONTHS = {
         "STRUNZTRUPPEN": 4, "TRICHECO": 4, "WOLF006": 4, "LE 12 SCIMMIE": 3, 
         "XFLOTCHY": 3, "ZOKRA": 3, "GOZ": 3, "SPIO24": 3, "ZAAAAAAAYYYYY": 3, 
         "GERRY": 3, "ARYRON": 3, "STEFANO00000": 3, "PAKII": 3, "KROMPIR": 3, 
-        "BUGSBUNNY": 3, "UNCLEG BROTHER": 2, "LIMAXIMUS": 2, "CRUEL NEVE": 2, 
+        "BUGSBUNNY": 3, "UNCLEG": 2, "LIMAXIMUS": 2, "CRUEL NEVE": 2, 
         "SIR VONSKI": 2, "SQUIRTLE ITA": 2, "GENNAROM": 2, "27FRANCESCO": 2, 
         "CASELLO": 2, "REKLAUS": 2, "ELCHICOJYOT": 2, "MEIO65": 2, "PERSEUSXXX": 2, 
         "CAMII": 2, "COMANDANTE MAVERIC": 2, "SKITETO": 2, "JAXXTRONIC": 2, 
@@ -191,32 +195,35 @@ HISTORICAL_5_MONTHS = {
 }
 
 def get_dynamic_history():
-    capo_counts = defaultdict(int)
-    pass_counts = defaultdict(int)
+    capo_hist = defaultdict(int)
+    pass_hist = defaultdict(int)
     
     for k, v in HISTORICAL_5_MONTHS["capo_counts"].items():
         norm_k = smart_normalize_name(k)
-        if norm_k in ACTIVE_PLAYERS_MAP: capo_counts[norm_k] = max(capo_counts[norm_k], v)
+        if norm_k in ACTIVE_PLAYERS_MAP: capo_hist[norm_k] = max(capo_hist[norm_k], v)
 
     for k, v in HISTORICAL_5_MONTHS["pass_counts"].items():
         norm_k = smart_normalize_name(k)
-        if norm_k in ACTIVE_PLAYERS_MAP: pass_counts[norm_k] = max(pass_counts[norm_k], v)
+        if norm_k in ACTIVE_PLAYERS_MAP: pass_hist[norm_k] = max(pass_hist[norm_k], v)
     
     for month_data in st.session_state.get('history', []):
         for row in month_data.get('cal', []):
             c_norm = smart_normalize_name(row.get('Capo', ''))
             p_norm = smart_normalize_name(row.get('Pass', ''))
-            if c_norm in ACTIVE_PLAYERS_MAP: capo_counts[c_norm] += 1
-            if p_norm in ACTIVE_PLAYERS_MAP: pass_counts[p_norm] += 1
+            if c_norm in ACTIVE_PLAYERS_MAP: capo_hist[c_norm] += 1
+            if p_norm in ACTIVE_PLAYERS_MAP: pass_hist[p_norm] += 1
                 
     for norm_k, vals in st.session_state.get('manual_overrides', {}).items():
-        if "capo" in vals: capo_counts[norm_k] = vals["capo"]
-        if "pass" in vals: pass_counts[norm_k] = vals["pass"]
+        if "capo" in vals: capo_hist[norm_k] = vals["capo"]
+        if "pass" in vals: pass_hist[norm_k] = vals["pass"]
 
-    return capo_counts, pass_counts
+    return capo_hist, pass_hist
 
-# --- ALGORITMO DI BILANCIAMENTO ---
-def get_advanced_balanced_player(pool, role_type, current_assignments, phase="Fase 1 (Primi 2 Mesi)"):
+# --- ALGORITMO DI BILANCIAMENTO CORRETTO ---
+def get_advanced_balanced_player(pool, role_type, current_assignments, exclude_list=None, phase="Fase 1 (Primi 2 Mesi)"):
+    if exclude_list is None:
+        exclude_list = []
+        
     capo_hist, pass_hist = get_dynamic_history()
     
     if phase == "Fase 1 (Primi 2 Mesi)":
@@ -230,21 +237,29 @@ def get_advanced_balanced_player(pool, role_type, current_assignments, phase="Fa
         sigma = 0.5
 
     candidates = []
+    norm_excludes = [smart_normalize_name(x) for x in exclude_list]
+
     for player in pool:
         norm_p = smart_normalize_name(player)
+        if norm_p in norm_excludes:
+            continue
         
-        curr_c = current_assignments["capo"][player]
-        curr_p = current_assignments["pass"][player]
+        curr_c = current_assignments["capo"][norm_p]
+        curr_p = current_assignments["pass"][norm_p]
         curr_total = curr_c + curr_p
         
         hist_c = capo_hist.get(norm_p, 0)
         hist_p = pass_hist.get(norm_p, 0)
         hist_role = hist_c if role_type == "capo" else hist_p
         
-        score = (hist_role * w_hist) + (curr_total * 2.5) + random.uniform(0, sigma)
+        # Penallizzazione fortissima per chi ha già un turno nello stesso mese
+        score = (hist_role * w_hist) + (curr_c * 10 if role_type == "capo" else curr_p * 10) + (curr_total * 3) + random.uniform(0, sigma)
         
         candidates.append({"player": player, "score": score})
     
+    if not candidates:
+        return "---"
+
     candidates.sort(key=lambda x: x["score"])
     return candidates[0]["player"]
 
@@ -258,7 +273,6 @@ st.markdown("""
         color: #e0e6ed; 
     }
     
-    /* TITOLO PRINCIPALE */
     .express-title {
         font-family: 'Orbitron', sans-serif;
         text-align: center;
@@ -272,7 +286,6 @@ st.markdown("""
         text-shadow: 0 0 10px #00f3ff, 0 0 20px #00f3ff, 0 0 40px #7b2cbf;
     }
     
-    /* ALLINEAMENTO VERTICALE PERFECT FIT */
     div[data-testid="stHorizontalBlock"] {
         align-items: flex-end !important;
         gap: 8px !important;
@@ -287,12 +300,10 @@ st.markdown("""
         width: 100%;
     }
     
-    /* NORMALIZZAZIONE INPUT E SELECTBOX */
     div[data-baseweb="select"], div[data-baseweb="input"] {
         border-radius: 6px !important;
     }
 
-    /* STILIZZAZIONE BOTTONI STANDARD */
     .stButton > button {
         height: 42px !important;
         border-radius: 6px !important;
@@ -315,7 +326,6 @@ st.markdown("""
         background: rgba(255, 0, 127, 0.2) !important;
     }
     
-    /* STILE SPECIALE PER PRIMO BOTTONE (GENERA) SUL PRIMO ELEMENTO COLONNA */
     div[data-testid="stHorizontalBlock"]:nth-of-type(2) div[data-testid="stColumn"]:first-child button {
         border: 2px solid #00f3ff !important;
         background: linear-gradient(135deg, rgba(0, 243, 255, 0.25), rgba(123, 44, 191, 0.4)) !important;
@@ -330,7 +340,6 @@ st.markdown("""
         box-shadow: 0 0 20px #00f3ff !important;
     }
 
-    /* TOGGLE STILIZZATO PERFETTAMENTE PARI AI BOTTONI */
     div[data-testid="stToggleButton"] {
         height: 42px !important;
         display: flex;
@@ -343,7 +352,6 @@ st.markdown("""
         margin: 0 !important;
     }
 
-    /* CALENDARIO GRIGLIA */
     .cal-header-container { display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 15px; margin-bottom: 15px; }
     .cal-header-text { font-family: 'Orbitron', sans-serif; color: #ff007f; text-shadow: 0 0 10px #ff007f; font-size: 2rem; margin: 0; }
     .calendar-cell { background: rgba(15, 15, 30, 0.85); border: 1px solid rgba(0, 243, 255, 0.25); padding: 12px 10px; color: #ffffff; display: flex; flex-direction: column; transition: all 0.3s ease; margin: -0.5px; position: relative; }
@@ -413,7 +421,6 @@ def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
 # --- TITOLO E INTERFACCIA ALTA ---
 st.markdown('<div class="express-title">🚄 AOSR EXPRESS</div>', unsafe_allow_html=True)
 
-# RIGA 1: CONFIGURAZIONE PARAMETRI
 c1, c2, c3, c4 = st.columns([1, 1, 1.3, 2.2])
 with c1: st.session_state['sel_mese'] = st.selectbox("📅 MESE", MESI_ITA, index=8)
 with c2: st.session_state['sel_anno'] = st.number_input("📆 ANNO", 2024, 2030, 2026)
@@ -422,9 +429,9 @@ with c4: merito_days_input = st.multiselect("🎖️ 5 GIORNI MERITO (R4)", list
 
 st.markdown('<div style="margin-top: 10px;"></div>', unsafe_allow_html=True)
 
-# RIGA 2: BARRA AZIONI E CONTROLLO
 cb1, cb2, cb3, cb4, cb5 = st.columns([1.5, 1.2, 1.4, 1, 1])
 
+# --- GENERAZIONE CON PREVENZIONE DUPLICATI ---
 with cb1:
     if st.button("⚡ GENERA CALENDARIO", use_container_width=True):
         p_l = leaders_list
@@ -441,14 +448,20 @@ with cb1:
                 c = "--- (DA ASSEGNARE)"
                 p = "--- (DA ASSEGNARE)"
             elif g <= 11:
-                c = get_advanced_balanced_player(p_l, "capo", current_assignments, phase=sel_phase)
-                p = get_advanced_balanced_player([x for x in all_players if x != c], "pass", current_assignments, phase=sel_phase)
+                # Primi 11 giorni: Capo Treno SOLO R4/R5
+                c = get_advanced_balanced_player(p_l, "capo", current_assignments, exclude_list=[], phase=sel_phase)
+                p = get_advanced_balanced_player(all_players, "pass", current_assignments, exclude_list=[c], phase=sel_phase)
             else:
-                c = get_advanced_balanced_player(all_players, "capo", current_assignments, phase=sel_phase)
-                p = get_advanced_balanced_player([x for x in all_players if x != c], "pass", current_assignments, phase=sel_phase)
+                # Giorni normali: Capo Treno Tutti
+                c = get_advanced_balanced_player(all_players, "capo", current_assignments, exclude_list=[], phase=sel_phase)
+                p = get_advanced_balanced_player(all_players, "pass", current_assignments, exclude_list=[c], phase=sel_phase)
             
-            if c in all_players: current_assignments["capo"][c] += 1
-            if p in all_players: current_assignments["pass"][p] += 1
+            norm_c = smart_normalize_name(c)
+            norm_p = smart_normalize_name(p)
+            
+            if norm_c: current_assignments["capo"][norm_c] += 1
+            if norm_p: current_assignments["pass"][norm_p] += 1
+            
             st.session_state['master_cal'].append({"Giorno": g, "Capo": c, "Pass": p})
 
 with cb2:
