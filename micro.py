@@ -1,590 +1,245 @@
-import streamlit as st
-import pandas as pd
-import random
-import json
 import os
+import json
 import re
 import unicodedata
-from datetime import datetime
-import calendar
-from collections import defaultdict
+import pandas as pd
+import streamlit as st
 
-# --- CONFIGURAZIONE PAGINA ---
-st.set_page_config(page_title="AOSR EXPRESS", layout="wide")
-
-MESI_ITA = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", 
-            "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
-
-GIORNI_SETTIMANA = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"]
-GIORNI_ABBR = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"]
-
+# ==========================================
+# CONFIGURAZIONE E FILE JSON
+# ==========================================
 DB_FILE = "cronologia_treni.json"
 OVERRIDES_FILE = "manual_overrides.json"
 
-# --- PERSISTENZA DATI ---
-def save_history():
-    with open(DB_FILE, "w", encoding="utf-8") as f:
-        json.dump(st.session_state['history'], f, ensure_ascii=False, indent=4)
+st.set_page_config(
+    page_title="Gestore Treni AOSR",
+    page_icon="🚆",
+    layout="wide"
+)
 
-def load_history():
-    if os.path.exists(DB_FILE):
+# ==========================================
+# FUNZIONI DI LETTURA E SALVATAGGIO SICURO
+# ==========================================
+def load_json_file(file_path, default_data):
+    """Carica un file JSON se esiste, altrimenti restituisce il valore di default."""
+    if os.path.exists(file_path):
         try:
-            with open(DB_FILE, "r", encoding="utf-8") as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 return json.load(f)
-        except:
-            return []
-    return []
+        except Exception as e:
+            st.error(f"Errore nel caricamento di {file_path}: {e}")
+    return default_data
 
-def save_overrides():
-    with open(OVERRIDES_FILE, "w", encoding="utf-8") as f:
-        json.dump(st.session_state['manual_overrides'], f, ensure_ascii=False, indent=4)
+def save_json_file(file_path, data):
+    """Salva i dati su file JSON in maniera atomica forzando il flush del disco."""
+    try:
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+            f.flush()
+            os.fsync(f.fileno())
+        return True
+    except Exception as e:
+        st.error(f"Errore durante il salvataggio in {file_path}: {e}")
+        return False
 
-def load_overrides():
-    if os.path.exists(OVERRIDES_FILE):
-        try:
-            with open(OVERRIDES_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except:
-            return {}
-    return {}
+# ==========================================
+# INIZIALIZZAZIONE SESSION STATE
+# ==========================================
+# Caricamento o creazione del calendario predefinito (Settembre 2026)
+default_september = [
+    {"giorno": 1, "capo_treno": "SHINYPASTA (R4)", "passeggero_vip": "IMADE"},
+    {"giorno": 2, "capo_treno": "ΨWALLΨ (R4)", "passeggero_vip": "WHALE PANDA"},
+    {"giorno": 3, "capo_treno": "SAGITTARIUS A1 (R4)", "passeggero_vip": "TRIVELLATORE"},
+    {"giorno": 4, "capo_treno": "Ｍａメツ (R4)", "passeggero_vip": "PEMBE KOMUTAN"},
+    {"giorno": 5, "capo_treno": "亗 HOOL 亗 (R5)", "passeggero_vip": "LEECHAI"},
+    {"giorno": 6, "capo_treno": "RICKY AROUND (R4)", "passeggero_vip": "PURPIX7"},
+    {"giorno": 7, "capo_treno": "09ALEX24 (R4)", "passeggero_vip": "ZAAAAAAAAYYYYY"},
+    {"giorno": 8, "capo_treno": "彡M A S T E R彡 (R4)", "passeggero_vip": "BONNYAND"},
+    {"giorno": 9, "capo_treno": "LE 12 SCIMMIE (R4)", "passeggero_vip": "DARK LALLA"},
+    {"giorno": 10, "capo_treno": "PΞPPΞ (R4)", "passeggero_vip": "RIKKI SAJO"},
+    {"giorno": 11, "capo_treno": "XFLOTCHY (R4)", "passeggero_vip": "PUPISNIC"},
+    {"giorno": 12, "capo_treno": "ZOKRA", "passeggero_vip": "MUSCOLEENI"},
+    {"giorno": 13, "capo_treno": "ARESARWEN", "passeggero_vip": "RND66"},
+    {"giorno": 14, "capo_treno": "PAKII", "passeggero_vip": "ღNeyღ"},
+    {"giorno": 15, "capo_treno": "YEAH YEAH COCO JAMBO", "passeggero_vip": "UNCLE G BROTHER"},
+    {"giorno": 16, "capo_treno": "SIR LANCE OF N8WATCH", "passeggero_vip": "ᶜᵃᵖᵒ ΘᴥΘ"},
+    {"giorno": 17, "capo_treno": "HOLDFAST", "passeggero_vip": "MMTYY"},
+    {"giorno": 18, "capo_treno": "MORTEN1212", "passeggero_vip": "DRAGONS SLAYER"},
+    {"giorno": 19, "capo_treno": "JAXXTRONIC", "passeggero_vip": "さGhandyる"},
+    {"giorno": 20, "capo_treno": "COMANDANTE MAVERIC", "passeggero_vip": "CONTROVENTO6"},
+    {"giorno": 21, "capo_treno": "Ξ GHOST Ξ", "passeggero_vip": "X THE LORD X"},
+    {"giorno": 22, "capo_treno": "BRANCII", "passeggero_vip": "ᴮᵃⁿᵃⁿᵃ B"},
+    {"giorno": 23, "capo_treno": "MARTINSK", "passeggero_vip": "PØNTΔTINΔTØRΞ"},
+    {"giorno": 24, "capo_treno": "TCHIK", "passeggero_vip": "INIURIA"},
+    {"giorno": 25, "capo_treno": "VINCENZOPOMA89", "passeggero_vip": "o GARGANTUA o"},
+    {"giorno": 26, "capo_treno": "ARYRON", "passeggero_vip": "MISSDRINKS"},
+    {"giorno": 27, "capo_treno": "F3NRYU", "passeggero_vip": "DOME B"},
+    {"giorno": 28, "capo_treno": "J๏รєקקђoNe", "passeggero_vip": "NOVEMBERGENZ"},
+    {"giorno": 29, "capo_treno": "KROMPIR", "passeggero_vip": "THEDANE001"},
+    {"giorno": 30, "capo_treno": "WOLF006", "passeggero_vip": "G ΣRRY"}
+]
 
-if 'history' not in st.session_state:
-    st.session_state['history'] = load_history()
-
-if 'manual_overrides' not in st.session_state:
-    st.session_state['manual_overrides'] = load_overrides()
-
-# --- DATABASE MEMBRI ATTIVI (ESTRATTI DAL CSV: 1 R5 + 10 R4 = 11 LEADERS) ---
-def init_db():
-    leaders = [
-        "亗 Hool 亗 (R5)",          # R5
-        "ΨWallΨ (R4)",              # R4
-        "09ALEX24 (R4)",            # R4
-        "Ricky Around (R4)",        # R4
-        "Sagittarius A1 (R4)",      # R4
-        "彡M A S T E Ʀ彡 (R4)",      # R4
-        "Ｍａメツ (R4)",             # R4
-        "PΞPPΞ (R4)",               # R4
-        "Le 12 Scimmie (R4)",       # R4
-        "ShinyPasta (R4)",          # R4
-        "xFlotchy (R4)"             # R4
-    ]
-    
-    r3_r2 = [
-        "Morten1212", "Ξ Ghost Ξ", "F3nryU", "Zokra", "DarkGiollo", "Dragons slayer", 
-        "BadBigBoss", "TheDane001", "J๏รєקקђoNe", "Scolligo", "JaxxTronic", "ARIO73", 
-        "Pitt9595", "GER176", "Ghandal", "Uncle g brother", "Limaximus", "Purpix7", 
-        "PØNTΔTINΔTØRΞ", "dome b", "perseusxxx", "MeSHeeL", "Elchicogyot", "tchik", 
-        "Leechai", "ᴮᵃⁿᵃⁿᵃ B", "cruel neve", "GennaroM", "Wolf006", "Ꮭ ᏗᎶᏋᏁᏖ0", 
-        "Aryron", "mike92i", "Mik I", "Sir Lance of N8Watch", "AMYᵃᵒˢʳ", "ImAde", 
-        "MartinSK", "PakII", "Dark doom", "controvento6", "MeIo65", "Bendico", 
-        "Rikki Sajo", "yeah yeah Coco Jambo", "27Francesco", "ᶜᵃᵖᵒ ΘᴥΘ", "uncle g", 
-        "holdfast", "BANDOLERO26", "VincenzoPoma89", "EDDward", "krompir", "zaaaaaaaayyyy", 
-        "ღNeyღ", "Comandante Maveric", "Giuseppec84", "Squirtle ITA", "AresArwen", 
-        "NOVEMBERGENZ", "rnd66", "Whale Panda", "SPio24", "torhil", "Pembe komutan", 
-        "Bunnyᘻ", "Trivellatore", "Billy1906", "Iniuria", "BRNcommando", "MUSCOLEENI", 
-        "Dark lalla", "G Σrry", "ℒιzzιℯ 82", "Strunztruppen", "Brancii", "o GARGANTUA o", 
-        "CΔMÍÍㆍᴥㆍ", "Skiteto", "Pielaur", "Anubis  7", "MissDrinks", "Mmtyy", 
-        "さGhandyる", "Peter Sveter", "x The Lord x", "LeFada13", "Tricheco", "bonnyand", "Pupisnic"
-    ]
-    
-    data = [{"Nome": "---", "Grado": "Nessuno"}] + \
-           [{"Nome": n, "Grado": "R5/R4"} for n in leaders] + \
-           [{"Nome": n, "Grado": "R3/R2"} for n in r3_r2]
-    return pd.DataFrame(data)
-
-if 'players_db' not in st.session_state: 
-    st.session_state['players_db'] = init_db()
-
-db = st.session_state['players_db']
-
-leaders_list = sorted(db[db['Grado'] == "R5/R4"]['Nome'].tolist())
-r3_r2_list = sorted(db[db['Grado'] == "R3/R2"]['Nome'].tolist())
-all_active_names = sorted(db[db['Nome'] != "---"]['Nome'].tolist())
-
-# --- ALIAS E PULIZIA NOMI ---
-def smart_normalize_name(name):
-    if not name or name == "---":
-        return ""
-    
-    str_name = str(name).strip()
-    
-    EXACT_MAP = {
-        "彡M A S T E Ʀ彡 (R4)": "MASTER", "彡M A S T E Ʀ彡": "MASTER", "MASTER": "MASTER", "MASTER (R4)": "MASTER",
-        "Ｍａメツ": "MA", "MA": "MA", "MAX": "MA", "MAメツ": "MA", "Ｍａメツ (R4)": "MA",
-        "PΞPPΞ (R4)": "PEPPE", "PΞPPΞ": "PEPPE", "PEPPE": "PEPPE", "PEPPE (R5)": "PEPPE", "PEPPE (R4)": "PEPPE",
-        "yeah yeah Coco Jambo": "GOZ", "yeah yeah": "GOZ", "GOZ": "GOZ",
-        "J๏รєקקђoNe": "JOSEPPONE", "J๏รєקקђoNe (R4)": "JOSEPPONE", "JOSEPPONE": "JOSEPPONE", "JOSEPPONE (R4)": "JOSEPPONE",
-        "Dark doom": "DARKDOOM", "Dark Doom": "DARKDOOM", "Markus Defender": "DARKDOOM", "MARKUS DEFENDE": "DARKDOOM", "DARK DOOM": "DARKDOOM", "DARKDOOM": "DARKDOOM",
-        "Elchicogyot": "ELCHICOJYOT", "Elchicojyot": "ELCHICOJYOT", "Zio Giotto": "ELCHICOJYOT", "ZIO GIOTTO": "ELCHICOJYOT", "ELCHICOJYOT": "ELCHICOJYOT",
-        "ΨWallΨ (R4)": "WALL", "ΨWallΨ": "WALL", "WALL (R4)": "WALL", "WALL": "WALL", "WALL7": "WALL", "WALL 7": "WALL", "WALL 7 (R4)": "WALL",
-        "Strunztruppen": "STRUNZTRUPPEN", "Struntruppen": "STRUNZTRUPPEN", "MX63": "STRUNZTRUPPEN",
-        "MUSCOLEENI": "MUSCHIOLINI", "BENITO MUSCHIO": "MUSCHIOLINI", "BENITO MUSCHIOI": "MUSCHIOLINI", "MUSCHIOLINI": "MUSCHIOLINI",
-        "Bugs Bunny": "BUGSBUNNY", "Bug Bunny": "BUGSBUNNY", "GHOST": "BUGSBUNNY", "Ξ Ghost Ξ": "BUGSBUNNY",
-        "CΔMÍÍㆍᴥㆍ": "CAMII", "CAMìì": "CAMII", "CAMIIIII 08": "CAMII",
-        "Ꮭ ᏗᎶᏋᏁᏖ0": "AGENT0", "AGENT BASS": "AGENT0",
-        "Bunnyᘻ": "BUNNYM", "ANA BUNNY": "BUNNYM",
-        "Stefano00000": "STEFANO00000",
-        "Reklaus": "REKLAUS", "REKLAUS": "REKLAUS",
-        "Uncle g brother": "UNCLEG", "uncle g": "UNCLEG", "Uncle g brother (R4)": "UNCLEG", "UNCLEG BROTHER": "UNCLEG",
-        "xFlotchy": "XFLOTCHY", "xFlotchy (R4)": "XFLOTCHY"
-    }
-    if str_name in EXACT_MAP:
-        return EXACT_MAP[str_name]
-        
-    clean = re.sub(r'\(.*?\)', '', str_name)
-    clean = unicodedata.normalize('NFKC', clean)
-    clean = unicodedata.normalize('NFKD', clean).encode('ASCII', 'ignore').decode('utf-8')
-    clean = clean.upper()
-
-    replacements = {
-        'Ʀ': 'R', 'Ξ': 'E', '亗': '', 'Ψ': '', '๏': 'O', 'ร': 'S', 'ק': 'P', 
-        'ђ': 'H', 'Σ': 'E', 'Δ': 'A', 'ℒ': 'L', 'ι': 'I', 'ℯ': 'E',
-        'ღ': '', 'ᘻ': 'M', 'Ꮭ': 'L', 'Ꮧ': 'A', 'Ꮆ': 'G', 'Ꮛ': 'E', 'Ꮑ': 'N', 'Ꮦ': 'T', 'ì': 'I'
-    }
-    for char, repl in replacements.items():
-        clean = clean.replace(char, repl)
-        
-    clean = re.sub(r'[^A-Z0-9]', '', clean)
-    
-    if "UNCLE" in clean: return "UNCLEG"
-    if "YEAH" in clean or "COCO" in clean or "JAMBO" in clean or "GOZ" in clean: return "GOZ"
-    if "JOSEPPONE" in clean or ("J" in clean and "PEP" in clean): return "JOSEPPONE"
-    if "PEPPE" in clean: return "PEPPE"
-    if "MASTER" in clean: return "MASTER"
-    if clean in ["MA", "MAX"]: return "MA"
-    if "MARKUS" in clean or "DARKDOOM" in clean: return "DARKDOOM"
-    if "ELCHICO" in clean or "ZIOGIOTTO" in clean: return "ELCHICOJYOT"
-    if "WALL" in clean: return "WALL"
-    if "MUSCOL" in clean or "MUSCH" in clean: return "MUSCHIOLINI"
-    if "STRUN" in clean or "STRUNT" in clean: return "STRUNZTRUPPEN"
-    if "GHOST" in clean: return "BUGSBUNNY"
-    if "CAMII" in clean: return "CAMII"
-    if "AGENT" in clean or "LAGENTO" in clean: return "AGENT0"
-    if "BUNNY" in clean or "ANA" in clean: return "BUNNYM"
-    if "FLOTCHY" in clean: return "XFLOTCHY"
-        
-    return clean.strip()
-
-ACTIVE_PLAYERS_MAP = {smart_normalize_name(p): p for p in all_active_names}
-
-HISTORICAL_5_MONTHS = {
-    "capo_counts": {
-        "09ALEX24": 5, "LE 12 SCIMMIE": 5, "RICKY AROUND": 5, "SAGITTARIUS A1": 5, 
-        "SHINYPASTA": 5, "WALL": 5, "MASTER": 5, "HOOL": 5, "PEPPE": 5, "JOSEPPONE": 5, 
-        "XFLOTCHY": 5, "ZOKRA": 5, "MA": 4, "GOZ": 4, "BADBIGBOSS": 4, "SPIO24": 4, 
-        "CRUEL NEVE": 4, "DARKGIOLLO": 4, "F3NRYU": 4, "LIMAXIMUS": 4, "PITT9595": 4, 
-        "SCOLLIGO": 4, "NOVEMBERGENZ": 3, "SIR VONSKI": 3, "UNCLEG": 3, 
-        "WHALE PANDA": 3, "MORTEN1212": 3, "MARTINSK": 3, "SQUIRTLE ITA": 3, 
-        "X THE LORD X": 3, "GHANDAL": 3, "GIUSEPPEC84": 3, "BENDICO": 2, 
-        "DARKDOOM": 2, "27FRANCESCO": 2, "BRANCII": 2, "GENNAROM": 2, "MUSCHIOLINI": 2, 
-        "STRUNZTRUPPEN": 2, "TORHIL": 2, "BANDOLERO26": 2, "BRNCOMMANDO": 2, "MIK I": 2, 
-        "TRICHECO": 1, "MEIO65": 1, "CASELLO": 1, "REKLAUS": 1, "ANUBIS 7": 1, 
-        "MIKE92I": 1, "ZAAAAAAAYYYYY": 1, "ELCHICOJYOT": 1, "PERSEUSXXX": 1
-    },
-    "pass_counts": {
-        "09ALEX24": 6, "SAGITTARIUS A1": 5, "SHINYPASTA": 5, "NOVEMBERGENZ": 5, 
-        "RICKY AROUND": 4, "MASTER": 4, "HOOL": 4, "PEPPE": 4, "WALL": 4, 
-        "MA": 4, "JOSEPPONE": 4, "BADBIGBOSS": 4, "BENDICO": 4, "BRANCII": 4, 
-        "STRUNZTRUPPEN": 4, "TRICHECO": 4, "WOLF006": 4, "LE 12 SCIMMIE": 3, 
-        "XFLOTCHY": 3, "ZOKRA": 3, "GOZ": 3, "SPIO24": 3, "ZAAAAAAAYYYYY": 3, 
-        "GERRY": 3, "ARYRON": 3, "STEFANO00000": 3, "PAKII": 3, "KROMPIR": 3, 
-        "BUGSBUNNY": 3, "UNCLEG": 2, "LIMAXIMUS": 2, "CRUEL NEVE": 2, 
-        "SIR VONSKI": 2, "SQUIRTLE ITA": 2, "GENNAROM": 2, "27FRANCESCO": 2, 
-        "CASELLO": 2, "REKLAUS": 2, "ELCHICOJYOT": 2, "MEIO65": 2, "PERSEUSXXX": 2, 
-        "CAMII": 2, "COMANDANTE MAVERIC": 2, "SKITETO": 2, "JAXXTRONIC": 2, 
-        "ARESARWEN": 2, "LEFADA13": 2, "TCHIK": 2, "PITT9595": 1, "DARKGIOLLO": 1, 
-        "F3NRYU": 1, "BANDOLERO26": 1, "MUSCHIOLINI": 1, "HOLDFAST": 1, 
-        "MISSDRINKS": 1, "MESHEL": 1, "SIR LANCE OF N8Watch": 1, "VINCENZOPOMA89": 1, 
-        "AGENT0": 1, "BUNNYM": 1
-    }
+# Modifiche manuali predefinite della tabella dello storico
+default_overrides = {
+    "09ALEX24 (R4)": {"turni_capo": 5, "turni_passeggero": 6, "totale_presenze": 11},
+    "Sagittarius A1 (R4)": {"turni_capo": 5, "turni_passeggero": 5, "totale_presenze": 10},
+    "ShinyPasta (R4)": {"turni_capo": 5, "turni_passeggero": 5, "totale_presenze": 10},
+    "J๏รєקקђoNe": {"turni_capo": 5, "turni_passeggero": 4, "totale_presenze": 9},
+    "PΞPPΞ (R4)": {"turni_capo": 5, "turni_passeggero": 4, "totale_presenze": 9},
+    "Ricky Around (R4)": {"turni_capo": 5, "turni_passeggero": 4, "totale_presenze": 9},
+    "ΨWallΨ (R4)": {"turni_capo": 5, "turni_passeggero": 4, "totale_presenze": 9},
+    "亗 Hool 亗 (R5)": {"turni_capo": 5, "turni_passeggero": 4, "totale_presenze": 9},
+    "彡M A S T E R彡 (R4)": {"turni_capo": 5, "turni_passeggero": 4, "totale_presenze": 9},
+    "BadBigBoss": {"turni_capo": 4, "turni_passeggero": 4, "totale_presenze": 8}
 }
 
-def get_dynamic_history():
-    capo_hist = defaultdict(int)
-    pass_hist = defaultdict(int)
+if 'history' not in st.session_state:
+    st.session_state['history'] = load_json_file(DB_FILE, default_september)
+
+if 'manual_overrides' not in st.session_state:
+    st.session_state['manual_overrides'] = load_json_file(OVERRIDES_FILE, default_overrides)
+
+# ==========================================
+# UTILITY ESPORTAZIONE CSV
+# ==========================================
+@st.cache_data
+def convert_df_to_csv(df):
+    """Converte un DataFrame Pandas in stringa CSV codificata UTF-8."""
+    return df.to_csv(index=False).encode('utf-8')
+
+# ==========================================
+# INTERFACCIA PRINCIPALE
+# ==========================================
+st.title("📊 STATISTICHE E MODIFICA STORICO")
+
+# Navigazione a Schede (Tabs)
+tab1, tab2 = st.tabs(["📊 TABELLA GENERALE", "✏️ MODIFICA MANUALMENTE LO STORICO"])
+
+# ------------------------------------------
+# TAB 1: TABELLA GENERALE E STATISTICHE
+# ------------------------------------------
+with tab1:
+    st.subheader("Riepilogo Totale Presenze e Turni")
+
+    # Elaborazione delle statistiche aggregate
+    stats_map = {}
     
-    for k, v in HISTORICAL_5_MONTHS["capo_counts"].items():
-        norm_k = smart_normalize_name(k)
-        if norm_k in ACTIVE_PLAYERS_MAP: capo_hist[norm_k] = max(capo_hist[norm_k], v)
-
-    for k, v in HISTORICAL_5_MONTHS["pass_counts"].items():
-        norm_k = smart_normalize_name(k)
-        if norm_k in ACTIVE_PLAYERS_MAP: pass_hist[norm_k] = max(pass_hist[norm_k], v)
-    
-    for month_data in st.session_state.get('history', []):
-        for row in month_data.get('cal', []):
-            c_norm = smart_normalize_name(row.get('Capo', ''))
-            p_norm = smart_normalize_name(row.get('Pass', ''))
-            if c_norm in ACTIVE_PLAYERS_MAP: capo_hist[c_norm] += 1
-            if p_norm in ACTIVE_PLAYERS_MAP: pass_hist[p_norm] += 1
-                
-    for norm_k, vals in st.session_state.get('manual_overrides', {}).items():
-        if "capo" in vals: capo_hist[norm_k] = vals["capo"]
-        if "pass" in vals: pass_hist[norm_k] = vals["pass"]
-
-    return capo_hist, pass_hist
-
-# --- ALGORITMO DI BILANCIAMENTO ---
-def get_advanced_balanced_player(pool, role_type, current_assignments, month_assigned_capos, exclude_list=None, phase="Fase 1 (Primi 2 Mesi)"):
-    if exclude_list is None:
-        exclude_list = []
+    # 1. Calcolo presenze dalla cronologia salvata
+    for item in st.session_state['history']:
+        capo = item.get("capo_treno", "")
+        pass_vip = item.get("passeggero_vip", "")
         
-    capo_hist, pass_hist = get_dynamic_history()
+        if capo:
+            if capo not in stats_map:
+                stats_map[capo] = {"Turni Capo": 0, "Turni Passeggero": 0}
+            stats_map[capo]["Turni Capo"] += 1
+            
+        if pass_vip:
+            if pass_vip not in stats_map:
+                stats_map[pass_vip] = {"Turni Capo": 0, "Turni Passeggero": 0}
+            stats_map[pass_vip]["Turni Passeggero"] += 1
+
+    # 2. Applicazione manual_overrides se presenti
+    for gioc, ov in st.session_state['manual_overrides'].items():
+        if gioc not in stats_map:
+            stats_map[gioc] = {"Turni Capo": 0, "Turni Passeggero": 0}
+        stats_map[gioc]["Turni Capo"] = ov.get("turni_capo", stats_map[gioc]["Turni Capo"])
+        stats_map[gioc]["Turni Passeggero"] = ov.get("turni_passeggero", stats_map[gioc]["Turni Passeggero"])
+
+    # Costruzione DataFrame per la visualizzazione
+    table_rows = []
+    for giocatore, counts in stats_map.items():
+        t_capo = counts["Turni Capo"]
+        t_pass = counts["Turni Passeggero"]
+        totale = t_capo + t_pass
+        table_rows.append({
+            "Giocatore": giocatore,
+            "Turni Capo": t_capo,
+            "Turni Passeggero": t_pass,
+            "Totale Presenze": totale
+        })
+
+    df_general = pd.DataFrame(table_rows)
     
-    if phase == "Fase 1 (Primi 2 Mesi)":
-        w_hist = 0.25
-        sigma = 0.5
-    elif phase == "Fase 2 (Transizione Mese 3)":
-        w_hist = 0.50
-        sigma = 0.5
+    if not df_general.empty:
+        # Ordina per Totale Presenze decrescente
+        df_general = df_general.sort_values(by=["Totale Presenze", "Turni Capo"], ascending=False).reset_index(drop=True)
+        
+        # Visualizza la tabella
+        st.dataframe(df_general, use_container_width=True, height=450)
+        
+        # PULSANTE ESTRAZIONE CSV STORICO
+        csv_bytes_stat = convert_df_to_csv(df_general)
+        
+        col_dl1, col_dl2 = st.columns([1, 3])
+        with col_dl1:
+            st.download_button(
+                label="📥 Scarica Storico (.CSV)",
+                data=csv_bytes_stat,
+                file_name="storico_generale_presenze.csv",
+                mime="text/csv",
+                key="btn_download_stat_csv",
+                help="Clicca qui per esportare la tabella dello storico direttamente in formato CSV per Excel"
+            )
     else:
-        w_hist = 1.00
-        sigma = 0.2
+        st.info("Nessun dato presente nello storico.")
 
-    candidates = []
-    norm_excludes = [smart_normalize_name(x) for x in exclude_list]
-
-    available_pool = [
-        p for p in pool 
-        if role_type != "capo" or smart_normalize_name(p) not in month_assigned_capos
-    ]
+# ------------------------------------------
+# TAB 2: MODIFICA MANUALE E OVERRIDES
+# ------------------------------------------
+with tab2:
+    st.subheader("Modifica o Aggiungi Presenze Manuali nello Storico")
     
-    if not available_pool:
-        available_pool = pool
-
-    for player in available_pool:
-        norm_p = smart_normalize_name(player)
-        if norm_p in norm_excludes:
-            continue
-        
-        curr_c = current_assignments["capo"][norm_p]
-        curr_p = current_assignments["pass"][norm_p]
-        curr_total = curr_c + curr_p
-        
-        hist_c = capo_hist.get(norm_p, 0)
-        hist_p = pass_hist.get(norm_p, 0)
-        hist_role = hist_c if role_type == "capo" else hist_p
-        
-        score = (hist_role * w_hist) + (curr_c * 50 if role_type == "capo" else curr_p * 10) + (curr_total * 5) + random.uniform(0, sigma)
-        
-        candidates.append({"player": player, "score": score})
+    # Prepariamo un dataframe modificabile con st.data_editor
+    overrides_rows = []
+    for giog, vals in st.session_state['manual_overrides'].items():
+        overrides_rows.append({
+            "Giocatore": giog,
+            "Turni Capo": vals.get("turni_capo", 0),
+            "Turni Passeggero": vals.get("turni_passeggero", 0)
+        })
     
-    if not candidates:
-        return "---"
-
-    candidates.sort(key=lambda x: x["score"])
-    return candidates[0]["player"]
-
-# --- CSS CAZZUTO E ALLINEAMENTO PERFETTO ---
-st.markdown("""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@600;700&display=swap');
+    df_editable = pd.DataFrame(overrides_rows)
     
-    .stApp { 
-        background: radial-gradient(circle at 50% 5%, #0f0a1e 0%, #05050a 100%); 
-        color: #e0e6ed; 
-    }
+    st.write("Puoi modificare direttamente i valori delle celle qui sotto o aggiungere nuovi giocatori:")
     
-    .express-title {
-        font-family: 'Orbitron', sans-serif;
-        text-align: center;
-        color: #00f3ff;
-        font-size: 3rem;
-        font-weight: 900;
-        letter-spacing: 4px;
-        text-transform: uppercase;
-        margin-top: -10px;
-        margin-bottom: 20px;
-        text-shadow: 0 0 10px #00f3ff, 0 0 20px #00f3ff, 0 0 40px #7b2cbf;
-    }
+    edited_df = st.data_editor(
+        df_editable,
+        num_rows="dynamic",
+        use_container_width=True,
+        key="editor_overrides"
+    )
     
-    div[data-testid="stHorizontalBlock"] {
-        align-items: flex-end !important;
-        gap: 8px !important;
-    }
+    col_save, col_exp = st.columns([1, 2])
     
-    div[data-testid="stColumn"] {
-        display: flex;
-        align-items: flex-end;
-    }
-
-    div[data-testid="stColumn"] > div {
-        width: 100%;
-    }
-    
-    div[data-baseweb="select"], div[data-baseweb="input"] {
-        border-radius: 6px !important;
-    }
-
-    .stButton > button {
-        height: 42px !important;
-        border-radius: 6px !important;
-        font-family: 'Orbitron', sans-serif !important;
-        font-size: 0.72rem !important;
-        font-weight: 700 !important;
-        letter-spacing: 0.5px !important;
-        border: 1px solid rgba(0, 243, 255, 0.4) !important;
-        background: rgba(15, 15, 30, 0.9) !important;
-        color: #00f3ff !important;
-        transition: all 0.25s ease-in-out !important;
-        padding: 0px 8px !important;
-        margin: 0 !important;
-    }
-    
-    .stButton > button:hover {
-        border-color: #ff007f !important;
-        color: #ffffff !important;
-        box-shadow: 0 0 12px rgba(255, 0, 127, 0.5) !important;
-        background: rgba(255, 0, 127, 0.2) !important;
-    }
-    
-    div[data-testid="stHorizontalBlock"]:nth-of-type(2) div[data-testid="stColumn"]:first-child button {
-        border: 2px solid #00f3ff !important;
-        background: linear-gradient(135deg, rgba(0, 243, 255, 0.25), rgba(123, 44, 191, 0.4)) !important;
-        color: #ffffff !important;
-        text-shadow: 0 0 5px #00f3ff !important;
-    }
-    
-    div[data-testid="stHorizontalBlock"]:nth-of-type(2) div[data-testid="stColumn"]:first-child button:hover {
-        border-color: #00f3ff !important;
-        background: #00f3ff !important;
-        color: #05050a !important;
-        box-shadow: 0 0 20px #00f3ff !important;
-    }
-
-    div[data-testid="stToggleButton"] {
-        height: 42px !important;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(15, 15, 30, 0.9) !important;
-        border: 1px solid rgba(0, 243, 255, 0.4) !important;
-        border-radius: 6px !important;
-        padding: 0px 10px !important;
-        margin: 0 !important;
-    }
-
-    .cal-header-container { display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 15px; margin-bottom: 15px; }
-    .cal-header-text { font-family: 'Orbitron', sans-serif; color: #ff007f; text-shadow: 0 0 10px #ff007f; font-size: 2rem; margin: 0; }
-    .calendar-cell { background: rgba(15, 15, 30, 0.85); border: 1px solid rgba(0, 243, 255, 0.25); padding: 12px 10px; color: #ffffff; display: flex; flex-direction: column; transition: all 0.3s ease; margin: -0.5px; position: relative; }
-    .calendar-cell:hover { border-color: #ff007f; box-shadow: 0 0 15px rgba(255, 0, 127, 0.4); z-index: 10; transform: translateY(-2px); }
-    .h-norm { min-height: 230px !important; }
-    .h-comp { min-height: 175px !important; }
-    .card-placeholder { background: rgba(5, 5, 12, 0.4); border: 1px dashed rgba(255,255,255,0.1); }
-    .day-badge { background: linear-gradient(135deg, #7b2cbf, #ff007f); color: #ffffff; font-family: 'Orbitron', sans-serif; font-weight: 800; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; width: fit-content; margin-bottom: 8px; }
-    .role-label { color: #00f3ff; font-size: 0.65rem; font-family: 'Rajdhani', sans-serif; text-transform: uppercase; font-weight: 700; border-bottom: 1px solid rgba(0, 243, 255, 0.2); margin-top: 6px; }
-    .name-text { font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; font-weight: 700; text-transform: uppercase; border-left: 3px solid #ff007f; padding-left: 6px; overflow: hidden; white-space: nowrap; margin-top: 3px; color: #ffffff !important; }
-    </style>
-    """, unsafe_allow_html=True)
-
-def get_weekday_idx(day, month_name, year):
-    month_idx = MESI_ITA.index(month_name) + 1
-    return datetime(year, month_idx, day).weekday()
-
-def draw_grid(data, compact=False, is_history=False, key_prefix="grid"):
-    mese_nom = st.session_state.get('sel_mese', "Settembre")
-    anno_val = st.session_state.get('sel_anno', 2026)
-    
-    first_day_wd = get_weekday_idx(1, mese_nom, anno_val)
-    full_display_list = [{"type": "empty"}] * first_day_wd
-    for item in data:
-        full_display_list.append({"type": "data", "content": item})
-    
-    n_cols = 10 if compact else 7
-    h_cls = "h-comp" if compact else "h-norm"
-    opts_all = ["---"] + sorted(all_active_names)
-
-    for i in range(0, len(full_display_list), n_cols):
-        cols = st.columns(n_cols)
-        chunk = full_display_list[i:i + n_cols]
-        for j, item in enumerate(chunk):
-            with cols[j]:
-                if item["type"] == "empty":
-                    st.markdown(f'<div class="calendar-cell card-placeholder {h_cls}"></div>', unsafe_allow_html=True)
-                else:
-                    r = item["content"]
-                    giorno = r['Giorno']
-                    wd_idx = get_weekday_idx(giorno, mese_nom, anno_val)
-                    wd_display = GIORNI_ABBR[wd_idx] if compact else GIORNI_SETTIMANA[wd_idx]
-                    
-                    st.markdown(f"""
-                    <div class="calendar-cell {h_cls}">
-                        <div class="day-badge">⚡ {wd_display} {giorno}</div>
-                        <div class="role-label">⚡ CAPO TRENO {"🛰️" if giorno <= 11 else ""}</div>
-                        <div class="name-text">{r['Capo']}</div>
-                        <div class="role-label">💺 PASSEGGERO VIP</div>
-                        <div class="name-text">{r['Pass']}</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                    if not is_history and not compact:
-                        with st.popover("⚙️ MODIFICA"):
-                            st.caption(f"Configurazione Giorno {giorno}")
-                            nc = st.selectbox("Capo", opts_all, index=opts_all.index(r['Capo']) if r['Capo'] in opts_all else 0, key=f"sel_c_{key_prefix}_{giorno}")
-                            np = st.selectbox("Pass", opts_all, index=opts_all.index(r['Pass']) if r['Pass'] in opts_all else 0, key=f"sel_p_{key_prefix}_{giorno}")
-                            
-                            if st.button("SALVA", key=f"s_{key_prefix}_{giorno}", use_container_width=True):
-                                for idx, m_item in enumerate(st.session_state['master_cal']):
-                                    if m_item["Giorno"] == giorno:
-                                        st.session_state['master_cal'][idx].update({"Capo": nc, "Pass": np})
-                                        break
-                                st.rerun()
-
-# --- TITOLO E INTERFACCIA ALTA ---
-st.markdown('<div class="express-title">🚄 AOSR EXPRESS</div>', unsafe_allow_html=True)
-
-c1, c2, c3, c4 = st.columns([1, 1, 1.3, 2.2])
-with c1: st.session_state['sel_mese'] = st.selectbox("📅 MESE", MESI_ITA, index=8)
-with c2: st.session_state['sel_anno'] = st.number_input("📆 ANNO", 2024, 2030, 2026)
-with c3: sel_phase = st.selectbox("⚖️ FASE BILANCIAMENTO", ["Fase 1 (Primi 2 Mesi)", "Fase 2 (Transizione Mese 3)", "Fase 3 (A Regime)"])
-with c4: merito_days_input = st.multiselect("🎖️ 5 GIORNI MERITO (R4)", list(range(12, 32)), default=[12, 15, 18, 22, 28])
-
-st.markdown('<div style="margin-top: 10px;"></div>', unsafe_allow_html=True)
-
-cb1, cb2, cb3, cb4, cb5 = st.columns([1.5, 1.2, 1.4, 1, 1])
-
-# --- GENERAZIONE ---
-with cb1:
-    if st.button("⚡ GENERA CALENDARIO", use_container_width=True):
-        p_l = leaders_list
-        p_o = r3_r2_list
-        all_players = sorted(list(set(p_l + p_o)))
-        
-        num_gg = calendar.monthrange(st.session_state['sel_anno'], MESI_ITA.index(st.session_state['sel_mese'])+1)[1]
-        st.session_state['master_cal'] = []
-        
-        current_assignments = {"capo": defaultdict(int), "pass": defaultdict(int)}
-        month_assigned_capos = set()
-        
-        for g in range(1, num_gg + 1):
-            if g in merito_days_input:
-                c = "--- (DA ASSEGNARE)"
-                p = "--- (DA ASSEGNARE)"
-            elif g <= 11:
-                # Primi 11 giorni: Capo Treno SOLO i 11 Leaders (R5 + R4)
-                c = get_advanced_balanced_player(p_l, "capo", current_assignments, month_assigned_capos, exclude_list=[], phase=sel_phase)
-                p = get_advanced_balanced_player(all_players, "pass", current_assignments, month_assigned_capos, exclude_list=[c], phase=sel_phase)
-            else:
-                # Giorni normali: Capo Treno Tutti
-                c = get_advanced_balanced_player(all_players, "capo", current_assignments, month_assigned_capos, exclude_list=[], phase=sel_phase)
-                p = get_advanced_balanced_player(all_players, "pass", current_assignments, month_assigned_capos, exclude_list=[c], phase=sel_phase)
+    with col_save:
+        if st.button("💾 Salva Modifiche nello Storico", type="primary"):
+            # Riconvertiamo il DataFrame modificato nel dizionario
+            new_overrides = {}
+            for _, row in edited_df.iterrows():
+                name = str(row["Giocatore"]).strip()
+                if name:
+                    t_capo = int(row["Turni Capo"]) if pd.notnull(row["Turni Capo"]) else 0
+                    t_pass = int(row["Turni Passeggero"]) if pd.notnull(row["Turni Passeggero"]) else 0
+                    new_overrides[name] = {
+                        "turni_capo": t_capo,
+                        "turni_passeggero": t_pass,
+                        "totale_presenze": t_capo + t_pass
+                    }
             
-            norm_c = smart_normalize_name(c)
-            norm_p = smart_normalize_name(p)
-            
-            if norm_c: 
-                current_assignments["capo"][norm_c] += 1
-                month_assigned_capos.add(norm_c)
-            if norm_p: 
-                current_assignments["pass"][norm_p] += 1
-            
-            st.session_state['master_cal'].append({"Giorno": g, "Capo": c, "Pass": p})
-
-with cb2:
-    if st.button("💾 SALVA IN MEMORIA", use_container_width=True):
-        if 'master_cal' in st.session_state:
-            st.session_state['history'].append({
-                "data": f"{st.session_state['sel_mese']} {st.session_state['sel_anno']}",
-                "mese": st.session_state['sel_mese'],
-                "anno": st.session_state['sel_anno'],
-                "ts": datetime.now().strftime("%d/%m/%Y %H:%M"), 
-                "cal": [dict(d) for d in st.session_state['master_cal']]
-            })
-            save_history()
-            st.toast("Salvato con successo!")
-            st.rerun()
-
-with cb3:
-    if st.button("🔙 ANNULLA SALVATAGGIO", use_container_width=True):
-        if st.session_state['history']:
-            last_saved = st.session_state['history'].pop()
-            save_history()
-            st.toast(f"Rimesso indietro lo storico! Eliminato: {last_saved['data']}")
-            st.rerun()
-        else:
-            st.toast("Nessun salvataggio presente!")
-
-with cb4:
-    if st.button("🌐 RESET", use_container_width=True):
-        num_gg = calendar.monthrange(st.session_state['sel_anno'], MESI_ITA.index(st.session_state['sel_mese'])+1)[1]
-        st.session_state['master_cal'] = [{"Giorno": g, "Capo": "---", "Pass": "---"} for g in range(1, num_gg + 1)]
-
-with cb5:
-    view_mode = st.toggle("🎞️ COMPATTA", value=False)
-
-# --- RENDERING GRIGLIA ---
-if 'master_cal' in st.session_state:
-    st.markdown(f"""
-        <div class="cal-header-container">
-            <span class="cal-header-text">AOSR - {st.session_state['sel_mese'].upper()} {st.session_state['sel_anno']}</span>
-        </div>
-    """, unsafe_allow_html=True)
-    draw_grid(st.session_state['master_cal'], compact=view_mode, key_prefix="master")
-
-# --- ARCHIVIO MESI ---
-st.markdown("<br><hr style='border:1px solid rgba(0,243,255,0.2)'><br>", unsafe_allow_html=True)
-st.markdown("<h2 style='color:#ff007f; font-family:Orbitron; text-align:center;'>📜 ARCHIVIO MESI E GESTIONE SALVATAGGI</h2>", unsafe_allow_html=True)
-
-if st.session_state['history']:
-    for idx, item in enumerate(reversed(st.session_state['history'])):
-        real_idx = len(st.session_state['history']) - 1 - idx
-        with st.expander(f"📌 {item['data']} (Salvato il {item['ts']})"):
-            c_del1, c_del2 = st.columns([4, 1])
-            with c_del2:
-                if st.button("🗑️ ELIMINA", key=f"del_hist_{real_idx}", use_container_width=True):
-                    st.session_state['history'].pop(real_idx)
-                    save_history()
-                    st.toast("Mese eliminato!")
-                    st.rerun()
-            with c_del1:
-                df_hist_preview = pd.DataFrame(item['cal'])
-                st.dataframe(df_hist_preview, use_container_width=True, hide_index=True)
-
-# --- STATISTICHE ---
-st.markdown("<br><hr style='border:1px solid rgba(0,243,255,0.2)'><br>", unsafe_allow_html=True)
-st.markdown("<h2 style='color:#00f3ff; font-family:Orbitron; text-align:center;'>📊 STATISTICHE E MODIFICA STORICO</h2>", unsafe_allow_html=True)
-
-capo_hist_total, pass_hist_total = get_dynamic_history()
-
-stats_data = []
-for norm_key, real_name in ACTIVE_PLAYERS_MAP.items():
-    c_count = capo_hist_total.get(norm_key, 0)
-    p_count = pass_hist_total.get(norm_key, 0)
-    stats_data.append({
-        "Giocatore": real_name,
-        "Turni Capo": c_count,
-        "Turni Passeggero": p_count,
-        "Totale Presenze": c_count + p_count
-    })
-
-df_stats = pd.DataFrame(stats_data).sort_values(by=["Totale Presenze", "Giocatore"], ascending=[False, True]).reset_index(drop=True)
-
-tab_stat1, tab_stat2 = st.tabs(["📋 TABELLA GENERALE", "✏️ MODIFICA MANUALMENTE LO STORICO"])
-
-with tab_stat1:
-    st.dataframe(df_stats, use_container_width=True, hide_index=True)
-
-with tab_stat2:
-    target_player = st.selectbox("Seleziona Giocatore:", all_active_names, key="override_player_select")
-    if target_player:
-        norm_target = smart_normalize_name(target_player)
-        curr_c = capo_hist_total.get(norm_target, 0)
-        curr_p = pass_hist_total.get(norm_target, 0)
-        
-        col_m1, col_m2 = st.columns(2)
-        new_c = col_m1.number_input(f"⚡ Turni CAPO per {target_player}:", min_value=0, max_value=100, value=curr_c)
-        new_p = col_m2.number_input(f"💺 Turni PASSEGGERO per {target_player}:", min_value=0, max_value=100, value=curr_p)
-            
-        col_btn_sav, col_btn_res = st.columns(2)
-        if col_btn_sav.button("💾 APPLICA E SALVA", use_container_width=True):
-            st.session_state['manual_overrides'][norm_target] = {"capo": new_c, "pass": new_p}
-            save_overrides()
-            st.toast("Salvato!")
-            st.rerun()
-            
-        if norm_target in st.session_state['manual_overrides']:
-            if col_btn_res.button("🔄 RIPRISTINA ORIGINALE", use_container_width=True):
-                del st.session_state['manual_overrides'][norm_target]
-                save_overrides()
+            # Aggiorna lo stato della sessione e salva su disco
+            st.session_state['manual_overrides'] = new_overrides
+            if save_json_file(OVERRIDES_FILE, new_overrides):
+                st.success("Storico aggiornato e salvato con successo su disco!")
                 st.rerun()
+
+    with col_exp:
+        # PULSANTE PER ESTRARRE I DATI MODIFICATI IN CSV
+        csv_bytes_edit = convert_df_to_csv(edited_df)
+        st.download_button(
+            label="📥 Esporta Modifiche Manuali (.CSV)",
+            data=csv_bytes_edit,
+            file_name="modifiche_manuali_storico.csv",
+            mime="text/csv",
+            key="btn_download_manual_csv"
+        )
